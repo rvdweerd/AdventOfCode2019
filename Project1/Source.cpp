@@ -1,0 +1,687 @@
+#include <vector>
+#include <iostream>
+#include <algorithm>
+#include <numeric>
+#include <fstream>
+#include <string>
+#include <map>
+
+void GetParameters(int& val, int& A, int& B, int& C, int& DE)
+{
+	DE = val % 100;
+	C = (val / 100) % 10;
+	B = (val / 1000) % 10;
+	A = (val / 10000) % 10;
+}
+void Run(std::vector<int>& vec)
+{
+	int opcode = 0;
+	int A = 0;
+	int B = 0;
+	int C = 0;
+
+	int increment = 0;
+	for (int i = 0; vec[i] != 99; i += increment)
+	{
+		GetParameters(vec[i], A, B, C, opcode);
+		if (opcode == 1) // add
+		{
+			int val1 = (C == 0 ? vec[vec[i + 1]] : vec[i + 1]);
+			int val2 = (B == 0 ? vec[vec[i + 2]] : vec[i + 2]);
+			int writePos = vec[i + 3];
+			vec[writePos] = val1 + val2;
+			increment = 4;
+		}
+		else if (opcode == 2) // multiply
+		{
+			int val1 = (C == 0 ? vec[vec[i + 1]] : vec[i + 1]);
+			int val2 = (B == 0 ? vec[vec[i + 2]] : vec[i + 2]);
+			int writePos = vec[i + 3];
+			vec[writePos] = val1 * val2;
+			increment = 4;
+		}
+		else if (opcode == 3) // input
+		{
+			int k;
+			std::cout << "Input:"; std::cin >> k;
+			vec[vec[i + 1]] = k;
+			increment = 2;
+		}
+		else if (opcode == 4) // output
+		{
+			int val1 = (C == 0 ? vec[vec[i + 1]] : vec[i + 1]);
+			std::cout << val1;
+			increment = 2;
+		}
+		else if (opcode == 4) // output
+		{
+			int val1 = (C == 0 ? vec[vec[i + 1]] : vec[i + 1]);
+			std::cout << val1;
+			increment = 2;
+		}
+		else if (opcode == 5) // jump-if-true
+		{
+			int val1 = (C == 0 ? vec[vec[i + 1]] : vec[i + 1]);
+			int val2 = (B == 0 ? vec[vec[i + 2]] : vec[i + 2]);
+			if (val1 != 0)
+			{
+				i = val2;
+				increment = 0;
+			}
+			else
+			{
+				increment = 3;
+			}
+		}
+		else if (opcode == 6) // jump-if-false
+		{
+			int val1 = (C == 0 ? vec[vec[i + 1]] : vec[i + 1]);
+			int val2 = (B == 0 ? vec[vec[i + 2]] : vec[i + 2]);
+			if (val1 == 0)
+			{
+				i = val2;
+				increment = 0;
+			}
+			else
+			{
+				increment = 3;
+			}
+		}
+		else if (opcode == 7) // less-than
+		{
+			int val1 = (C == 0 ? vec[vec[i + 1]] : vec[i + 1]);
+			int val2 = (B == 0 ? vec[vec[i + 2]] : vec[i + 2]);
+			int writePos = vec[i + 3];
+			
+			vec[writePos] = (val1 < val2 ? 1 : 0);
+			increment = 4;
+		}
+		else if (opcode == 8) // equals
+		{
+			int val1 = (C == 0 ? vec[vec[i + 1]] : vec[i + 1]);
+			int val2 = (B == 0 ? vec[vec[i + 2]] : vec[i + 2]);
+			int writePos = vec[i + 3];
+			vec[writePos] = (val1 == val2 ? 1 : 0);
+			increment = 4;
+		}
+		else
+		{
+			std::cout << "error.";
+		}
+	}
+}
+void printMap(std::vector<std::vector<char>>& map)
+{
+	for (int y = 0; y < map.size(); y++)
+	{
+		for (int x = 0; x < map[0].size(); x++)
+		{
+			std::cout << map[y][x];
+		}
+		std::cout << std::endl;
+	}
+	std::cout << std::endl;
+}
+void Day1()
+{
+	std::ifstream in("Text.txt");
+	std::vector<int> mass;
+	while (!in.eof())
+	{
+		std::string str;
+		for (char ch = in.get(); ch != '\n' && !in.eof(); ch = in.get())
+		{
+			str += ch;
+		}
+		mass.push_back(std::stoi(str));
+	}
+
+	int fuel = std::accumulate(mass.begin(), mass.end(), 0, [](int cum, int m)
+		{
+			int count = 0;
+			int additional = m;
+			while (additional != 0)
+			{
+				additional = std::max(0, additional / 3 - 2);
+				count += additional;
+			}
+
+			return cum + count;
+		});
+
+	std::cout << "Fuel needed = " << fuel;
+	std::cin.get();
+}
+void Day2()
+{
+	std::ifstream in("Text2.txt");
+	std::vector<int> vec0;
+	while (!in.eof())
+	{
+		std::string str;
+		for (char ch = in.get(); ch != ',' && !in.eof(); ch = in.get())
+		{
+			str += ch;
+		}
+		vec0.push_back(std::stoi(str));
+	}
+	//vec[1] = 12;
+	//vec[2] = 2;
+	//Run(vec);
+
+
+	int noun = 0;
+	int verb = 0;
+	std::vector<int> vec;
+	for (noun = 0; noun < 100; ++noun)
+	{
+		for (verb = 0; verb < 100; ++verb)
+		{
+			vec = vec0;
+			vec[1] = noun; vec[2] = verb;
+			Run(vec);
+			std::cout << noun << "," << verb << ": " << vec[0] << std::endl;
+			if (vec[0] == 19690720) break;
+		}
+		if (vec[0] == 19690720) break;
+	}
+	for (int v : vec)
+	{
+		std::cout << v << ",";
+	}
+	std::cout << "the answer is: " << (100 * noun + verb);
+
+	std::cin.get();
+
+}
+void Day3()
+{
+	std::vector<std::vector<char>> map1;
+	auto maxx = map1.max_size();
+	std::vector<std::vector<char>> map2;
+	std::vector<std::vector<char>> mergedMap;
+	int fieldSize = 40;
+	std::vector<char> row(fieldSize);
+	for (int i = 0; i < fieldSize; i++) row[i] = '.';
+	for (int i = 0; i < fieldSize; i++) map1.push_back(row);
+	map2 = map1;
+
+	std::ifstream in("Text3.txt");
+	//BUILD MAP1
+	int x = fieldSize / 2;
+	int y = fieldSize / 2;
+	char ch = 0; char dir = 0; char dir_old = 0;
+	while (!in.eof() && ch != '\n')
+	{
+
+		std::string str;
+		for (ch = in.get(); ch != ',' && !in.eof() && ch != '\n'; ch = in.get())
+		{
+			str += ch;
+		}
+		dir = str[0];
+		if (dir == 'L')
+		{
+			int nSteps = std::stoi(str.erase(0, 1));
+			for (int i = 0; i < nSteps; i++)
+			{
+				if (dir != dir_old)
+				{
+					map1[y][x] = '+';
+					dir_old = dir;
+				}
+				map1[y][--x] = '-';
+			}
+		}
+		if (dir == 'R')
+		{
+			int nSteps = std::stoi(str.erase(0, 1));
+			for (int i = 0; i < nSteps; i++)
+			{
+				if (dir != dir_old)
+				{
+					map1[y][x] = '+';
+					dir_old = dir;
+				}
+				map1[y][++x] = '-';
+			}
+		}
+		if (dir == 'U') // mirrored, down in the map space
+		{
+			int nSteps = std::stoi(str.erase(0, 1));
+			for (int i = 0; i < nSteps; i++)
+			{
+				if (dir != dir_old)
+				{
+					map1[y][x] = '+';
+					dir_old = dir;
+				}
+				map1[++y][x] = '|';
+			}
+		}
+		if (dir == 'D')
+		{
+			int nSteps = std::stoi(str.erase(0, 1));
+			for (int i = 0; i < nSteps; i++)
+			{
+				if (dir != dir_old)
+				{
+					map1[y][x] = '+';
+					dir_old = dir;
+				}
+				map1[--y][x] = '|';
+			}
+		}
+	} map1[fieldSize / 2][fieldSize / 2] = 'o';
+
+	//BUILD MAP2
+	x = fieldSize / 2;
+	y = fieldSize / 2;
+	ch = 0; dir = 0; dir_old = 0;
+	while (!in.eof() && ch != '\n')
+	{
+
+		std::string str;
+		for (ch = in.get(); ch != ',' && !in.eof() && ch != '\n'; ch = in.get())
+		{
+			str += ch;
+		}
+		dir = str[0];
+		if (dir == 'L')
+		{
+			int nSteps = std::stoi(str.erase(0, 1));
+			for (int i = 0; i < nSteps; i++)
+			{
+				if (dir != dir_old)
+				{
+					map2[y][x] = '+';
+					dir_old = dir;
+				}
+				map2[y][--x] = '-';
+			}
+		}
+		if (dir == 'R')
+		{
+			int nSteps = std::stoi(str.erase(0, 1));
+			for (int i = 0; i < nSteps; i++)
+			{
+				if (dir != dir_old)
+				{
+					map2[y][x] = '+';
+					dir_old = dir;
+				}
+				map2[y][++x] = '-';
+			}
+		}
+		if (dir == 'U') // mirrored, down in the map space
+		{
+			int nSteps = std::stoi(str.erase(0, 1));
+			for (int i = 0; i < nSteps; i++)
+			{
+				if (dir != dir_old)
+				{
+					map2[y][x] = '+';
+					dir_old = dir;
+				}
+				map2[++y][x] = '|';
+			}
+		}
+		if (dir == 'D')
+		{
+			int nSteps = std::stoi(str.erase(0, 1));
+			for (int i = 0; i < nSteps; i++)
+			{
+				if (dir != dir_old)
+				{
+					map2[y][x] = '+';
+					dir_old = dir;
+				}
+				map2[--y][x] = '|';
+			}
+		}
+	}  map2[fieldSize / 2][fieldSize / 2] = 'o';
+
+	//MERGE MAPS
+	mergedMap = map1;
+	int origin_x = fieldSize / 2;
+	int origin_y = fieldSize / 2;
+	std::vector<int> hits;
+	for (int y = 0; y < map1.size(); y++)
+	{
+		for (int x = 0; x < map1[0].size(); x++)
+		{
+			if (map1[y][x] != '.' && map2[y][x] != '.' && map1[y][x] != 'o' && map2[y][x] != 'o')
+			{
+				mergedMap[y][x] = 'X';
+				int manhattanDist = abs(x - origin_x) + abs(y - origin_y);
+				if (manhattanDist != 0) hits.push_back(manhattanDist);
+			}
+			else if (map1[y][x] == '.' && map2[y][x] != '.')
+			{
+				mergedMap[y][x] = map2[y][x];
+			}
+		}
+	}
+
+	printMap(map1);
+	printMap(map2); 
+	
+	printMap(mergedMap);
+
+	std::cout << "Vector of hit distances: ";
+	for (int v : hits) { std::cout << v << ","; }
+	if (hits.size() > 0)
+	{
+		int minDist = *std::min_element(hits.begin(), hits.end());
+		std::cout << "Manhattan distance to the closest intersection: " << minDist << std::endl;
+	}
+	else
+	{
+		std::cout << "No hits.\n";
+	}
+
+	// Put Hits in map1 and map2
+	char nHits = 1;
+	for (int y = 0; y < map1.size(); y++)
+	{
+		for (int x = 0; x < map1[0].size(); x++)
+		{
+			map1[y][x] = 'z';
+			map2[y][x] = 'z';
+			if (mergedMap[y][x] == 'X')
+			{
+				map1[y][x] = nHits++;
+				map2[y][x] = map1[y][x];
+			}
+		}
+	}
+	//printMap(map1);
+	//printMap(map2);
+
+	//Traverse map1.
+	std::ifstream in2("Text3.txt");
+	//in.seekg(0);
+	std::map<int, std::pair<int, int>> distdata;
+	//distdata[1]; distdata[1].first = 10;
+	x = fieldSize / 2;
+	y = fieldSize / 2;
+	ch = 0; dir = 0; dir_old = 0;
+	int counter = 0;
+	while (!in2.eof() && ch != '\n')
+	{
+
+		std::string str;
+		for (ch = in2.get(); ch != ',' && !in2.eof() && ch != '\n'; ch = in2.get())
+		{
+			str += ch;
+		}
+		dir = str[0];
+		if (dir == 'L')
+		{
+			int nSteps = std::stoi(str.erase(0, 1));
+			for (int i = 0; i < nSteps; i++)
+			{
+				x--; counter++;
+				if (map1[y][x] < 'z')
+				{
+					distdata[map1[y][x]]; distdata[map1[y][x]].first = counter;
+				}
+			}
+		}
+		if (dir == 'R')
+		{
+			int nSteps = std::stoi(str.erase(0, 1));
+			for (int i = 0; i < nSteps; i++)
+			{
+				x++; counter++;
+				if (map1[y][x] < 'z')
+				{
+					distdata[map1[y][x]]; distdata[map1[y][x]].first = counter;
+				}
+			}
+		}
+		if (dir == 'U') // mirrored, down in the map space
+		{
+			int nSteps = std::stoi(str.erase(0, 1));
+			for (int i = 0; i < nSteps; i++)
+			{
+				y++; counter++;
+				if (map1[y][x] < 'z')
+				{
+					distdata[map1[y][x]]; distdata[map1[y][x]].first = counter;
+				}
+			}
+		}
+		if (dir == 'D')
+		{
+			int nSteps = std::stoi(str.erase(0, 1));
+			for (int i = 0; i < nSteps; i++)
+			{
+				y--; counter++;
+				if (map1[y][x] < 'z')
+				{
+					distdata[map1[y][x]]; distdata[map1[y][x]].first = counter;
+				}
+			}
+		}
+	}
+
+	//Traverse map2.
+	//in.close(); std::ifstream in("Text3.txt");
+	x = fieldSize / 2;
+	y = fieldSize / 2;
+	ch = 0; dir = 0; dir_old = 0;
+	counter = 0;
+	while (!in2.eof() && ch != '\n')
+	{
+
+		std::string str;
+		for (ch = in2.get(); ch != ',' && !in2.eof() && ch != '\n'; ch = in2.get())
+		{
+			str += ch;
+		}
+		dir = str[0];
+		if (dir == 'L')
+		{
+			int nSteps = std::stoi(str.erase(0, 1));
+			for (int i = 0; i < nSteps; i++)
+			{
+				x--; counter++;
+				if (map2[y][x] < 'z')
+				{
+					distdata[map2[y][x]].second = counter;
+				}
+			}
+		}
+		if (dir == 'R')
+		{
+			int nSteps = std::stoi(str.erase(0, 1));
+			for (int i = 0; i < nSteps; i++)
+			{
+				x++; counter++;
+				if (map2[y][x] < 'z')
+				{
+					distdata[map2[y][x]].second = counter;
+				}
+			}
+		}
+		if (dir == 'U') // mirrored, down in the map space
+		{
+			int nSteps = std::stoi(str.erase(0, 1));
+			for (int i = 0; i < nSteps; i++)
+			{
+				y++; counter++;
+				if (map2[y][x] < 'z')
+				{
+					distdata[map2[y][x]].second = counter;
+				}
+			}
+		}
+		if (dir == 'D')
+		{
+			int nSteps = std::stoi(str.erase(0, 1));
+			for (int i = 0; i < nSteps; i++)
+			{
+				y--; counter++;
+				if (map2[y][x] < 'z')
+				{
+					distdata[map2[y][x]].second = counter;
+				}
+			}
+		}
+	}
+
+	std::vector<int> shortestPath;
+	for (int i = 1; i < distdata.size(); i++)
+	{
+		std::cout << "Crossing " << i << ": " << "(" << distdata[i].first << "," << distdata[i].second << "), total steps: " << distdata[i].first + distdata[i].second << std::endl;
+		shortestPath.push_back(distdata[i].first + distdata[i].second);
+	}
+
+	std::sort(shortestPath.begin(), shortestPath.end());
+	std::cout << "Shortest paths:\n";
+	for (int v : shortestPath)
+	{
+		std::cout << v << std::endl;
+	}
+
+}
+bool isValidPassword(int num)
+{
+	std::string number = std::to_string(num);
+	bool flag1 = false;
+	int adj = 0; int max_adj = 0;
+	std::vector<int> test;
+	for (int i = 0; i < 6 - 1; i++)
+	{
+		if (number[i] == number[i + 1]) 
+		{ 
+			adj++; 
+			max_adj = std::max(max_adj, adj); 
+		}
+		else 
+		{ 
+			test.push_back(adj);
+			adj = 0; 
+		}
+		if (number[i + 1] < number[i]) return false;
+	}
+	test.push_back(adj);
+	return ( std::find(test.begin(),test.end(),1) != test.end() );
+}
+void Day4()
+{
+	int start = 278384;
+	int end = 824795;
+	int count = 0;
+	isValidPassword(788999);
+	for (int num = start; num <= end; num++)
+	{
+		if (isValidPassword(num))
+		{
+			count++;
+			std::cout << num << std::endl;
+		}
+	}
+	std::cout << "TOTAL VALID: " << count;
+
+}
+void Day5()
+{
+	std::ifstream in("Text2.txt");
+	std::vector<int> vec0;
+	while (!in.eof())
+	{
+		std::string str;
+		for (char ch = in.get(); ch != ',' && !in.eof(); ch = in.get())
+		{
+			str += ch;
+		}
+		vec0.push_back(std::stoi(str));
+	}
+	Run(vec0);
+
+	std::cout << "\nEnded.\n";
+
+}
+int nToRoot(std::string p, std::map<std::string, std::string>& map)
+{
+	if (map[p] == "COM")
+	{
+		return 1;
+	}
+	else
+	{
+		return 1 + nToRoot(map[p], map);
+	}
+}
+void Day6()
+{
+	std::vector<std::string> planets;// = { "A", "B","C","D","E","F","G","H" };
+	std::map<std::string, std::string> map;
+
+	std::ifstream in("Text6.txt");
+	std::vector<int> mass;
+	char ch = 0;
+	while (!in.eof())
+	{
+		std::string str;
+		std::string planetA;
+		for (ch = in.get(); ch != '\n' && !in.eof(); ch = in.get())
+		{
+			if (ch != ')')
+			{
+				str += ch;
+			}
+			else
+			{
+				planetA = str;
+				str = "";
+			}
+		}
+		planets.push_back(str);
+		map[str] = planetA;
+		if (in.eof()) break;
+	}
+
+	int count = 0;
+	for (auto p : planets)
+	{
+		count += nToRoot(p, map);
+	}
+	std::cout << "n = " << count;
+
+
+	std::map<std::string, int> voyageYOU;
+	std::map<std::string, int> voyageSAN;
+	count = -1;
+	for (std::string p = "YOU"; p != "COM"; p = map[p])
+	{
+		voyageYOU[p] = count++;
+	}
+	count = -1;
+	for (std::string p = "SAN"; p != "COM"; p = map[p])
+	{
+		voyageSAN[p] = count++;
+	}
+	int minSteps = 0b1111111111111111111111111111111;
+	for (auto p : voyageYOU)
+	{
+		for (auto q : voyageSAN)
+		{
+			if (p.first == q.first)
+			{
+				minSteps = std::min(minSteps, p.second + q.second);
+			}
+		}
+	}
+	std::cout << "\nminSteps = " << minSteps;
+}
+int main()
+{
+	Day6();
+	
+	std::cin.clear();
+	std::cin.ignore(5, '\n');
+	std::cin.get();
+}
