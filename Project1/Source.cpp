@@ -6,225 +6,10 @@
 #include <string>
 #include <map>
 #include <sstream>
+#include <conio.h>
 #include "IntCode.h"
+#include "HelperFunctions.h"
 
-void GetParameters(int& val, int& A, int& B, int& C, int& DE)
-{
-	DE = val % 100;
-	C = (val / 100) % 10;
-	B = (val / 1000) % 10;
-	A = (val / 10000) % 10;
-}
-void Run(std::vector<int>& vec)
-{
-	int opcode = 0;
-	int A = 0;
-	int B = 0;
-	int C = 0;
-
-	int increment = 0;
-	for (int i = 0; vec[i] != 99; i += increment)
-	{
-		GetParameters(vec[i], A, B, C, opcode);
-		if (opcode == 1) // add
-		{
-			int val1 = (C == 0 ? vec[vec[i + 1]] : vec[i + 1]);
-			int val2 = (B == 0 ? vec[vec[i + 2]] : vec[i + 2]);
-			int writePos = vec[i + 3];
-			vec[writePos] = val1 + val2;
-			increment = 4;
-		}
-		else if (opcode == 2) // multiply
-		{
-			int val1 = (C == 0 ? vec[vec[i + 1]] : vec[i + 1]);
-			int val2 = (B == 0 ? vec[vec[i + 2]] : vec[i + 2]);
-			int writePos = vec[i + 3];
-			vec[writePos] = val1 * val2;
-			increment = 4;
-		}
-		else if (opcode == 3) // input
-		{
-			int k;
-			std::cout << "Input:"; std::cin >> k;
-			vec[vec[i + 1]] = k;
-			increment = 2;
-		}
-		else if (opcode == 4) // output
-		{
-			int val1 = (C == 0 ? vec[vec[i + 1]] : vec[i + 1]);
-			std::cout << val1<<std::endl;
-			increment = 2;
-		}
-		else if (opcode == 4) // output
-		{
-			int val1 = (C == 0 ? vec[vec[i + 1]] : vec[i + 1]);
-			std::cout << val1;
-			increment = 2;
-		}
-		else if (opcode == 5) // jump-if-true
-		{
-			int val1 = (C == 0 ? vec[vec[i + 1]] : vec[i + 1]);
-			int val2 = (B == 0 ? vec[vec[i + 2]] : vec[i + 2]);
-			if (val1 != 0)
-			{
-				i = val2;
-				increment = 0;
-			}
-			else
-			{
-				increment = 3;
-			}
-		}
-		else if (opcode == 6) // jump-if-false
-		{
-			int val1 = (C == 0 ? vec[vec[i + 1]] : vec[i + 1]);
-			int val2 = (B == 0 ? vec[vec[i + 2]] : vec[i + 2]);
-			if (val1 == 0)
-			{
-				i = val2;
-				increment = 0;
-			}
-			else
-			{
-				increment = 3;
-			}
-		}
-		else if (opcode == 7) // less-than
-		{
-			int val1 = (C == 0 ? vec[vec[i + 1]] : vec[i + 1]);
-			int val2 = (B == 0 ? vec[vec[i + 2]] : vec[i + 2]);
-			int writePos = vec[i + 3];
-			
-			vec[writePos] = (val1 < val2 ? 1 : 0);
-			increment = 4;
-		}
-		else if (opcode == 8) // equals
-		{
-			int val1 = (C == 0 ? vec[vec[i + 1]] : vec[i + 1]);
-			int val2 = (B == 0 ? vec[vec[i + 2]] : vec[i + 2]);
-			int writePos = vec[i + 3];
-			vec[writePos] = (val1 == val2 ? 1 : 0);
-			increment = 4;
-		}
-		else
-		{
-			std::cout << "error.";
-		}
-	}
-}
-int RunAutomaticInput(std::vector<int> vec, int in1, int in2)
-{
-	int opcode = 0;
-	int A = 0;
-	int B = 0;
-	int C = 0;
-
-	int increment = 0;
-	for (int i = 0; vec[i] != 99; i += increment)
-	{
-		GetParameters(vec[i], A, B, C, opcode);
-		if (opcode == 1) // add
-		{
-			int val1 = (C == 0 ? vec[vec[i + 1]] : vec[i + 1]);
-			int val2 = (B == 0 ? vec[vec[i + 2]] : vec[i + 2]);
-			int writePos = vec[i + 3];
-			vec[writePos] = val1 + val2;
-			increment = 4;
-		}
-		else if (opcode == 2) // multiply
-		{
-			int val1 = (C == 0 ? vec[vec[i + 1]] : vec[i + 1]);
-			int val2 = (B == 0 ? vec[vec[i + 2]] : vec[i + 2]);
-			int writePos = vec[i + 3];
-			vec[writePos] = val1 * val2;
-			increment = 4;
-		}
-		else if (opcode == 3) // input
-		{
-			int k;
-			//std::cout << "Input:"; std::cin >> k;
-			k = in1; in1 = in2; //std::cout << "Input entered: " << k << std::endl;
-			vec[vec[i + 1]] = k;
-			increment = 2;
-		}
-		else if (opcode == 4) // output
-		{
-			int val1 = (C == 0 ? vec[vec[i + 1]] : vec[i + 1]);
-			//std::cout << val1<<std::endl;
-			return val1;
-			increment = 2;
-		}
-		else if (opcode == 4) // output
-		{
-			int val1 = (C == 0 ? vec[vec[i + 1]] : vec[i + 1]);
-			std::cout << val1;
-			increment = 2;
-		}
-		else if (opcode == 5) // jump-if-true
-		{
-			int val1 = (C == 0 ? vec[vec[i + 1]] : vec[i + 1]);
-			int val2 = (B == 0 ? vec[vec[i + 2]] : vec[i + 2]);
-			if (val1 != 0)
-			{
-				i = val2;
-				increment = 0;
-			}
-			else
-			{
-				increment = 3;
-			}
-		}
-		else if (opcode == 6) // jump-if-false
-		{
-			int val1 = (C == 0 ? vec[vec[i + 1]] : vec[i + 1]);
-			int val2 = (B == 0 ? vec[vec[i + 2]] : vec[i + 2]);
-			if (val1 == 0)
-			{
-				i = val2;
-				increment = 0;
-			}
-			else
-			{
-				increment = 3;
-			}
-		}
-		else if (opcode == 7) // less-than
-		{
-			int val1 = (C == 0 ? vec[vec[i + 1]] : vec[i + 1]);
-			int val2 = (B == 0 ? vec[vec[i + 2]] : vec[i + 2]);
-			int writePos = vec[i + 3];
-
-			vec[writePos] = (val1 < val2 ? 1 : 0);
-			increment = 4;
-		}
-		else if (opcode == 8) // equals
-		{
-			int val1 = (C == 0 ? vec[vec[i + 1]] : vec[i + 1]);
-			int val2 = (B == 0 ? vec[vec[i + 2]] : vec[i + 2]);
-			int writePos = vec[i + 3];
-			vec[writePos] = (val1 == val2 ? 1 : 0);
-			increment = 4;
-		}
-		else
-		{
-			std::cout << "error.";
-		}
-	}
-	return -1;
-}
-
-void printMap(std::vector<std::vector<char>>& map)
-{
-	for (size_t y = 0; y < map.size(); y++)
-	{
-		for (size_t x = 0; x < map[0].size(); x++)
-		{
-			std::cout << map[y][x];
-		}
-		std::cout << std::endl;
-	}
-	std::cout << std::endl;
-}
 void Day1()
 {
 	std::ifstream in("day1input.txt");
@@ -253,7 +38,6 @@ void Day1()
 		});
 
 	std::cout << "Fuel needed = " << fuel;
-	std::cin.get();
 }
 void Day2a()
 {
@@ -262,7 +46,6 @@ void Day2a()
 	comp.GetRunCodeVectorReference()[2] = 2;
 	comp.Run();
 	std::cout << "Answer to part 1: "<<comp.GetRunCodeVectorReference()[0];
-	std::cin.get();
 }
 void Day2b()
 {
@@ -283,13 +66,12 @@ void Day2b()
 		}
 		if (comp.GetRunCodeVectorReference()[0] == 19690720) break;
 	}
+	std::cout << "\nRuncode vector at termintion: ";
 	for (int v : comp.GetRunCodeVectorReference())
 	{
 		std::cout << v << ",";
 	}
-	std::cout << "Answer to part 2: " << (100 * noun + verb);
-
-	std::cin.get();
+	std::cout << "\nAnswer to part 2: " << (100 * noun + verb);
 }
 void Day3()
 {
@@ -297,7 +79,8 @@ void Day3()
 	auto maxx = map1.max_size();
 	std::vector<std::vector<char>> map2;
 	std::vector<std::vector<char>> mergedMap;
-	int fieldSize = 25000;
+	int fieldSize = 50;//25000;
+	static constexpr int maxPrintableFieldSize = 60;
 	std::vector<char> row(fieldSize);
 	for (int i = 0; i < fieldSize; i++) row[i] = '.';
 	for (int i = 0; i < fieldSize; i++) map1.push_back(row);
@@ -459,7 +242,7 @@ void Day3()
 			}
 		}
 	}
-	if (fieldSize < 50)
+	if (fieldSize <= maxPrintableFieldSize)
 	{
 		printMap(map1);
 		printMap(map2);
@@ -493,14 +276,17 @@ void Day3()
 			}
 		}
 	}
-	//printMap(map1);
-	//printMap(map2);
+
+	if (fieldSize <= maxPrintableFieldSize)
+	{
+		printMap(map1);
+		printMap(map2);
+		printMap(mergedMap);
+	}
 
 	//Traverse map1.
 	std::ifstream in2("day3input.txt");
-	//in.seekg(0);
 	std::map<int, std::pair<int, int>> distdata;
-	//distdata[1]; distdata[1].first = 10;
 	x = fieldSize / 2;
 	y = fieldSize / 2;
 	ch = 0; dir = 0; dir_old = 0;
@@ -565,7 +351,6 @@ void Day3()
 	}
 
 	//Traverse map2.
-	//in.close(); std::ifstream in("Text3.txt");
 	x = fieldSize / 2;
 	y = fieldSize / 2;
 	ch = 0; dir = 0; dir_old = 0;
@@ -630,7 +415,7 @@ void Day3()
 	}
 
 	std::vector<int> shortestPath;
-	for (size_t i = 1; i < distdata.size(); i++)
+	for (size_t i = 1; i <= distdata.size(); i++)
 	{
 		std::cout << "Crossing " << i << ": " << "(" << distdata[i].first << "," << distdata[i].second << "), total steps: " << distdata[i].first + distdata[i].second << std::endl;
 		shortestPath.push_back(distdata[i].first + distdata[i].second);
@@ -642,30 +427,6 @@ void Day3()
 	{
 		std::cout << v << std::endl;
 	}
-
-}
-bool isValidPassword(int num)
-{
-	std::string number = std::to_string(num);
-	bool flag1 = false;
-	int adj = 0; int max_adj = 0;
-	std::vector<int> test;
-	for (int i = 0; i < 6 - 1; i++)
-	{
-		if (number[i] == number[i + 1]) 
-		{ 
-			adj++; 
-			max_adj = std::max(max_adj, adj); 
-		}
-		else 
-		{ 
-			test.push_back(adj);
-			adj = 0; 
-		}
-		if (number[i + 1] < number[i]) return false;
-	}
-	test.push_back(adj);
-	return ( std::find(test.begin(),test.end(),1) != test.end() );
 }
 void Day4()
 {
@@ -682,24 +443,12 @@ void Day4()
 		}
 	}
 	std::cout << "TOTAL VALID: " << count;
-
 }
 void Day5()
 {
 	IntCode comp("day5input.txt");
 	comp.Run(); // (supply code 1 as only input for 1st part of day1, code 5 for 2nd part)
 	std::cout << "\nEnded.\n";
-}
-int nToRoot(std::string p, std::map<std::string, std::string>& map)
-{
-	if (map[p] == "COM")
-	{
-		return 1;
-	}
-	else
-	{
-		return 1 + nToRoot(map[p], map);
-	}
 }
 void Day6()
 {
@@ -763,31 +512,14 @@ void Day6()
 	}
 	std::cout << "\nminSteps = " << minSteps;
 }
-void permute(std::vector<std::string>& vec, std::string input, std::string sofar)
-{
-	int len = input.size();
-	if (len > 0)
-	{
-		for (int i = 0; i < len; i++)
-		{
-			char ch = input[i];
-			std::string tmp = input.substr(0, i) + input.substr(i + 1, len);
-			permute(vec, tmp, sofar + ch);
-		}
-	}
-	else
-	{
-		vec.push_back(sofar);
-	}
-}
 void Day7a()
 {
 	//Load Intcode computers for the Amps
-	IntCode ampA("Text7.txt");
-	IntCode ampB("Text7.txt");
-	IntCode ampC("Text7.txt");
-	IntCode ampD("Text7.txt");
-	IntCode ampE("Text7.txt");
+	IntCode ampA("day7ainput.txt");
+	IntCode ampB("day7ainput.txt");
+	IntCode ampC("day7ainput.txt");
+	IntCode ampD("day7ainput.txt");
+	IntCode ampE("day7ainput.txt");
 
 	// Generate all permutations of input signal and put in "options", a vector of strings 
 	std::string input = "01234";
@@ -869,10 +601,11 @@ void Day7b()
 
 int main()
 {
-	Day7b();
+	// Instruction: load data in appropriate .txt input file and run the function associated with a specific day
+	// So, for example, to run Day 7 challenge:
+	// --> save data to "day7ainput.txt" and "day7binput.txt"
+	// --> run the functions Day7a(); and/or Day7b(); in main()
+	Day7a();
 	
-
-	std::cin.clear();
-	std::cin.ignore(5, '\n');
-	std::cin.get();
+	while (!_kbhit());
 }
