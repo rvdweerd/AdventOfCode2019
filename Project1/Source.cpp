@@ -783,18 +783,12 @@ void permute(std::vector<std::string>& vec, std::string input, std::string sofar
 void Day7a()
 {
 	//Load Intcode computers for the Amps
-	std::ifstream in("Text7.txt");
-	std::vector<int> ampA;
-	while (!in.eof())
-	{
-		std::string str;
-		for (char ch = in.get(); ch != ',' && !in.eof(); ch = in.get())
-		{
-			str += ch;
-		}
-		ampA.push_back(std::stoi(str));
-	}
-	
+	IntCode ampA("Text7.txt");
+	IntCode ampB("Text7.txt");
+	IntCode ampC("Text7.txt");
+	IntCode ampD("Text7.txt");
+	IntCode ampE("Text7.txt");
+
 	// Generate all permutations of input signal and put in "options", a vector of strings 
 	std::string input = "01234";
 	std::vector<std::string> options;
@@ -802,15 +796,15 @@ void Day7a()
 
 	// Check result for all possible options, log maxResult and maxOption everytime a new option yields a better result
 	int maxResult = -1;
-	int tmpResult = 0;
 	std::string maxOption;
 	for (auto str : options)
 	{
-		for (int i = 0; i < 5; i++)
-		{
-			int tmp = int(str[i] - '0');
-			tmpResult = RunAutomaticInput(ampA, int(str[i]) - '0', tmpResult);
-		}
+		int resA = ampA.Run(str[0] - '0', 0)		; ampA.Reset();
+		int resB = ampB.Run(str[1] - '0', resA)		; ampB.Reset();
+		int resC = ampC.Run(str[2] - '0', resB)		; ampC.Reset();
+		int resD = ampD.Run(str[3] - '0', resC)		; ampD.Reset();
+		int tmpResult = ampE.Run(str[4] - '0', resD); ampE.Reset();
+		
 		if (tmpResult > maxResult)
 		{
 			maxResult = tmpResult;
@@ -821,14 +815,62 @@ void Day7a()
 	std::cout << "Result: " << maxResult << " with Signal: " << maxOption;
 
 }
+void Day7b()
+{
+	//Load Intcode computers for the Amps
+	IntCode ampA("day7binput.txt");
+	IntCode ampB("day7binput.txt");
+	IntCode ampC("day7binput.txt");
+	IntCode ampD("day7binput.txt");
+	IntCode ampE("day7binput.txt");
+
+	// Generate all permutations of input signal and put in "options", a vector of strings 
+	std::string input = "56789";
+	std::vector<std::string> options;
+	permute(options, input, "");
+
+	// Check result for all possible options, log maxResult and maxOption everytime a new option yields a better result
+	int maxResult = -1;
+	std::string maxOption;
+
+	for (auto str : options)
+	{
+		int tmpResult = 0;
+		// First run to set the phases
+		int resA = ampA.Run(str[0] - '0',0);
+		int resB = ampB.Run(str[1] - '0',resA);
+		int resC = ampC.Run(str[2] - '0',resB);
+		int resD = ampD.Run(str[3] - '0',resC);
+		int resE = ampE.Run(str[4] - '0',resD);
+
+		// loop until signal processing stops
+		while (true)
+		{
+			resA = ampA.Run(resE); 
+			if (resA == -1)
+			{
+				if (resE > maxResult)
+				{
+					maxResult = resE;
+					maxOption = str;
+				}
+				ampA.Reset(); ampB.Reset(); ampC.Reset(); ampD.Reset(); ampE.Reset();
+				break;
+			}
+			resB = ampB.Run(resA);
+			resC = ampC.Run(resB);
+			resD = ampD.Run(resC);
+			resE = ampE.Run(resD);
+		}
+	}
+	std::cout << "Result: " << maxResult << " with Signal: " << maxOption;
+
+}
+
 int main()
 {
-	Day6();
+	Day7b();
 	
-	//IntCode comp("day5input.txt");
-	//comp.Run();
-	//std::cout << "\nEnded.\n";
-
 
 	std::cin.clear();
 	std::cin.ignore(5, '\n');
