@@ -5,6 +5,7 @@
 #include <fstream>
 #include <string>
 #include <map>
+#include "IntCoder.h"
 
 void GetParameters(int& val, int& A, int& B, int& C, int& DE)
 {

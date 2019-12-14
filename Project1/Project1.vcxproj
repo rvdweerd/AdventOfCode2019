@@ -147,6 +147,9 @@
     <Text Include="Text3.txt" />
     <Text Include="Text6.txt" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="IntCoder.h" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
