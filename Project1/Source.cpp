@@ -598,6 +598,40 @@ void Day7b()
 	std::cout << "Result: " << maxResult << " with Signal: " << maxOption;
 
 }
+void Day8()
+{
+	std::ifstream in("day8ainput.txt");
+	std::string str;
+	in >> str;
+	std::vector<char> pixelArray;
+	for (char ch: str)
+	{
+		pixelArray.push_back(ch-'0');
+	}
+
+	int width = 25;
+	int height = 6;
+	//int sum_of_0s = 0;
+	//int sum_of_1s = 0;
+	//int sum_of_2s = 0;
+	int min_0s = width;
+	int multiple = 0;
+	//for (int y = 0; y < height; y++)
+	for (int y = 0; y < int(pixelArray.size())/(height*width); y++)
+	{
+		std::vector<int> counterVec = { 0,0,0 }; // counts occurances of 0,1,2 respectively
+		for (int x = 0; x < width*height; x++)
+		{
+			counterVec[pixelArray[width*height * y + x]]++;
+		}
+		if (counterVec[0] < min_0s)
+		{
+			min_0s = counterVec[0];
+			multiple = counterVec[1] * counterVec[2];
+		}
+	}
+	std::cout << "The multiple is: " << multiple;
+}
 
 int main()
 {
@@ -605,7 +639,7 @@ int main()
 	// So, for example, to run Day 7 challenge:
 	// --> save data to "day7ainput.txt" and "day7binput.txt"
 	// --> run the functions Day7a(); and/or Day7b(); in main()
-	Day7a();
+	Day8();
 	
 	while (!_kbhit());
 }

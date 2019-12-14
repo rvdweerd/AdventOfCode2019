@@ -41,6 +41,9 @@
     <Text Include="day7ainput.txt">
       <Filter>Resource Files</Filter>
     </Text>
+    <Text Include="day8ainput.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="IntCode.h">
