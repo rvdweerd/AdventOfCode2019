@@ -5,6 +5,37 @@
 #include <string>
 #include <map>
 
+struct Pos
+{
+	int x;
+	int y;
+	//friend Pos operator-(Pos& p1, Pos& p2);
+};
+void ReduceToLowestCommonDenom(Pos& direction)
+{
+	if (direction.x != 0)
+	{
+		for (int i = std::max(std::abs(direction.x), std::abs(direction.y)); i > 1; i--)
+		{
+			if (direction.y % i == 0 && direction.x % i == 0)
+			{
+				direction.y /= i;
+				direction.x /= i;
+			}
+		}
+	}
+	if (direction.x == 0 && direction.y != 0)
+	{
+		direction.y /= std::abs(direction.y);
+	}
+}
+/*
+Pos operator-(Pos& p1, Pos& p2)
+{
+	return { p1.x - p2.x ,p1.y - p2.y };
+}
+*/
+
 void printMap(std::vector<std::vector<char>>& map)
 {
 	for (size_t y = 0; y < map.size(); y++)

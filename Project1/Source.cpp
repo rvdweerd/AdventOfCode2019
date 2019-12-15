@@ -5,6 +5,7 @@
 #include <fstream>
 #include <string>
 #include <map>
+#include <set>
 #include <sstream>
 #include <conio.h>
 #include "IntCode.h"
@@ -652,13 +653,62 @@ void Day9()
 	IntCode comp("day9input.txt");
 	comp.Run();
 }
+void Day10()
+{
+	// Load astroid map
+	std::ifstream in("day10input.txt");
+	std::vector<Pos> astroids;
+	char ch;
+	int x = 0;
+	int y = 0;
+	for (ch = in.get(); !in.eof(); ch=in.get())
+	{
+		if (ch == '\n') // newline encountered
+		{
+			ch = in.get();
+			x = 0;
+			y++;
+			std::cout << std::endl;
+		}
+		if (ch == '#') // astroid present at location
+		{
+			astroids.push_back({ x,y });
+		}
+		x++;
+		std::cout << ch;
+	}
+	std::cout << std::endl;
+
+	Pos bestPos = { 0,0 };
+	int maxVisible = 0;
+	for (Pos activePos : astroids)
+	{
+		std::set<std::pair<int, int>> set;
+		for (Pos p : astroids)
+		{
+			Pos dir = { p.x - activePos.x, p.y - activePos.y };
+			ReduceToLowestCommonDenom(dir);
+
+			set.insert({ dir.x,dir.y });
+		}
+		std::cout << "Astroid at: (" << activePos.x << "," << activePos.y << ") : " << set.size() - 1<<std::endl;
+		if (set.size()-1 > maxVisible)
+		{
+			maxVisible = set.size()-1;
+			bestPos = activePos;
+		}
+	}
+	std::cout << "The best position is (" << bestPos.x << "," << bestPos.y << "), with " << maxVisible << " other astroids detected:\n";
+	//print to be implemented
+}
+
 int main()
 {
 	// Instruction: load data in appropriate .txt input file and run the function associated with a specific day
 	// So, for example, to run Day 7 challenge:
 	// --> save data to "day7ainput.txt" and "day7binput.txt"
 	// --> run the functions Day7a(); and/or Day7b(); in main()
-	Day9();
+	Day10();
 	
 	while (!_kbhit());
 }
