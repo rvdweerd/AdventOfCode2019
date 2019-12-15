@@ -611,18 +611,16 @@ void Day8()
 
 	int width = 25;
 	int height = 6;
-	//int sum_of_0s = 0;
-	//int sum_of_1s = 0;
-	//int sum_of_2s = 0;
+	int nPixelsPerLayer = width * height;
+	int nLayers = int(pixelArray.size()) / (height * width);
 	int min_0s = width;
 	int multiple = 0;
-	//for (int y = 0; y < height; y++)
-	for (int y = 0; y < int(pixelArray.size())/(height*width); y++)
+	for (int layer = 0; layer < nLayers; layer++)
 	{
 		std::vector<int> counterVec = { 0,0,0 }; // counts occurances of 0,1,2 respectively
-		for (int x = 0; x < width*height; x++)
+		for (int i = 0; i < nPixelsPerLayer; i++)
 		{
-			counterVec[pixelArray[width*height * y + x]]++;
+			counterVec[pixelArray[nPixelsPerLayer * layer + i]]++;
 		}
 		if (counterVec[0] < min_0s)
 		{
@@ -630,7 +628,24 @@ void Day8()
 			multiple = counterVec[1] * counterVec[2];
 		}
 	}
-	std::cout << "The multiple is: " << multiple;
+	std::cout << "The multiple is: " << multiple<<std::endl << std::endl;
+
+	for (int y = 0; y < height; y++)
+	{
+		for (int x = 0; x < width; x++)
+		{
+			for (int layer = 0; layer < nLayers; layer++)
+			{
+				char cellColor = pixelArray[(y * width + x) + layer * nPixelsPerLayer]+'0';
+				if (cellColor != '2')
+				{
+					std::cout << (cellColor == '1' ? "&": " ");
+					break;
+				}
+			}
+		}
+		std::cout << std::endl;
+	}
 }
 
 int main()
