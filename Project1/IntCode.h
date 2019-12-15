@@ -114,7 +114,7 @@ public:
 			}
 		}
 	}
-	long long int Run(long long int input1, long long int input2=0)
+	long long int Run(long long int input1, long long int input2 = 0)
 	{
 		int increment = 0;
 		for (/*code_index = 0*/; (int)runCodeVec[code_index] != 99; code_index += increment)
@@ -122,42 +122,41 @@ public:
 			GetParameters(code_index);
 			if (opcode == 1) // add
 			{
-				long long int val1 = (C == 0 ? runCodeVec[(int)runCodeVec[code_index + 1]] : runCodeVec[code_index + 1]);
-				long long int val2 = (B == 0 ? runCodeVec[(int)runCodeVec[code_index + 2]] : runCodeVec[code_index + 2]);
-				int writePos = (int)runCodeVec[code_index + 3];
-				runCodeVec[writePos] = val1 + val2;
+				long long int val1 = readVal<long long int>(code_index + 1, C);
+				long long int val2 = readVal<long long int>(code_index + 2, B);
+				writeVal<long long int>(code_index + 3, A, val1 + val2);
 				increment = 4;
 			}
 			else if (opcode == 2) // multiply
 			{
-				long long int val1 = (C == 0 ? runCodeVec[(int)runCodeVec[code_index + 1]] : runCodeVec[code_index + 1]);
-				long long int val2 = (B == 0 ? runCodeVec[(int)runCodeVec[code_index + 2]] : runCodeVec[code_index + 2]);
-				int writePos = (int)runCodeVec[code_index + 3];
-				runCodeVec[writePos] = val1 * val2;
+				long long int val1 = readVal<long long int>(code_index + 1, C);
+				long long int val2 = readVal<long long int>(code_index + 2, B);
+				writeVal<long long int>(code_index + 3, A, val1 * val2);
 				increment = 4;
 			}
 			else if (opcode == 3) // input
 			{
 				//int k;
 				//std::cout << "Input:"; std::cin >> k;
-				runCodeVec[(int)runCodeVec[code_index + 1]] = input1;
-				input1 = input2;
+				writeVal<long long int>(code_index + 1, C, input1);
+				input1 = input2; // to enable two consecutive inputs to be processed
 				increment = 2;
 			}
 			else if (opcode == 4) // output
 			{
-				long long int val1 = (C == 0 ? runCodeVec[(int)runCodeVec[code_index + 1]] : runCodeVec[code_index + 1]);
-				//std::cout << val1 << std::endl;
-				code_index += 2;//increment = 2;
+				long long int val1 = readVal<long long int>(code_index + 1, C);
+				//std::cout << val1 << ",";
+				//increment = 2;
+				code_index += 2;
 				return val1;
 			}
 			else if (opcode == 5) // jump-if-true
 			{
-				long long int val1 = (C == 0 ? runCodeVec[(int)runCodeVec[code_index + 1]] : runCodeVec[code_index + 1]);
-				long long int val2 = (B == 0 ? runCodeVec[(int)runCodeVec[code_index + 2]] : runCodeVec[code_index + 2]);
+				long long int val1 = readVal<long long int>(code_index + 1, C);
+				long long int val2 = readVal<long long int>(code_index + 2, B);
 				if (val1 != 0)
 				{
-					code_index = (int)val2;
+					code_index = int(val2);
 					increment = 0;
 				}
 				else
@@ -167,11 +166,11 @@ public:
 			}
 			else if (opcode == 6) // jump-if-false
 			{
-				long long int val1 = (C == 0 ? runCodeVec[(int)runCodeVec[code_index + 1]] : runCodeVec[code_index + 1]);
-				long long int val2 = (B == 0 ? runCodeVec[(int)runCodeVec[code_index + 2]] : runCodeVec[code_index + 2]);
+				long long int val1 = readVal<long long int>(code_index + 1, C);
+				long long int val2 = readVal<long long int>(code_index + 2, B);
 				if (val1 == 0)
 				{
-					code_index = (int)val2;
+					code_index = int(val2);
 					increment = 0;
 				}
 				else
@@ -181,25 +180,27 @@ public:
 			}
 			else if (opcode == 7) // less-than
 			{
-				long long int val1 = (C == 0 ? runCodeVec[(int)runCodeVec[code_index + 1]] : runCodeVec[code_index + 1]);
-				long long int val2 = (B == 0 ? runCodeVec[(int)runCodeVec[code_index + 2]] : runCodeVec[code_index + 2]);
-				int writePos = (int)runCodeVec[code_index + 3];
-
-				runCodeVec[writePos] = (val1 < val2 ? 1 : 0);
+				long long int val1 = readVal<long long int>(code_index + 1, C);
+				long long int val2 = readVal<long long int>(code_index + 2, B);
+				writeVal<long long int>(code_index + 3, A, (val1 < val2 ? 1 : 0));
 				increment = 4;
 			}
 			else if (opcode == 8) // equals
 			{
-				long long int val1 = (C == 0 ? runCodeVec[(int)runCodeVec[code_index + 1]] : runCodeVec[code_index + 1]);
-				long long int val2 = (B == 0 ? runCodeVec[(int)runCodeVec[code_index + 2]] : runCodeVec[code_index + 2]);
-				int writePos = (int)runCodeVec[code_index + 3];
-				runCodeVec[writePos] = (val1 == val2 ? 1 : 0);
+				long long int val1 = readVal<long long int>(code_index + 1, C);
+				long long int val2 = readVal<long long int>(code_index + 2, B);
+				writeVal<long long int>(code_index + 3, A, (val1 == val2 ? 1 : 0));
 				increment = 4;
+			}
+			else if (opcode == 9) // adjust relative base
+			{
+				long long int val1 = readVal<long long int>(code_index + 1, C);
+				relativeBase += int(val1);
+				increment = 2;
 			}
 			else
 			{
 				std::cout << "error.";
-				
 			}
 		}
 		return -1;
