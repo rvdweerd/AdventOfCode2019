@@ -67,7 +67,7 @@ void Day2b()
 		if (comp.GetRunCodeVectorReference()[0] == 19690720) break;
 	}
 	std::cout << "\nRuncode vector at termintion: ";
-	for (int v : comp.GetRunCodeVectorReference())
+	for (long long int v : comp.GetRunCodeVectorReference())
 	{
 		std::cout << v << ",";
 	}
@@ -527,15 +527,15 @@ void Day7a()
 	permute(options, input, "");
 
 	// Check result for all possible options, log maxResult and maxOption everytime a new option yields a better result
-	int maxResult = -1;
+	long long int maxResult = -1;
 	std::string maxOption;
 	for (auto str : options)
 	{
-		int resA = ampA.Run(str[0] - '0', 0)		; ampA.Reset();
-		int resB = ampB.Run(str[1] - '0', resA)		; ampB.Reset();
-		int resC = ampC.Run(str[2] - '0', resB)		; ampC.Reset();
-		int resD = ampD.Run(str[3] - '0', resC)		; ampD.Reset();
-		int tmpResult = ampE.Run(str[4] - '0', resD); ampE.Reset();
+		long long int resA = ampA.Run(str[0] - '0', 0)			; ampA.Reset();
+		long long int resB = ampB.Run(str[1] - '0', resA)		; ampB.Reset();
+		long long int resC = ampC.Run(str[2] - '0', resB)		; ampC.Reset();
+		long long int resD = ampD.Run(str[3] - '0', resC)		; ampD.Reset();
+		long long int tmpResult = ampE.Run(str[4] - '0', resD)	; ampE.Reset();
 		
 		if (tmpResult > maxResult)
 		{
@@ -562,18 +562,18 @@ void Day7b()
 	permute(options, input, "");
 
 	// Check result for all possible options, log maxResult and maxOption everytime a new option yields a better result
-	int maxResult = -1;
+	long long int maxResult = -1;
 	std::string maxOption;
 
 	for (auto str : options)
 	{
-		int tmpResult = 0;
+		long long int tmpResult = 0;
 		// First run to set the phases
-		int resA = ampA.Run(str[0] - '0',0);
-		int resB = ampB.Run(str[1] - '0',resA);
-		int resC = ampC.Run(str[2] - '0',resB);
-		int resD = ampD.Run(str[3] - '0',resC);
-		int resE = ampE.Run(str[4] - '0',resD);
+		long long int resA = ampA.Run(str[0] - '0',0);
+		long long int resB = ampB.Run(str[1] - '0',resA);
+		long long int resC = ampC.Run(str[2] - '0',resB);
+		long long int resD = ampD.Run(str[3] - '0',resC);
+		long long int resE = ampE.Run(str[4] - '0',resD);
 
 		// loop until signal processing stops
 		while (true)
@@ -647,14 +647,18 @@ void Day8()
 		std::cout << std::endl;
 	}
 }
-
+void Day9()
+{
+	IntCode comp("day9input.txt");
+	comp.Run();
+}
 int main()
 {
 	// Instruction: load data in appropriate .txt input file and run the function associated with a specific day
 	// So, for example, to run Day 7 challenge:
 	// --> save data to "day7ainput.txt" and "day7binput.txt"
 	// --> run the functions Day7a(); and/or Day7b(); in main()
-	Day8();
+	Day9();
 	
 	while (!_kbhit());
 }

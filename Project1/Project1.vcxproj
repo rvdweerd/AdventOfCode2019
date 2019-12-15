@@ -150,6 +150,7 @@
     <Text Include="day7ainput.txt" />
     <Text Include="day7binput.txt" />
     <Text Include="day8ainput.txt" />
+    <Text Include="day9input.txt" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="HelperFunctions.h" />
