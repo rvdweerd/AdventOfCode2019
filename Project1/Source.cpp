@@ -702,7 +702,8 @@ void Day10()
 		}
 	}
 	std::cout << "The best position is (" << bestPos.x << "," << bestPos.y << "), with " << maxVisible << " other astroids detected:\n";
-	//print to be implemented
+	//
+	// print to be implemented
 
 	// ##############################################################################
 	// PART 2
@@ -727,12 +728,14 @@ void Day10()
 		std::cout << "Planet (" << p.x << "," << p.y << ") has direction vector (" << dir.x << "," << dir.y << "), at angle: " << getClockAngle({ dir.x,dir.y }) << " deg\n";
 	}
 	// -> sort [[vec_Dir]] in order of distance to monitoring station (x+y) closeby to far
+	//
 	std::sort(vec_Dir.begin(), vec_Dir.end(), [](std::pair<int, int> p1, std::pair<int, int> p2) { return (p1.first+p1.second) > (p2.first+p2.second); });
 	// -> fill [[vec_baseDir]], a vector with all normalized directions and sort 
 	//    in order of their direction angle (0deg = top of screen, clockwise to 360 deg )
 	for (auto p : set_baseDir) vec_baseDir.push_back(p);
 	std::sort(vec_baseDir.begin(), vec_baseDir.end(), [](std::pair<int, int> p1, std::pair<int, int> p2) { return getClockAngle(p1) < getClockAngle(p2); });
 	// -> fill [[map]], that maps each base direction to a vector that contains all planets in the line of sight for that base direction
+	//
 	std::map< std::pair<int,int>, std::vector<std::pair<int,int>> > map;
 	for (auto d : vec_Dir)
 	{
@@ -772,6 +775,73 @@ void Day10()
 	std::cout << "The "<<nBet<<"th astroid destroyed is at absolute position: (" << x_abs<< "," << y_abs << ").\n";
 	std::cout << "The answer (100*x+y) = " << 100 * x_abs + y_abs << "\n";
 }
+void Day11()
+{
+	// 0=black, 1=white
+	int fieldWidth = 120;
+	int fieldHeight = 110;
+	int nPanels = fieldWidth * fieldHeight;
+	std::map<Direction, std::pair<int, int>> directionMap;
+	directionMap[Direction::UP]		= { 0,-1 };
+	directionMap[Direction::RIGHT]	= { 1, 0 };
+	directionMap[Direction::DOWN]	= { 0, 1 };
+	directionMap[Direction::LEFT]	= {-1, 0 };
+
+	IntCode comp("day11input.txt");
+	std::pair<int, int> pos = { fieldWidth/2-5, fieldHeight/2 +20};
+	std::vector<int> field(nPanels);
+	std::vector<int> field_copy(nPanels);
+	std::set<std::pair<int, int>> paintedPositions;
+	int currentColor = 1;
+	Direction dir = Direction::UP;
+	int minx=fieldWidth/2;
+	int maxx=0;
+	int miny=fieldHeight/2;
+	int maxy=0;
+
+	while (true)
+	{
+		int instr0 = (int)comp.Run(currentColor); if (instr0 == -1) break;
+		int instr1 = (int)comp.Run(0); if (instr1 == -1) break;
+		//std::cout << "Current panel: (" << pos.first << "," << pos.second << "), ";
+		//std::cout << "Current color: " << currentColor<<", ";
+		//std::cout << "Instruction received: [" << instr0 << "," << instr1 << "], ";
+		
+		// apply paint
+		field[pos.second * fieldWidth + pos.first] = instr0;
+		field_copy[pos.second * fieldWidth + pos.first] = 1;
+		paintedPositions.emplace(pos);
+
+		// adjust direction (there has got to be a better way, but this works)
+		(instr1 == 1) ? (dir = Direction((int(dir) + 1) % int(Direction::count))) : (dir = Direction((int(dir) - 1 + int(Direction::count)) % int(Direction::count)));
+		// take step
+		pos.first += directionMap[dir].first;
+		pos.second += directionMap[dir].second;
+		// read current color
+		currentColor = field[pos.second * fieldWidth + pos.first];
+		// output new position
+		minx = std::min(minx, pos.first);
+		miny = std::min(miny, pos.second);
+		maxx = std::max(maxx, pos.first);
+		maxy = std::max(maxy, pos.second);
+		//std::cout<<"New position: ("<< pos.first << "," << pos.second << "). \n";
+	}
+	std::cout << "\nCode ended.\n";
+
+	//printing the canvas
+	for (int y = 0; y < fieldHeight; y++)
+	{
+		for (int x = 0; x < fieldWidth; x++)
+		{
+			if (field[y * fieldWidth + x] == 1) std::cout << "#"; else std::cout<<".";
+		}
+		std::cout << std::endl;
+	}
+	std::cout << "Minimum number of painted positions: " << paintedPositions.size();
+	std::cout << "\nxmin: " << minx << " xmax: " << maxx << "\n";
+	std::cout << "ymin: " << miny << " ymax: " << maxy << "\n";
+
+}
 
 int main()
 {
@@ -779,7 +849,7 @@ int main()
 	// So, for example, to run Day 7 challenge:
 	// --> save data to "day7ainput.txt" and "day7binput.txt"
 	// --> run the functions Day7a(); and/or Day7b(); in main()
-	Day10();
+	Day11();
 	
 	while (!_kbhit());
 }

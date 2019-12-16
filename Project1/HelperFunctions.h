@@ -70,6 +70,14 @@ float getClockAngle(std::pair<int, int> q)
 		return 0;
 	}
 }
+enum class Direction
+{
+	UP = 0,
+	RIGHT,
+	DOWN,
+	LEFT,
+	count
+};
 void printMap(std::vector<std::vector<char>>& map)
 {
 	for (size_t y = 0; y < map.size(); y++)
