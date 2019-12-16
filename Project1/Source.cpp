@@ -655,6 +655,9 @@ void Day9()
 }
 void Day10()
 {
+	// ##############################################################################
+	// PART 1
+	// ##############################################################################
 	// Load astroid map
 	std::ifstream in("day10input.txt");
 	std::vector<Pos> astroids;
@@ -700,6 +703,74 @@ void Day10()
 	}
 	std::cout << "The best position is (" << bestPos.x << "," << bestPos.y << "), with " << maxVisible << " other astroids detected:\n";
 	//print to be implemented
+
+	// ##############################################################################
+	// PART 2
+	// ##############################################################################
+	// General strategy: 
+	// 1. make vector of unique normalized directions from monitoring station to astroids in the angular order (top of screen=0deg, clockwise to 360deg)
+	// 2. make a map with [keys]: all unique normalized directions, [values]: vector of all astroids on that direction, sorted by distance, closeby to far away
+	// 3. loop through vector (1), removing each first astroid in vector (2) that maps to each direction, until all vetors in the map are empty.
+	//
+	// Let monitoring station be at bestPos, fill all helper containers
+	// -> fill [[set_baseDir]] with normalized directions from station to all planets
+	// -> fill [[vec_Dir]] with all distance vertices from station to all planets
+	std::set<std::pair<int, int>> set_baseDir;
+	std::vector<std::pair<int, int>> vec_Dir;
+	std::vector<std::pair<int, int>> vec_baseDir;
+	for (Pos p : astroids)
+	{
+		Pos dir = { p.x - bestPos.x, p.y - bestPos.y };
+		vec_Dir.push_back({ dir.x,dir.y });
+		ReduceToLowestCommonDenom(dir);
+		set_baseDir.insert({ dir.x,dir.y });
+		std::cout << "Planet (" << p.x << "," << p.y << ") has direction vector (" << dir.x << "," << dir.y << "), at angle: " << getClockAngle({ dir.x,dir.y }) << " deg\n";
+	}
+	// -> sort [[vec_Dir]] in order of distance to monitoring station (x+y) closeby to far
+	std::sort(vec_Dir.begin(), vec_Dir.end(), [](std::pair<int, int> p1, std::pair<int, int> p2) { return (p1.first+p1.second) > (p2.first+p2.second); });
+	// -> fill [[vec_baseDir]], a vector with all normalized directions and sort 
+	//    in order of their direction angle (0deg = top of screen, clockwise to 360 deg )
+	for (auto p : set_baseDir) vec_baseDir.push_back(p);
+	std::sort(vec_baseDir.begin(), vec_baseDir.end(), [](std::pair<int, int> p1, std::pair<int, int> p2) { return getClockAngle(p1) < getClockAngle(p2); });
+	// -> fill [[map]], that maps each base direction to a vector that contains all planets in the line of sight for that base direction
+	std::map< std::pair<int,int>, std::vector<std::pair<int,int>> > map;
+	for (auto d : vec_Dir)
+	{
+		Pos baseD = {d.first,d.second};
+		ReduceToLowestCommonDenom(baseD);
+		map[{baseD.x, baseD.y}].push_back({ d.first,d.second });
+	}
+	
+	// Now, loop though [[vec_baseDir]] until all vectors in the map are empty, shooting the first element of each vector at every pass 
+	// We'll fill a new vector [[vec_Destroyed]] to log the astroids in the order that they are destroyed
+	std::vector<std::pair<int, int>> vec_Destroyed;
+	int astroidsLeft = vec_Dir.size();
+	std::cout << "Destroying: ";
+	while (astroidsLeft > 0)
+	{
+		for (auto d : vec_baseDir)
+		{
+			if (map[d].size() > 0)
+			{
+				int x_rel = map[d][0].first;
+				int y_rel = map[d][0].second;
+				if (x_rel != 0 || y_rel != 0) // own astroid at relative position (0,0) cannot be destroyed
+				{
+					vec_Destroyed.push_back(map[d][0]);
+					std::cout << "(" << map[d][0].first << "," << map[d][0].second << "),";
+				}
+				map[d].erase(map[d].begin());
+				astroidsLeft--;
+			}
+		}
+	} std::cout << std::endl;
+	// NOW WE KNOW THE ANSWER
+	int nBet = 200; 
+	int nDestroyed = vec_Destroyed.size(); if (nDestroyed < nBet) nBet = nDestroyed;
+	int x_abs = vec_Destroyed[nBet-1].first + bestPos.x;
+	int y_abs = vec_Destroyed[nBet-1].second + bestPos.y;
+	std::cout << "The "<<nBet<<"th astroid destroyed is at absolute position: (" << x_abs<< "," << y_abs << ").\n";
+	std::cout << "The answer (100*x+y) = " << 100 * x_abs + y_abs << "\n";
 }
 
 int main()

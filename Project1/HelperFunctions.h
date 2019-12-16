@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <string>
 #include <map>
+#include <math.h>
 
 struct Pos
 {
@@ -35,7 +36,40 @@ Pos operator-(Pos& p1, Pos& p2)
 	return { p1.x - p2.x ,p1.y - p2.y };
 }
 */
-
+float getClockAngle(std::pair<int, int> q)
+{
+	float pi = 3.14159265f;
+	std::pair<float, float> p = { float(q.first),float(q.second) };
+	if (p.first == 0) // on y-axis
+	{
+		if (p.second >= 0) return 180.0f; else return 0.0f;
+	}
+	else if (p.second == 0) // on x-axis
+	{
+		if (p.first >= 0) return 90.0f; else return 270.0f;
+	}	
+	else if (p.first > 0 && p.second < 0) //1st quadrant
+	{
+		return (atan(p.first / (-p.second)) * 180 / pi);
+	}
+	else if (p.first > 0 && p.second > 0) //2nd quadrant
+	{
+		return (atan((p.second) / p.first) * 180 / pi + 90.0f);
+	}
+	else if (p.first < 0 && p.second > 0) //3rd quadrant
+	{
+		return (atan((-p.first) / p.second) * 180 / pi + 180.0f);
+	}
+	else if (p.first < 0 && p.second < 0) //4th quadrant
+	{
+		return (atan((p.second) / p.first) * 180 / pi + 270.0f);
+	}
+	else
+	{
+		std::cout << "getClockAngle: error in calc of angle using atan\n";
+		return 0;
+	}
+}
 void printMap(std::vector<std::vector<char>>& map)
 {
 	for (size_t y = 0; y < map.size(); y++)
