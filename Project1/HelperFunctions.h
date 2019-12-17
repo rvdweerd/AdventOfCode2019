@@ -129,7 +129,7 @@ int nToRoot(std::string p, std::map<std::string, std::string>& map)
 
 void permute(std::vector<std::string>& vec, std::string input, std::string sofar)
 {
-	int len = input.size();
+	int len = (int)input.size();
 	if (len > 0)
 	{
 		for (int i = 0; i < len; i++)

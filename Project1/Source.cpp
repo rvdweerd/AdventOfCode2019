@@ -10,6 +10,9 @@
 #include <conio.h>
 #include "IntCode.h"
 #include "HelperFunctions.h"
+#include "Planet.h"
+#include <iomanip>
+#include <unordered_set>
 
 void Day1()
 {
@@ -416,7 +419,7 @@ void Day3()
 	}
 
 	std::vector<int> shortestPath;
-	for (size_t i = 1; i <= distdata.size(); i++)
+	for (int i = 1; i <= (int)distdata.size(); i++)
 	{
 		std::cout << "Crossing " << i << ": " << "(" << distdata[i].first << "," << distdata[i].second << "), total steps: " << distdata[i].first + distdata[i].second << std::endl;
 		shortestPath.push_back(distdata[i].first + distdata[i].second);
@@ -695,9 +698,9 @@ void Day10()
 			set.insert({ dir.x,dir.y });
 		}
 		std::cout << "Astroid at: (" << activePos.x << "," << activePos.y << ") : " << set.size() - 1<<std::endl;
-		if (set.size()-1 > maxVisible)
+		if (int(set.size()-1) > maxVisible)
 		{
-			maxVisible = set.size()-1;
+			maxVisible = (int)set.size()-1;
 			bestPos = activePos;
 		}
 	}
@@ -747,7 +750,7 @@ void Day10()
 	// Now, loop though [[vec_baseDir]] until all vectors in the map are empty, shooting the first element of each vector at every pass 
 	// We'll fill a new vector [[vec_Destroyed]] to log the astroids in the order that they are destroyed
 	std::vector<std::pair<int, int>> vec_Destroyed;
-	int astroidsLeft = vec_Dir.size();
+	int astroidsLeft = (int)vec_Dir.size();
 	std::cout << "Destroying: ";
 	while (astroidsLeft > 0)
 	{
@@ -769,7 +772,7 @@ void Day10()
 	} std::cout << std::endl;
 	// NOW WE KNOW THE ANSWER
 	int nBet = 200; 
-	int nDestroyed = vec_Destroyed.size(); if (nDestroyed < nBet) nBet = nDestroyed;
+	int nDestroyed = (int)vec_Destroyed.size(); if (nDestroyed < nBet) nBet = nDestroyed;
 	int x_abs = vec_Destroyed[nBet-1].first + bestPos.x;
 	int y_abs = vec_Destroyed[nBet-1].second + bestPos.y;
 	std::cout << "The "<<nBet<<"th astroid destroyed is at absolute position: (" << x_abs<< "," << y_abs << ").\n";
@@ -841,12 +844,6 @@ void Day11()
 	std::cout << "\nxmin: " << minx << " xmax: " << maxx << "\n";
 	std::cout << "ymin: " << miny << " ymax: " << maxy << "\n";
 }
-struct Vei3
-{
-	int x;
-	int y;
-	int z;
-};
 void CreateSubsets(std::string str, std::string sofar, std::vector<std::pair<int,int>>& pairs)
 {
 	if (sofar.size() == 2)
@@ -888,13 +885,14 @@ void Day12()
 	velocities.push_back({ 0,0,0 });
 	velocities.push_back({ 0,0,0 });
 	int nSteps = 1000;
+
 	for (int timestep = 0; timestep < nSteps; timestep++)
 	{
 		// print pos & vel
 		std::cout << "After " << timestep << " step"; std::cout << ((timestep != 1) ? "s:" : ":"); std::cout << std::endl;
 		for (int i : planetIndices)
 		{
-			std::cout << "Pos=<x=" << positions[i].x << ", y= " << positions[i].y << ">, z=" << positions[i].z << ">, ";
+			std::cout<< std::setw(6)<< "Pos=<x=" << positions[i].x << ", y= " << positions[i].y << ">, z=" << positions[i].z << ">, ";
 			std::cout << "Vel=<x=" << velocities[i].x << ", y= " << velocities[i].y << ">, z=" << velocities[i].z << ">\n";
 		}
 		// apply gravity
@@ -950,13 +948,78 @@ void Day12()
 	}
 	std::cout << "Total energy in sytem: " << energyTotal;
 }
+void Day12_()
+{
+	std::vector<std::pair<int, int>> pairs;
+	std::string str = "0123";
+	CreateSubsets(str, "", pairs);
+
+	std::vector<Planet> planets;
+	
+	//planets.push_back({ -1, 0, 2 });
+	//planets.push_back({ 2, -10,-7 });
+	//planets.push_back({ 4,-8,8 });
+	//planets.push_back({ 3, 5,  -1 });
+
+	planets.push_back({ -6, -5, -8 });
+	planets.push_back({ 0, -3,-13 });
+	planets.push_back({ -15,10,-11 });
+	planets.push_back({ -3, -8,  3 });
+
+	   
+	std::unordered_set<std::string> planetStateSet;
+	std::cout << "Max set capacity: " << planetStateSet.max_size() << std::endl;
+	int timestep = 0;
+	while (true)
+	{
+		{
+			std::string planetStateString;
+			for (auto p : planets)
+			{
+				planetStateString += p.Serialize();
+			}
+			if (timestep==0) planetStateSet.insert(planetStateString);
+		}
+		//apply gravity
+		for (auto& p : pairs)
+		{
+			planets[p.first].Gravitate(planets[p.second]);
+		}
+		// apply velocity
+		for (Planet& p : planets)
+		{
+			p.Move();
+		}
+		if (++timestep % 100000000 == 0) std::cout << planetStateSet.size() << std::endl;
+		{
+			std::string planetStateString;
+			for (auto p : planets)
+			{
+				planetStateString += p.Serialize();
+			}
+			auto search = planetStateSet.find(planetStateString);
+			if(search != planetStateSet.end()) break;
+		}
+	}
+	// 
+	std::cout << "similar state achieved after " << timestep << "steps. \n";
+	
+	// calculate energy after n steps
+	int energyTotal = 0;
+	for (Planet& p : planets)
+	{
+		energyTotal += p.TotalEnergy();
+	}
+	std::cout << "Total energy in sytem: " << energyTotal;
+
+}
 int main()
 {
 	// Instruction: load data in appropriate .txt input file and run the function associated with a specific day
 	// So, for example, to run Day 7 challenge:
 	// --> save data to "day7ainput.txt" and "day7binput.txt"
 	// --> run the functions Day7a(); and/or Day7b(); in main()
-	Day12();
-	
+	Day12_();
+
 	while (!_kbhit());
 }

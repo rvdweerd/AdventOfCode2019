@@ -157,6 +157,7 @@
   <ItemGroup>
     <ClInclude Include="HelperFunctions.h" />
     <ClInclude Include="IntCode.h" />
+    <ClInclude Include="Planet.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
