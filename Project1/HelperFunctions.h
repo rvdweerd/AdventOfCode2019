@@ -5,6 +5,7 @@
 #include <string>
 #include <map>
 #include <math.h>
+#include <windows.h>
 
 struct Pos
 {
@@ -16,7 +17,7 @@ void ReduceToLowestCommonDenom(Pos& direction)
 {
 	if (direction.x != 0)
 	{
-		for (int i = std::max(std::abs(direction.x), std::abs(direction.y)); i > 1; i--)
+		for (int i = max(std::abs(direction.x), std::abs(direction.y)); i > 1; i--)
 		{
 			if (direction.y % i == 0 && direction.x % i == 0)
 			{
@@ -102,7 +103,7 @@ bool isValidPassword(int num)
 		if (number[i] == number[i + 1])
 		{
 			adj++;
-			max_adj = std::max(max_adj, adj);
+			max_adj = max(max_adj, adj);
 		}
 		else
 		{
@@ -143,4 +144,40 @@ void permute(std::vector<std::string>& vec, std::string input, std::string sofar
 	{
 		vec.push_back(sofar);
 	}
+}
+void ClearScreen()
+{
+	HANDLE                     hStdOut;
+	CONSOLE_SCREEN_BUFFER_INFO csbi;
+	DWORD                      count;
+	DWORD                      cellCount;
+	COORD                      homeCoords = { 0, 0 };
+
+	hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
+	if (hStdOut == INVALID_HANDLE_VALUE) return;
+
+	/* Get the number of cells in the current buffer */
+	if (!GetConsoleScreenBufferInfo(hStdOut, &csbi)) return;
+	cellCount = csbi.dwSize.X * csbi.dwSize.Y;
+
+	/* Fill the entire buffer with spaces */
+	if (!FillConsoleOutputCharacter(
+		hStdOut,
+		(TCHAR)' ',
+		cellCount,
+		homeCoords,
+		&count
+	)) return;
+
+	/* Fill the entire buffer with the current colors and attributes */
+	if (!FillConsoleOutputAttribute(
+		hStdOut,
+		csbi.wAttributes,
+		cellCount,
+		homeCoords,
+		&count
+	)) return;
+
+	/* Move the cursor home */
+	SetConsoleCursorPosition(hStdOut, homeCoords);
 }

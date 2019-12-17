@@ -79,6 +79,10 @@ public:
 	{
 		return ((this->pos == rhs.pos) && (this->vel == rhs.vel));
 	}
+	std::pair<int, int> Get2DPos()
+	{
+		return { pos.x,pos.y };
+	}
 public:
 	Vei3 pos;
 	Vei3 vel;

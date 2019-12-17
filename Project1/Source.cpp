@@ -13,6 +13,9 @@
 #include "Planet.h"
 #include <iomanip>
 #include <unordered_set>
+#include <unordered_map>
+#include <chrono>
+#include <thread>
 
 void Day1()
 {
@@ -34,7 +37,7 @@ void Day1()
 			int additional = m;
 			while (additional != 0)
 			{
-				additional = std::max(0, additional / 3 - 2);
+				additional = max(0, additional / 3 - 2);
 				count += additional;
 			}
 
@@ -510,7 +513,7 @@ void Day6()
 		{
 			if (p.first == q.first)
 			{
-				minSteps = std::min(minSteps, p.second + q.second);
+				minSteps = min(minSteps, p.second + q.second);
 			}
 		}
 	}
@@ -823,10 +826,10 @@ void Day11()
 		// read current color
 		currentColor = field[pos.second * fieldWidth + pos.first];
 		// output new position
-		minx = std::min(minx, pos.first);
-		miny = std::min(miny, pos.second);
-		maxx = std::max(maxx, pos.first);
-		maxy = std::max(maxy, pos.second);
+		minx = min(minx, pos.first);
+		miny = min(miny, pos.second);
+		maxx = max(maxx, pos.first);
+		maxy = max(maxy, pos.second);
 		//std::cout<<"New position: ("<< pos.first << "," << pos.second << "). \n";
 	}
 	std::cout << "\nCode ended.\n";
@@ -836,7 +839,10 @@ void Day11()
 	{
 		for (int x = 0; x < fieldWidth; x++)
 		{
-			if (field[y * fieldWidth + x] == 1) std::cout << "#"; else std::cout<<".";
+			if ((y * fieldWidth + x) < nPanels)
+			{
+				if (field[y * fieldWidth + x] == 1) std::cout << "#"; else std::cout << ".";
+			}
 		}
 		std::cout << std::endl;
 	}
@@ -966,19 +972,34 @@ void Day12_()
 	planets.push_back({ -15,10,-11 });
 	planets.push_back({ -3, -8,  3 });
 
-	   
+	//console output parameters
+	//int fieldWidth = 160;
+	//int fieldHeight = 70;
+	//int nPanels = fieldWidth * fieldHeight;
+	//std::pair<int, int> origin = { fieldWidth / 2, fieldHeight / 2 };
+	//std::vector<int> emptyField(nPanels, -1);
+	//std::vector<int> field(nPanels, -1);
+	//int trailLength = 5;
+	 
+	//data structures
+	//std::unordered_map<std::string,int> planetStateMap;
+	//std::cout << "Max set capacity: " << planetStateMap.max_size() << std::endl;
 	std::unordered_set<std::string> planetStateSet;
 	std::cout << "Max set capacity: " << planetStateSet.max_size() << std::endl;
 	int timestep = 0;
+	int timestep_old=0;
+
+	//main loop
 	while (true)
 	{
 		{
-			std::string planetStateString;
-			for (auto p : planets)
-			{
-				planetStateString += p.Serialize();
-			}
-			if (timestep==0) planetStateSet.insert(planetStateString);
+			//std::string planetStateString;
+			//for (auto p : planets)
+			//{
+			//	planetStateString += p.Serialize();
+			//}
+			if (timestep==0) planetStateSet.insert(planets[0].Serialize());
+			//planetStateMap[planets[0].Serialize()] = timestep;
 		}
 		//apply gravity
 		for (auto& p : pairs)
@@ -990,16 +1011,77 @@ void Day12_()
 		{
 			p.Move();
 		}
-		if (++timestep % 100000000 == 0) std::cout << planetStateSet.size() << std::endl;
+		if (++timestep % 10000000 == 0) std::cout << "timestep "<<timestep<< std::endl;
+		//timestep++;
 		{
-			std::string planetStateString;
-			for (auto p : planets)
-			{
-				planetStateString += p.Serialize();
-			}
+			//std::string planetStateString;
+			//for (auto p : planets)
+			//{
+			//	planetStateString += p.Serialize();
+			//}
+			std::string planetStateString = planets[0].Serialize();
 			auto search = planetStateSet.find(planetStateString);
-			if(search != planetStateSet.end()) break;
+			//if(search != planetStateSet.end()) break;
+			if (search != planetStateSet.end())
+			{
+				std::cout << "similar state achieved after " << timestep -timestep_old<< "steps. \n";
+				timestep_old = timestep;
+			}
+			/*if (search != planetStateMap.end())
+			{
+				std::cout << "similar state achieved for pos "<<planetStateString <<" at t=" << planetStateMap[planetStateString] << " after " << timestep << "steps." << planets[0].pos.x << "," << planets[0].pos.y << "," << planets[0].pos.z;
+				std::cout << "step interval = "<< timestep - planetStateMap[planetStateString] << std::endl;
+			}*/
 		}
+
+		//ClearScreen();
+		//std::pair<int, int> pos0 = planets[0].Get2DPos(); pos0.first += origin.first; pos0.second += origin.second;
+		//std::pair<int, int> pos1 = planets[1].Get2DPos(); pos1.first += origin.first; pos1.second += origin.second;
+		//std::pair<int, int> pos2 = planets[2].Get2DPos(); pos2.first += origin.first; pos2.second += origin.second;
+		//std::pair<int, int> pos3 = planets[3].Get2DPos(); pos3.first += origin.first; pos3.second += origin.second;
+
+		//if ((pos0.second * fieldWidth + pos0.first) < nPanels && (pos0.second * fieldWidth + pos0.first) > 0)
+		//{
+		//	field[pos0.second * fieldWidth + pos0.first] = trailLength;
+		//}
+		//if ((pos1.second * fieldWidth + pos1.first) < nPanels && (pos1.second * fieldWidth + pos1.first) > 0)
+		//{
+		//	field[pos1.second * fieldWidth + pos1.first] = 10+ trailLength;
+		//}
+		//if ((pos2.second * fieldWidth + pos2.first) < nPanels && (pos2.second * fieldWidth + pos2.first) > 0)
+		//{
+		//	field[pos2.second * fieldWidth + pos2.first] = 100+ trailLength;
+		//}
+		//if ((pos3.second * fieldWidth + pos3.first) < nPanels && (pos3.second * fieldWidth + pos3.first) > 0)
+		//{
+		//	field[pos3.second * fieldWidth + pos3.first] = 1000+ trailLength;
+		//}
+
+		//for (int y = 0; y < fieldHeight; y++)
+		//{
+		//	for (int x = 0; x < fieldWidth; x++)
+		//	{
+		//		int val = field[y * fieldWidth + x];
+		//		if		(val <= 0)					std::cout << " ";//keep empty
+		//		else if (val > 0 && val < 10)		std::cout << "O";
+		//		else if (val > 10 && val < 100)		std::cout << "X";
+		//		else if (val > 100 && val < 1000)	std::cout << "#";
+		//		else if (val > 1000 )				std::cout << ".";
+		//	}
+		//	std::cout << std::endl;
+		//}
+		//for (int y = 0; y < fieldHeight; y++)
+		//{
+		//	for (int x = 0; x < fieldWidth; x++)
+		//	{
+		//		int val = field[y * fieldWidth + x];
+		//		if (val == 0 || val == 10 || val == 100 || val == 1000) field[y * fieldWidth + x] = -1;
+		//		else field[y * fieldWidth + x] = val - 1;
+		//	}
+		//	std::cout << std::endl;
+		//}
+		//std::this_thread::sleep_for(std::chrono::milliseconds(100));
+		
 	}
 	// 
 	std::cout << "similar state achieved after " << timestep << "steps. \n";
