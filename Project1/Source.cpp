@@ -840,16 +840,123 @@ void Day11()
 	std::cout << "Minimum number of painted positions: " << paintedPositions.size();
 	std::cout << "\nxmin: " << minx << " xmax: " << maxx << "\n";
 	std::cout << "ymin: " << miny << " ymax: " << maxy << "\n";
-
 }
+struct Vei3
+{
+	int x;
+	int y;
+	int z;
+};
+void CreateSubsets(std::string str, std::string sofar, std::vector<std::pair<int,int>>& pairs)
+{
+	if (sofar.size() == 2)
+	{
+		pairs.push_back({ (int)(sofar[0]-'0'), (int)(sofar[1]-'0')});
+		return;
+	}
+	else if (str.size() ==0)
+	{
+		return;
+	}
+	else
+	{
+		//for (int i = 0; i < str.size(); i++)
+		{
+			char ch = str[0];
+			//sofar += ch;
+			str.erase(0, 1);
+			CreateSubsets(str, sofar, pairs);
+			CreateSubsets(str, sofar + ch, pairs);
+		}
+	}
+}
+void Day12()
+{
+	//Initialize data
+	std::vector<int> planetIndices = { 0,1,2,3 };
+	std::vector<std::pair<int, int>> pairs;
+	std::string str = "0123";
+	CreateSubsets(str,"", pairs);
+	std::vector<Vei3> positions;
+	positions.push_back({ -6,   -5,   -8 });
+	positions.push_back({  0, -3,  -13 });
+	positions.push_back({  -15,  10,   -11 });
+	positions.push_back({  -3,   -8,  3 });
+	std::vector<Vei3> velocities;
+	velocities.push_back({ 0,0,0 });
+	velocities.push_back({ 0,0,0 });
+	velocities.push_back({ 0,0,0 });
+	velocities.push_back({ 0,0,0 });
+	int nSteps = 1000;
+	for (int timestep = 0; timestep < nSteps; timestep++)
+	{
+		// print pos & vel
+		std::cout << "After " << timestep << " step"; std::cout << ((timestep != 1) ? "s:" : ":"); std::cout << std::endl;
+		for (int i : planetIndices)
+		{
+			std::cout << "Pos=<x=" << positions[i].x << ", y= " << positions[i].y << ">, z=" << positions[i].z << ">, ";
+			std::cout << "Vel=<x=" << velocities[i].x << ", y= " << velocities[i].y << ">, z=" << velocities[i].z << ">\n";
+		}
+		// apply gravity
+		for (auto p : pairs)
+		{
+			if (positions[p.first].x < positions[p.second].x)
+			{
+				velocities[p.first].x += 1;
+				velocities[p.second].x -= 1;
+			}
+			else if (positions[p.first].x > positions[p.second].x)
+			{
+				velocities[p.first].x -= 1;
+				velocities[p.second].x += 1;
+			}
+			if (positions[p.first].y < positions[p.second].y)
+			{
+				velocities[p.first].y += 1;
+				velocities[p.second].y -= 1;
+			}
+			else if (positions[p.first].y > positions[p.second].y)
+			{
+				velocities[p.first].y -= 1;
+				velocities[p.second].y += 1;
 
+			}
+			if (positions[p.first].z < positions[p.second].z)
+			{
+				velocities[p.first].z += 1;
+				velocities[p.second].z -= 1;
+			}
+			else if (positions[p.first].z > positions[p.second].z)
+			{
+				velocities[p.first].z -= 1;
+				velocities[p.second].z += 1;
+			}
+		}
+		// apply velocity
+		for (int i : planetIndices)
+		{
+			positions[i].x += velocities[i].x;
+			positions[i].y += velocities[i].y;
+			positions[i].z += velocities[i].z;
+		}
+	}
+	// calculate energy after n steps
+	int energyTotal = 0; 
+	for (int i : planetIndices)
+	{
+		int pot = std::abs(positions[i].x) + std::abs(positions[i].y) + std::abs(positions[i].z);
+		int kin = std::abs(velocities[i].x) + std::abs(velocities[i].y) + std::abs(velocities[i].z);
+		energyTotal += (pot * kin);
+	}
+	std::cout << "Total energy in sytem: " << energyTotal;
+}
 int main()
 {
 	// Instruction: load data in appropriate .txt input file and run the function associated with a specific day
 	// So, for example, to run Day 7 challenge:
 	// --> save data to "day7ainput.txt" and "day7binput.txt"
 	// --> run the functions Day7a(); and/or Day7b(); in main()
-	Day11();
+	Day12();
 	
 	while (!_kbhit());
 }
