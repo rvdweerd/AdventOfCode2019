@@ -1,11 +1,14 @@
 #pragma once
 #include <iomanip>
+
+template <typename E>
 struct Vei3
 {
-	int x;
-	int y;
-	int z;
-	bool operator==(Vei3& rhs)
+public:
+	E x;
+	E y;
+	E z;
+	bool operator==(Vei3<int>& rhs)
 	{
 		return (this->x == rhs.x && this->y == rhs.y && this->z == rhs.z);
 	}
@@ -14,9 +17,9 @@ struct Vei3
 class Planet
 {
 public:
-	Planet(int x, int y, int z)
+	Planet(Vei3<int> pos)
 		:
-		pos({x,y,z}),
+		pos({pos.x,pos.y,pos.z}),
 		vel({0,0,0})
 	{}
 	void Print()
@@ -70,10 +73,25 @@ public:
 		int kin = std::abs(vel.x) + std::abs(vel.y) + std::abs(vel.z);
 		return (pot * kin);
 	}
-	std::string Serialize() const
+	std::string SerializeXYZ() const
 	{
-		return	std::to_string(pos.x)+ std::to_string(pos.y)+ std::to_string(pos.z)+
-				std::to_string(vel.x)+ std::to_string(vel.y)+ std::to_string(vel.z);
+		return	std::to_string(pos.x) + std::to_string(pos.y)+ std::to_string(pos.z)+
+			std::to_string(vel.x) +std::to_string(vel.y) + std::to_string(vel.z);
+	}
+	std::string SerializeX() const
+	{
+		return	std::to_string(pos.x) +// std::to_string(pos.y)+ std::to_string(pos.z)+
+			std::to_string(vel.x);// +std::to_string(vel.y) + std::to_string(vel.z);
+	}
+	std::string SerializeY() const
+	{
+		return	std::to_string(pos.y) +// std::to_string(pos.y)+ std::to_string(pos.z)+
+			std::to_string(vel.y);// +std::to_string(vel.y) + std::to_string(vel.z);
+	}
+	std::string SerializeZ() const
+	{
+		return	std::to_string(pos.z) +// std::to_string(pos.y)+ std::to_string(pos.z)+
+			std::to_string(vel.z);// +std::to_string(vel.y) + std::to_string(vel.z);
 	}
 	bool operator==(Planet& rhs)
 	{
@@ -84,6 +102,6 @@ public:
 		return { pos.x,pos.y };
 	}
 public:
-	Vei3 pos;
-	Vei3 vel;
+	Vei3<int> pos;
+	Vei3<int> vel;
 };

@@ -16,6 +16,8 @@
 #include <unordered_map>
 #include <chrono>
 #include <thread>
+#include "PlanetSys.h"
+
 
 void Day1()
 {
@@ -850,250 +852,58 @@ void Day11()
 	std::cout << "\nxmin: " << minx << " xmax: " << maxx << "\n";
 	std::cout << "ymin: " << miny << " ymax: " << maxy << "\n";
 }
-void CreateSubsets(std::string str, std::string sofar, std::vector<std::pair<int,int>>& pairs)
-{
-	if (sofar.size() == 2)
-	{
-		pairs.push_back({ (int)(sofar[0]-'0'), (int)(sofar[1]-'0')});
-		return;
-	}
-	else if (str.size() ==0)
-	{
-		return;
-	}
-	else
-	{
-		//for (int i = 0; i < str.size(); i++)
-		{
-			char ch = str[0];
-			//sofar += ch;
-			str.erase(0, 1);
-			CreateSubsets(str, sofar, pairs);
-			CreateSubsets(str, sofar + ch, pairs);
-		}
-	}
-}
 void Day12()
 {
 	//Initialize data
-	std::vector<int> planetIndices = { 0,1,2,3 };
-	std::vector<std::pair<int, int>> pairs;
-	std::string str = "0123";
-	CreateSubsets(str,"", pairs);
-	std::vector<Vei3> positions;
-	positions.push_back({ -6,   -5,   -8 });
-	positions.push_back({  0, -3,  -13 });
-	positions.push_back({  -15,  10,   -11 });
-	positions.push_back({  -3,   -8,  3 });
-	std::vector<Vei3> velocities;
-	velocities.push_back({ 0,0,0 });
-	velocities.push_back({ 0,0,0 });
-	velocities.push_back({ 0,0,0 });
-	velocities.push_back({ 0,0,0 });
-	int nSteps = 1000;
-
-	for (int timestep = 0; timestep < nSteps; timestep++)
+	PlanetSys pSys;
+	pSys.AddPlanet({ -6, -5,  -8});
+	pSys.AddPlanet({  0, -3, -13});
+	pSys.AddPlanet({-15, 10, -11});
+	pSys.AddPlanet({ -3, -8,   3});
+	for (int i = 0; i < 1000; i++)
 	{
-		// print pos & vel
-		std::cout << "After " << timestep << " step"; std::cout << ((timestep != 1) ? "s:" : ":"); std::cout << std::endl;
-		for (int i : planetIndices)
-		{
-			std::cout<< std::setw(6)<< "Pos=<x=" << positions[i].x << ", y= " << positions[i].y << ">, z=" << positions[i].z << ">, ";
-			std::cout << "Vel=<x=" << velocities[i].x << ", y= " << velocities[i].y << ">, z=" << velocities[i].z << ">\n";
-		}
-		// apply gravity
-		for (auto p : pairs)
-		{
-			if (positions[p.first].x < positions[p.second].x)
-			{
-				velocities[p.first].x += 1;
-				velocities[p.second].x -= 1;
-			}
-			else if (positions[p.first].x > positions[p.second].x)
-			{
-				velocities[p.first].x -= 1;
-				velocities[p.second].x += 1;
-			}
-			if (positions[p.first].y < positions[p.second].y)
-			{
-				velocities[p.first].y += 1;
-				velocities[p.second].y -= 1;
-			}
-			else if (positions[p.first].y > positions[p.second].y)
-			{
-				velocities[p.first].y -= 1;
-				velocities[p.second].y += 1;
-
-			}
-			if (positions[p.first].z < positions[p.second].z)
-			{
-				velocities[p.first].z += 1;
-				velocities[p.second].z -= 1;
-			}
-			else if (positions[p.first].z > positions[p.second].z)
-			{
-				velocities[p.first].z -= 1;
-				velocities[p.second].z += 1;
-			}
-		}
-		// apply velocity
-		for (int i : planetIndices)
-		{
-			positions[i].x += velocities[i].x;
-			positions[i].y += velocities[i].y;
-			positions[i].z += velocities[i].z;
-		}
+		pSys.Update();
 	}
-	// calculate energy after n steps
-	int energyTotal = 0; 
-	for (int i : planetIndices)
-	{
-		int pot = std::abs(positions[i].x) + std::abs(positions[i].y) + std::abs(positions[i].z);
-		int kin = std::abs(velocities[i].x) + std::abs(velocities[i].y) + std::abs(velocities[i].z);
-		energyTotal += (pot * kin);
-	}
-	std::cout << "Total energy in sytem: " << energyTotal;
+	pSys.PrintCoordinates();
 }
 void Day12_()
 {
-	std::vector<std::pair<int, int>> pairs;
-	std::string str = "0123";
-	CreateSubsets(str, "", pairs);
+	PlanetSys planetSys;
+	//planetSys.AddPlanet({ -1,  0, 2 });
+	//planetSys.AddPlanet({  2,-10,-7 });
+	//planetSys.AddPlanet({  4, -8, 8 });
+	//planetSys.AddPlanet({  3,  5,-1 });
 
-	std::vector<Planet> planets;
-	
-	//planets.push_back({ -1, 0, 2 });
-	//planets.push_back({ 2, -10,-7 });
-	//planets.push_back({ 4,-8,8 });
-	//planets.push_back({ 3, 5,  -1 });
+	planetSys.AddPlanet({ -8, -10,  0 });
+	planetSys.AddPlanet({ 5, 5, 10 });
+	planetSys.AddPlanet({ 2, -7, 3 });
+	planetSys.AddPlanet({ 9, -8,   -3 });
 
-	planets.push_back({ -6, -5, -8 });
-	planets.push_back({ 0, -3,-13 });
-	planets.push_back({ -15,10,-11 });
-	planets.push_back({ -3, -8,  3 });
+	//planetSys.AddPlanet({ -6, -5,  -8 });
+	//planetSys.AddPlanet({  0, -3, -13 });
+	//planetSys.AddPlanet({-15, 10, -11 });
+	//planetSys.AddPlanet({ -3, -8,   3 });
 
-	//console output parameters
-	//int fieldWidth = 160;
-	//int fieldHeight = 70;
-	//int nPanels = fieldWidth * fieldHeight;
-	//std::pair<int, int> origin = { fieldWidth / 2, fieldHeight / 2 };
-	//std::vector<int> emptyField(nPanels, -1);
-	//std::vector<int> field(nPanels, -1);
-	//int trailLength = 5;
-	 
-	//data structures
-	//std::unordered_map<std::string,int> planetStateMap;
-	//std::cout << "Max set capacity: " << planetStateMap.max_size() << std::endl;
-	std::unordered_set<std::string> planetStateSet;
-	std::cout << "Max set capacity: " << planetStateSet.max_size() << std::endl;
-	int timestep = 0;
-	int timestep_old=0;
-
-	//main loop
-	while (true)
+	long long int minPeriod = LLONG_MAX;
+	for (int i = 0; i < 10000; i++)
 	{
+		std::vector < Vei3<long long int>> orbResPeriods = planetSys.GetOrbitalResonancePeriods(i);
+		unsigned long long int p0 = std::lcm(std::lcm(orbResPeriods[0].x, orbResPeriods[0].y), orbResPeriods[0].z);
+		unsigned long long int p1 = std::lcm(std::lcm(orbResPeriods[1].x, orbResPeriods[1].y), orbResPeriods[1].z);
+		unsigned long long int p2 = std::lcm(std::lcm(orbResPeriods[2].x, orbResPeriods[2].y), orbResPeriods[2].z);
+		unsigned long long int p3 = std::lcm(std::lcm(orbResPeriods[3].x, orbResPeriods[3].y), orbResPeriods[3].z);
+		//std::cout << "Orbital Res Periods, planet 0: " << p0;// << std::endl;
+		//std::cout << ", planet 1: " << p1;// << std::endl;
+		//std::cout << ", , planet 2: " << p2;// << std::endl;
+		//std::cout << "planet 3: " << p3;// << std::endl;
+		unsigned long long int pAll = std::lcm(std::lcm(p0, p1), std::lcm(p2, p3));
+		if (pAll < minPeriod)
 		{
-			//std::string planetStateString;
-			//for (auto p : planets)
-			//{
-			//	planetStateString += p.Serialize();
-			//}
-			if (timestep==0) planetStateSet.insert(planets[0].Serialize());
-			//planetStateMap[planets[0].Serialize()] = timestep;
-		}
-		//apply gravity
-		for (auto& p : pairs)
-		{
-			planets[p.first].Gravitate(planets[p.second]);
-		}
-		// apply velocity
-		for (Planet& p : planets)
-		{
-			p.Move();
-		}
-		if (++timestep % 10000000 == 0) std::cout << "timestep "<<timestep<< std::endl;
-		//timestep++;
-		{
-			//std::string planetStateString;
-			//for (auto p : planets)
-			//{
-			//	planetStateString += p.Serialize();
-			//}
-			std::string planetStateString = planets[0].Serialize();
-			auto search = planetStateSet.find(planetStateString);
-			//if(search != planetStateSet.end()) break;
-			if (search != planetStateSet.end())
-			{
-				std::cout << "similar state achieved after " << timestep -timestep_old<< "steps. \n";
-				timestep_old = timestep;
-			}
-			/*if (search != planetStateMap.end())
-			{
-				std::cout << "similar state achieved for pos "<<planetStateString <<" at t=" << planetStateMap[planetStateString] << " after " << timestep << "steps." << planets[0].pos.x << "," << planets[0].pos.y << "," << planets[0].pos.z;
-				std::cout << "step interval = "<< timestep - planetStateMap[planetStateString] << std::endl;
-			}*/
+			minPeriod = pAll;
+			std::cout << "ORP for planet system: " << pAll << ", starttime: "<<i<<std::endl;
 		}
 
-		//ClearScreen();
-		//std::pair<int, int> pos0 = planets[0].Get2DPos(); pos0.first += origin.first; pos0.second += origin.second;
-		//std::pair<int, int> pos1 = planets[1].Get2DPos(); pos1.first += origin.first; pos1.second += origin.second;
-		//std::pair<int, int> pos2 = planets[2].Get2DPos(); pos2.first += origin.first; pos2.second += origin.second;
-		//std::pair<int, int> pos3 = planets[3].Get2DPos(); pos3.first += origin.first; pos3.second += origin.second;
-
-		//if ((pos0.second * fieldWidth + pos0.first) < nPanels && (pos0.second * fieldWidth + pos0.first) > 0)
-		//{
-		//	field[pos0.second * fieldWidth + pos0.first] = trailLength;
-		//}
-		//if ((pos1.second * fieldWidth + pos1.first) < nPanels && (pos1.second * fieldWidth + pos1.first) > 0)
-		//{
-		//	field[pos1.second * fieldWidth + pos1.first] = 10+ trailLength;
-		//}
-		//if ((pos2.second * fieldWidth + pos2.first) < nPanels && (pos2.second * fieldWidth + pos2.first) > 0)
-		//{
-		//	field[pos2.second * fieldWidth + pos2.first] = 100+ trailLength;
-		//}
-		//if ((pos3.second * fieldWidth + pos3.first) < nPanels && (pos3.second * fieldWidth + pos3.first) > 0)
-		//{
-		//	field[pos3.second * fieldWidth + pos3.first] = 1000+ trailLength;
-		//}
-
-		//for (int y = 0; y < fieldHeight; y++)
-		//{
-		//	for (int x = 0; x < fieldWidth; x++)
-		//	{
-		//		int val = field[y * fieldWidth + x];
-		//		if		(val <= 0)					std::cout << " ";//keep empty
-		//		else if (val > 0 && val < 10)		std::cout << "O";
-		//		else if (val > 10 && val < 100)		std::cout << "X";
-		//		else if (val > 100 && val < 1000)	std::cout << "#";
-		//		else if (val > 1000 )				std::cout << ".";
-		//	}
-		//	std::cout << std::endl;
-		//}
-		//for (int y = 0; y < fieldHeight; y++)
-		//{
-		//	for (int x = 0; x < fieldWidth; x++)
-		//	{
-		//		int val = field[y * fieldWidth + x];
-		//		if (val == 0 || val == 10 || val == 100 || val == 1000) field[y * fieldWidth + x] = -1;
-		//		else field[y * fieldWidth + x] = val - 1;
-		//	}
-		//	std::cout << std::endl;
-		//}
-		//std::this_thread::sleep_for(std::chrono::milliseconds(100));
-		
 	}
-	// 
-	std::cout << "similar state achieved after " << timestep << "steps. \n";
-	
-	// calculate energy after n steps
-	int energyTotal = 0;
-	for (Planet& p : planets)
-	{
-		energyTotal += p.TotalEnergy();
-	}
-	std::cout << "Total energy in sytem: " << energyTotal;
-
 }
 int main()
 {

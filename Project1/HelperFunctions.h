@@ -181,3 +181,8 @@ void ClearScreen()
 	/* Move the cursor home */
 	SetConsoleCursorPosition(hStdOut, homeCoords);
 }
+
+//long long int LCM(long long int n)
+//{
+//
+//}
