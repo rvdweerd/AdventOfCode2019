@@ -84,19 +84,22 @@ public:
 		pairs = GetAllBilaterals();
 		planets_orig = planets;
 	}
-	void Update()
+	void Update(int n=1)
 	{
-		//apply gravity
-		for (auto& p : pairs)
+		for (int i = 0; i < n; i++)
 		{
-			planets[p.first].Gravitate(planets[p.second]);
+			//apply gravity
+			for (auto& p : pairs)
+			{
+				planets[p.first].Gravitate(planets[p.second]);
+			}
+			// apply velocity
+			for (Planet& p : planets)
+			{
+				p.Move();
+			}
+			timestep++;
 		}
-		// apply velocity
-		for (Planet& p : planets)
-		{
-			p.Move();
-		}
-		timestep++;
 	}
 	void Print2D()
 	{
@@ -128,52 +131,61 @@ public:
 		}
 		return energyTotal;
 	}
-	std::vector < Vei3<long long int>> GetOrbitalResonancePeriods(int starttime = 0)
+	std::vector < long long int> GetOrbitalResonancePeriods(int starttime = 0)
 	{
 		Reset();
 		for (int i = 0; i < starttime; i++)
 		{
 			Update();
 		}
-		std::vector<std::string> startPosX;
-		std::vector<std::string> startPosY;
-		std::vector<std::string> startPosZ;
+		PrintCoordinates();
+		std::string startPosX;
+		std::string startPosY;
+		std::string startPosZ;
 		for (auto p : planets)
 		{
-			startPosX.push_back(p.SerializeX());
-			startPosY.push_back(p.SerializeY());
-			startPosZ.push_back(p.SerializeZ());
+			startPosX+=p.SerializeX();
+			startPosY+=p.SerializeY();
+			startPosZ+=p.SerializeZ();
 		}
 		
-		std::vector < Vei3<long long int>> orbResPeriods(nPlanets, { 0,0,0 });
+		std::vector < long long int> orbResPeriods(3, 0);
 
 		int count = 0;
 		while (true)
 		{
 			Update();
-			for (int i = 0; i < nPlanets; i++)
+			std::string posX;
+			std::string posY;
+			std::string posZ;
+			for (auto p : planets)
 			{
-				if (orbResPeriods[i].x == 0 && planets[i].SerializeX() == startPosX[i])
+				posX += p.SerializeX();
+				posY += p.SerializeY();
+				posZ += p.SerializeZ();
+			}
+			{
+				if (orbResPeriods[0] == 0 && posX == startPosX)
 				{
-					orbResPeriods[i].x = timestep;
+					orbResPeriods[0] = timestep;
 					count++;
-					//PrintCoordinates();
+					PrintCoordinates();
 				}
-				if (orbResPeriods[i].y == 0 && planets[i].SerializeY() == startPosY[i])
+				if (orbResPeriods[1] == 0 && posY == startPosY)
 				{
-					orbResPeriods[i].y = timestep;
+					orbResPeriods[1] = timestep;
 					count++;
-					//PrintCoordinates();
+					PrintCoordinates();
 				}
-				if (orbResPeriods[i].z == 0 && planets[i].SerializeZ() == startPosZ[i])
+				if (orbResPeriods[2] == 0 && posZ == startPosZ)
 				{
-					orbResPeriods[i].z = timestep;
+					orbResPeriods[2] = timestep;
 					count++;
-					//PrintCoordinates();
+					PrintCoordinates();
 				}
 
 			}
-			if (count == nPlanets*3) break;
+			if (count == 3) break;
 		}
 		return orbResPeriods;
 	}	

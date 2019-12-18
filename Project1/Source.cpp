@@ -852,9 +852,8 @@ void Day11()
 	std::cout << "\nxmin: " << minx << " xmax: " << maxx << "\n";
 	std::cout << "ymin: " << miny << " ymax: " << maxy << "\n";
 }
-void Day12()
+void Day12a()
 {
-	//Initialize data
 	PlanetSys pSys;
 	pSys.AddPlanet({ -6, -5,  -8});
 	pSys.AddPlanet({  0, -3, -13});
@@ -866,7 +865,7 @@ void Day12()
 	}
 	pSys.PrintCoordinates();
 }
-void Day12_()
+void Day12b()
 {
 	PlanetSys planetSys;
 	//planetSys.AddPlanet({ -1,  0, 2 });
@@ -874,35 +873,20 @@ void Day12_()
 	//planetSys.AddPlanet({  4, -8, 8 });
 	//planetSys.AddPlanet({  3,  5,-1 });
 
-	planetSys.AddPlanet({ -8, -10,  0 });
-	planetSys.AddPlanet({ 5, 5, 10 });
-	planetSys.AddPlanet({ 2, -7, 3 });
-	planetSys.AddPlanet({ 9, -8,   -3 });
+	//planetSys.AddPlanet({ -8, -10,  0 });
+	//planetSys.AddPlanet({ 5, 5, 10 });
+	//planetSys.AddPlanet({ 2, -7, 3 });
+	//planetSys.AddPlanet({ 9, -8,   -3 });
 
-	//planetSys.AddPlanet({ -6, -5,  -8 });
-	//planetSys.AddPlanet({  0, -3, -13 });
-	//planetSys.AddPlanet({-15, 10, -11 });
-	//planetSys.AddPlanet({ -3, -8,   3 });
+	planetSys.AddPlanet({ -6, -5,  -8 });
+	planetSys.AddPlanet({  0, -3, -13 });
+	planetSys.AddPlanet({-15, 10, -11 });
+	planetSys.AddPlanet({ -3, -8,   3 });
 
-	long long int minPeriod = LLONG_MAX;
-	for (int i = 0; i < 10000; i++)
 	{
-		std::vector < Vei3<long long int>> orbResPeriods = planetSys.GetOrbitalResonancePeriods(i);
-		unsigned long long int p0 = std::lcm(std::lcm(orbResPeriods[0].x, orbResPeriods[0].y), orbResPeriods[0].z);
-		unsigned long long int p1 = std::lcm(std::lcm(orbResPeriods[1].x, orbResPeriods[1].y), orbResPeriods[1].z);
-		unsigned long long int p2 = std::lcm(std::lcm(orbResPeriods[2].x, orbResPeriods[2].y), orbResPeriods[2].z);
-		unsigned long long int p3 = std::lcm(std::lcm(orbResPeriods[3].x, orbResPeriods[3].y), orbResPeriods[3].z);
-		//std::cout << "Orbital Res Periods, planet 0: " << p0;// << std::endl;
-		//std::cout << ", planet 1: " << p1;// << std::endl;
-		//std::cout << ", , planet 2: " << p2;// << std::endl;
-		//std::cout << "planet 3: " << p3;// << std::endl;
-		unsigned long long int pAll = std::lcm(std::lcm(p0, p1), std::lcm(p2, p3));
-		if (pAll < minPeriod)
-		{
-			minPeriod = pAll;
-			std::cout << "ORP for planet system: " << pAll << ", starttime: "<<i<<std::endl;
-		}
-
+		std::vector < long long int> orbResPeriods = planetSys.GetOrbitalResonancePeriods();
+		unsigned long long int pAll = std::lcm(orbResPeriods[0], std::lcm(orbResPeriods[1],orbResPeriods[2]));
+		std::cout << "ORP for planet system: " << pAll <<std::endl;
 	}
 }
 int main()
@@ -911,7 +895,7 @@ int main()
 	// So, for example, to run Day 7 challenge:
 	// --> save data to "day7ainput.txt" and "day7binput.txt"
 	// --> run the functions Day7a(); and/or Day7b(); in main()
-	Day12_();
+	Day12b();
 
 	while (!_kbhit());
 }
