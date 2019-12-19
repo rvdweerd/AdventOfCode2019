@@ -889,13 +889,59 @@ void Day12b()
 		std::cout << "ORP for planet system: " << pAll <<std::endl;
 	}
 }
+void Day13()
+{
+	
+
+	IntCode arcadeComputer("day13input.txt");
+
+	int fieldWidth = 45;
+	int fieldHeight = 32;
+	int nPanels = fieldWidth * fieldHeight;
+	std::vector<int> field(nPanels);
+	bool GameEnd = false;
+
+	while (true)
+	{
+		for (int i = 0; i < 3; i++)
+		{
+			int x = arcadeComputer.Run(-10);
+			if (x == -999)
+			{
+				GameEnd = true;
+				break;
+			}
+			int y = arcadeComputer.Run(0);
+			int id = arcadeComputer.Run(0);
+			if (x == -1)
+			{
+				arcadeComputer.PrintTextToConsole("Score= ", { 0,31 });
+				std::cout << id;
+			}
+			else
+			{
+				field[y * fieldWidth + x] = id;
+				arcadeComputer.PrintSymbolToConsole(id, { (SHORT)x,(SHORT)y });
+			}
+		}
+		if (GameEnd) break;
+		//std::this_thread::sleep_for(std::chrono::milliseconds(100));
+	}
+	int count = 0;
+	for (int v : field)
+	{
+		if (v == 2) count++;
+	}
+	arcadeComputer.PrintTextToConsole("Blocks in field: ", { 0,32 });
+	std::cout<< count;
+}
 int main()
 {
 	// Instruction: load data in appropriate .txt input file and run the function associated with a specific day
 	// So, for example, to run Day 7 challenge:
 	// --> save data to "day7ainput.txt" and "day7binput.txt"
 	// --> run the functions Day7a(); and/or Day7b(); in main()
-	Day12b();
+	Day13();
 
 	while (!_kbhit());
 }

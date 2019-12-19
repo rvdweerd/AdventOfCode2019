@@ -3,6 +3,7 @@
 #include <vector>
 #include <iostream>
 #include <fstream>
+#include <Windows.h>
 
 class IntCode
 {
@@ -21,6 +22,35 @@ public:
 		}
 		originalCodeVec.resize(size_t(1e5), 0);
 		runCodeVec = originalCodeVec;
+
+		// setup winapi consolescreen
+		hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
+		if (hStdOut == INVALID_HANDLE_VALUE) std::cout << "ERROR INITIALIZING WINAPI";
+
+		/* Get the number of cells in the current buffer */
+		if (!GetConsoleScreenBufferInfo(hStdOut, &csbi)) std::cout << "ERROR INITIALIZING WINAPI";
+		cellCount = csbi.dwSize.X * csbi.dwSize.Y;
+
+		/* Fill the entire buffer with spaces */
+		if (!FillConsoleOutputCharacter(
+			hStdOut,
+			(TCHAR)' ',
+			cellCount,
+			homeCoords,
+			&count
+		)) std::cout << "ERROR INITIALIZING WINAPI";
+
+		/* Fill the entire buffer with the current colors and attributes */
+		if (!FillConsoleOutputAttribute(
+			hStdOut,
+			csbi.wAttributes,
+			cellCount,
+			homeCoords,
+			&count
+		)) std::cout << "ERROR INITIALIZING WINAPI";
+
+		/* Move the cursor home */
+		SetConsoleCursorPosition(hStdOut, homeCoords);
 	}
 	void Reset()
 	{
@@ -136,10 +166,14 @@ public:
 			}
 			else if (opcode == 3) // input
 			{
-				//int k;
-				//std::cout << "Input:"; std::cin >> k;
-				writeVal<long long int>(code_index + 1, C, input1);
-				input1 = input2; // to enable two consecutive inputs to be processed
+				int k;
+				if (ballPosX > padPosX) k = 1;
+				else if (ballPosX < padPosX) k = -1;
+				else k = 0;
+				//PrintTextToConsole("Input: ", { 0,30 });
+				//std::cin >> k;
+				PrintTextToConsole("Input: ", { 0,30 }); std::cout << k;
+				writeVal<long long int>(code_index + 1, C, k);
 				increment = 2;
 			}
 			else if (opcode == 4) // output
@@ -148,6 +182,7 @@ public:
 				//std::cout << val1 << ",";
 				//increment = 2;
 				code_index += 2;
+				//if (val1 == 3||true) { std::cout << "value 3 retured, code_index=" << code_index; }
 				return val1;
 			}
 			else if (opcode == 5) // jump-if-true
@@ -203,12 +238,46 @@ public:
 				std::cout << "error.";
 			}
 		}
-		return -1;
+		return -999;
 	}
 	std::vector<long long int>& GetRunCodeVectorReference()
 	{
 		return runCodeVec;
 	}
+	void PrintTextToConsole(std::string text, COORD coord)
+	{
+		SetConsoleCursorPosition(hStdOut, coord);
+		std::cout << text;
+	}
+	void PrintSymbolToConsole(int id, COORD coord)
+	{
+		SetConsoleCursorPosition(hStdOut, coord);
+		switch (id)
+		{
+		case 0:
+			std::cout << " ";
+			break;
+		case 1:
+			std::cout << "W";
+			break;
+		case 2:
+			std::cout << "B";
+			break;
+		case 3:
+			std::cout << "=";
+			PrintTextToConsole("Pad position: (", { 0,28 }); std::cout << coord.X << "," << coord.Y << ")";
+			padPosX = coord.X;
+			break;
+		case 4:
+			std::cout << "O";
+			PrintTextToConsole("Ball position: (", { 0,27 }); std::cout << coord.X << "," << coord.Y << ")";
+			ballPosX = coord.X;
+			break;
+		std::cout << "X";
+		}
+		return;
+	}
+
 private:
 	void GetParameters(int index)
 	{
@@ -262,7 +331,6 @@ private:
 		std::cout << "Error, no parameter mode found for writeVal()\n";
 		return;
 	}
-
 private:
 	int code_index=0;
 	int A = 0;
@@ -272,4 +340,14 @@ private:
 	int relativeBase = 0;
 	std::vector<long long int> runCodeVec;
 	std::vector<long long int> originalCodeVec;
+	int ballPosX;
+	int padPosX;
+
+private:
+	HANDLE                     hStdOut;
+	CONSOLE_SCREEN_BUFFER_INFO csbi;
+	DWORD                      count;
+	DWORD                      cellCount;
+	COORD                      homeCoords = { 0, 0 };
+
 };
