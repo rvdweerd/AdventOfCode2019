@@ -17,6 +17,7 @@
 #include <chrono>
 #include <thread>
 #include "PlanetSys.h"
+#include <utility>
 
 
 void Day1()
@@ -882,6 +883,11 @@ void Day12b()
 	planetSys.AddPlanet({  0, -3, -13 });
 	planetSys.AddPlanet({-15, 10, -11 });
 	planetSys.AddPlanet({ -3, -8,   3 });
+	while (true)
+	{
+		planetSys.Update();
+		planetSys.Print2D();
+	}
 
 	{
 		std::vector < long long int> orbResPeriods = planetSys.GetOrbitalResonancePeriods();
@@ -891,8 +897,6 @@ void Day12b()
 }
 void Day13()
 {
-	
-
 	IntCode arcadeComputer("day13input.txt");
 
 	int fieldWidth = 45;
@@ -935,13 +939,123 @@ void Day13()
 	arcadeComputer.PrintTextToConsole("Blocks in field: ", { 0,32 });
 	std::cout<< count;
 }
+struct R {
+	R(std::string str, int n)
+		:
+		element(str),
+		n(n)
+	{}
+	friend bool operator==(const R& lhs, const R& rhs)
+	{
+		return (lhs.element == rhs.element && lhs.n == rhs.n);
+	}
+	friend bool operator!=(const R& lhs, const R& rhs)
+	{
+		return (lhs.element != rhs.element || lhs.n != rhs.n);
+	}
+	friend bool operator<(const R& lhs, const R& rhs)
+	{
+		return lhs.element < rhs.element;
+	}
+	std::string element;
+	int n;
+};
+struct ProdTables {
+	std::map<std::string, int>& MinProduction;
+	std::map<std::string, int>& Stock;
+	std::map<std::string, std::vector<R>>& ProductionMap;
+};
+int OreRequired(std::string product, int nRequired, ProdTables& tables)
+{
+	if (nRequired <= 0) return 0;
+	{	// Manage stock (first use up what's in stock)
+		int inStock = tables.Stock[product];
+		if (inStock > 0)
+		{
+			if (inStock >= nRequired)
+			{
+				tables.Stock[product] -= nRequired;
+				return 0;
+			}
+			else
+			{
+				nRequired -= inStock;
+				tables.Stock[product] -= 0;
+			}
+		}
+	}
+	
+	int sum = 0;
+	int minprod = tables.MinProduction[product];
+	int quant = 0;
+	if (minprod >= nRequired) quant = 1; else quant = std::ceil(float(nRequired) / float(minprod));
+	int overproduction = quant * minprod - nRequired;
+
+	for (R r : tables.ProductionMap[product])
+	{
+		if (r.element == "ORE")
+		{
+			tables.Stock[product] += overproduction;
+			std::cout << "ORE used: " << r.n * quant<<std::endl;
+			return r.n * quant;
+		}
+		else
+		{
+			sum += OreRequired(r.element, quant * r.n, tables);
+			tables.Stock[r.element] += overproduction;
+		}
+	}
+	return sum;
+}
+
+void Day14()
+{
+	std::map<std::string, int> MinProduction;
+	std::map<std::string, int> Stock;
+	std::map<std::string, std::vector<R>> ProductionMap;
+
+	MinProduction["FUEL"] = 1;
+	MinProduction["CA"] = 1;
+	MinProduction["BC"] = 1;
+	MinProduction["AB"] = 1;
+	MinProduction["C"] = 5;
+	MinProduction["B"] = 3;
+	MinProduction["A"] = 2;
+
+	Stock["FUEL"] = 0;
+	Stock["CA"] = 0;
+	Stock["BC"] = 0;
+	Stock["AB"] = 0;
+	Stock["C"] = 0;
+	Stock["B"] = 0;
+	Stock["A"] = 0;
+
+	ProductionMap["FUEL"] = { {"CA",4},{"BC",3},{"AB",2} };
+	ProductionMap["CA"] = { {"C",4},{"A",1} };
+	ProductionMap["BC"] = { {"B",5},{"C",7} };
+	ProductionMap["AB"] = { {"A",3},{"B",4} };
+	ProductionMap["C"] = { {"ORE",7}, };
+	ProductionMap["B"] = { {"ORE",8} };
+	ProductionMap["A"] = { {"ORE",9} };
+
+	ProdTables tables = { MinProduction,Stock,ProductionMap };
+	//R start = R{ "C",6 };
+	//R start = R{ "FUEL",1 };
+	int k = OreRequired("FUEL",1, tables);
+	std::cout << "Ore required: " << k << std::endl;
+	std::cout << "Stock:\n";
+	for (auto e : Stock)  std::cout << e.first << ":" << e.second << std::endl;
+}
+	
+
+
 int main()
 {
 	// Instruction: load data in appropriate .txt input file and run the function associated with a specific day
 	// So, for example, to run Day 7 challenge:
 	// --> save data to "day7ainput.txt" and "day7binput.txt"
 	// --> run the functions Day7a(); and/or Day7b(); in main()
-	Day13();
+	Day14();
 
 	while (!_kbhit());
 }
