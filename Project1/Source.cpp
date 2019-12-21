@@ -18,6 +18,7 @@
 #include <thread>
 #include "PlanetSys.h"
 #include <utility>
+#include <stack>
 
 
 void Day1()
@@ -1014,29 +1015,62 @@ void Day14()
 	std::map<std::string, int> Stock;
 	std::map<std::string, std::vector<R>> ProductionMap;
 
-	MinProduction["FUEL"] = 1;
-	MinProduction["CA"] = 1;
-	MinProduction["BC"] = 1;
-	MinProduction["AB"] = 1;
-	MinProduction["C"] = 5;
-	MinProduction["B"] = 3;
-	MinProduction["A"] = 2;
+	// File Loading to fill data structures
+	{ 
+		std::ifstream in("day14input.txt");
+		char ch;
+		std::stack<std::string> lhs_values;
+		std::stack<std::string> lhs_elements;
+		std::string rhs_value;
+		std::string rhs_element;
 
-	Stock["FUEL"] = 0;
-	Stock["CA"] = 0;
-	Stock["BC"] = 0;
-	Stock["AB"] = 0;
-	Stock["C"] = 0;
-	Stock["B"] = 0;
-	Stock["A"] = 0;
+		bool switch_lineSide = 0;
+		bool switch_pairSide = 0;
+		while (!in.eof())
+		{
+			std::string str;
+			for (ch = in.get(); ch != ',' && ch != ' ' && ch != '>' && ch != '=' && !in.eof() && ch != '\n'; ch = in.get())
+			{
+				str += ch;
+			}
 
-	ProductionMap["FUEL"] = { {"CA",4},{"BC",3},{"AB",2} };
-	ProductionMap["CA"] = { {"C",4},{"A",1} };
-	ProductionMap["BC"] = { {"B",5},{"C",7} };
-	ProductionMap["AB"] = { {"A",3},{"B",4} };
-	ProductionMap["C"] = { {"ORE",7}, };
-	ProductionMap["B"] = { {"ORE",8} };
-	ProductionMap["A"] = { {"ORE",9} };
+			if (ch == '=') {
+				switch_lineSide = 1;
+			}
+			if (ch == '\n' || in.eof()) {
+				rhs_element = str;
+				MinProduction[rhs_element] = std::stoi(rhs_value);
+				Stock[rhs_element] = 0;
+				while (lhs_elements.size() != 0)
+				{
+					std::string e = lhs_elements.top(); lhs_elements.pop();
+					int n = std::stoi(lhs_values.top()); lhs_values.pop();
+					ProductionMap[rhs_element].push_back({ e,n });
+				}
+				switch_lineSide = 0;
+			}
+			if (ch == ',' || ch == ' ')
+			{
+				if (switch_lineSide == 0 && str != "")
+				{
+					if (switch_pairSide == 0)
+					{
+						lhs_values.push(str);
+						switch_pairSide = 1;
+					}
+					else
+					{
+						lhs_elements.push(str);
+						switch_pairSide = 0;
+					}
+				}
+				if (switch_lineSide == 1 && str != "")
+				{
+					rhs_value = str;
+				}
+			}
+		}
+	} // END of file loading
 
 	ProdTables tables = { MinProduction,Stock,ProductionMap };
 	//R start = R{ "C",6 };
