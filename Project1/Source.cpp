@@ -966,47 +966,54 @@ struct ProdTables {
 	std::map<std::string, int>& Stock;
 	std::map<std::string, std::vector<R>>& ProductionMap;
 };
-int OreRequired(std::string product, int nRequired, ProdTables& tables)
+void OreRequired(std::string product, int nRequired, ProdTables& tables)
 {
-	if (nRequired <= 0) return 0;
+	if (nRequired <= 0) return;// 0;
 	{	// Manage stock (first use up what's in stock)
-		int inStock = tables.Stock[product];
+		/*int inStock = tables.Stock[product]; 
 		if (inStock > 0)
 		{
 			if (inStock >= nRequired)
 			{
 				tables.Stock[product] -= nRequired;
+				nRequired = 0;
+				std::cout << nRequired << " of " << product << " taken from stock\n";
 				return 0;
 			}
 			else
 			{
 				nRequired -= inStock;
-				tables.Stock[product] -= 0;
+				tables.Stock[product] = 0;
+				std::cout << nRequired << " of " << product << " taken from stock\n";
 			}
-		}
+		}*/
 	}
 	
-	int sum = 0;
+	//int sum = 0;
 	int minprod = tables.MinProduction[product];
 	int quant = 0;
 	if (minprod >= nRequired) quant = 1; else quant = std::ceil(float(nRequired) / float(minprod));
-	int overproduction = quant * minprod - nRequired;
+	//int overproduction = quant * minprod - nRequired;
 
 	for (R r : tables.ProductionMap[product])
 	{
 		if (r.element == "ORE")
 		{
-			tables.Stock[product] += overproduction;
-			std::cout << "ORE used: " << r.n * quant<<std::endl;
-			return r.n * quant;
+			//tables.Stock[product] += nRequired;
+			//tables.Stock[product] += r.n * quant;
+			//tables.Stock[product] += overproduction;
+			//std::cout << "ORE used: " << r.n * quant<<" to produce "<<minprod*quant<<" of "<<product<<std::endl;
+			//std::cout << "\nStock:\n";
+			//for (auto e : tables.Stock) std::cout << e.first << "," << e.second << std::endl;
+			//return r.n * quant;
 		}
 		else
 		{
-			sum += OreRequired(r.element, quant * r.n, tables);
-			tables.Stock[r.element] += overproduction;
+			tables.Stock[r.element] += quant * r.n;
+			OreRequired(r.element, quant * r.n, tables);
 		}
 	}
-	return sum;
+	//return sum;
 }
 
 void Day14()
@@ -1071,14 +1078,40 @@ void Day14()
 			}
 		}
 	} // END of file loading
-
+	// Cluster containers in one struct
 	ProdTables tables = { MinProduction,Stock,ProductionMap };
+	
+	
 	//R start = R{ "C",6 };
 	//R start = R{ "FUEL",1 };
-	int k = OreRequired("FUEL",1, tables);
-	std::cout << "Ore required: " << k << std::endl;
-	std::cout << "Stock:\n";
-	for (auto e : Stock)  std::cout << e.first << ":" << e.second << std::endl;
+	//int k = OreRequired("FUEL",1, tables);
+	OreRequired("FUEL", 1, tables);
+	
+	// Deduce ore converstion elements
+	std::vector<std::string> OCE;
+	for (auto e : ProductionMap)
+	{
+		if (e.second[0].element == "ORE") OCE.push_back(e.first);
+	}
+
+	// Calculate required ORE
+	int OreRequired = 0;
+	for (auto e : OCE)
+	{
+		int nRequired = tables.Stock[e];
+		int minprod = tables.MinProduction[e];
+		int quant = 0;
+		if (minprod >= nRequired) quant = 1; else quant = std::ceil(float(nRequired) / float(minprod));
+		OreRequired += quant * tables.ProductionMap[e][0].n;
+	}
+	
+	std::cout << "Ore required: " << OreRequired << std::endl;
+	std::cout << "\nStock:\n";
+	for (auto e : tables.Stock) std::cout << e.first << "," << e.second << std::endl;
+	
+	std::cout << "Ore Conversersion Elements: \n";
+	for (auto e : OCE) std::cout << e << std::endl;
+
 }
 	
 
