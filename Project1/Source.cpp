@@ -961,67 +961,86 @@ struct R {
 	std::string element;
 	int n;
 };
+struct ChemNode; // forward declaration
 struct ProdTables {
 	std::map<std::string, int>& MinProduction;
 	std::map<std::string, int>& Stock;
 	std::map<std::string, std::vector<R>>& ProductionMap;
+	std::map<std::string, ChemNode*>& ChemNodes;
+	std::map<std::string, int>& OreConvertingChemicals;
 };
-void OreRequired(std::string product, int nRequired, ProdTables& tables)
+struct ChemNode
 {
-	if (nRequired <= 0) return;// 0;
-	{	// Manage stock (first use up what's in stock)
-		/*int inStock = tables.Stock[product]; 
-		if (inStock > 0)
+	ChemNode(std::string name, int orderSize, ProdTables& tables)
+		:
+		name(name)
+	{
+		for (auto e : tables.ProductionMap[name]) 
 		{
-			if (inStock >= nRequired)
+			auto searchnode = tables.ChemNodes.find(e.element);
+			if ( searchnode != tables.ChemNodes.end())
 			{
-				tables.Stock[product] -= nRequired;
-				nRequired = 0;
-				std::cout << nRequired << " of " << product << " taken from stock\n";
-				return 0;
+				//node  already exists, link to existing
+				auto supplier = tables.ChemNodes[e.element];
+				suppliers.push_back(supplier);
 			}
 			else
 			{
-				nRequired -= inStock;
-				tables.Stock[product] = 0;
-				std::cout << nRequired << " of " << product << " taken from stock\n";
+				//create new node
+				tables.ChemNodes[e.element] = new ChemNode(e.element, 0, tables);
+				ChemNode* newnode = tables.ChemNodes[e.element];
+				suppliers.push_back(newnode);
 			}
-		}*/
+		}	
 	}
-	
-	//int sum = 0;
-	int minprod = tables.MinProduction[product];
-	int quant = 0;
-	if (minprod >= nRequired) quant = 1; else quant = std::ceil(float(nRequired) / float(minprod));
-	//int overproduction = quant * minprod - nRequired;
-
-	for (R r : tables.ProductionMap[product])
+	void Purchase(int orderSize, ProdTables& tables)
 	{
-		if (r.element == "ORE")
+		sold += orderSize;
+		// calculate production and manage stock
+		if (stock >= orderSize)
 		{
-			//tables.Stock[product] += nRequired;
-			//tables.Stock[product] += r.n * quant;
-			//tables.Stock[product] += overproduction;
-			//std::cout << "ORE used: " << r.n * quant<<" to produce "<<minprod*quant<<" of "<<product<<std::endl;
-			//std::cout << "\nStock:\n";
-			//for (auto e : tables.Stock) std::cout << e.first << "," << e.second << std::endl;
-			//return r.n * quant;
+			stock -= orderSize;
+			return;
 		}
+		else if (stock > 0)
+		{
+			orderSize -= stock;
+			stock = 0;
+		}
+		int minProduction = tables.MinProduction[name];
+		int quant = 0;
+		if (minProduction >= orderSize) quant = 1; else quant = std::ceil(float(orderSize) / float(minProduction));
+		produced += quant * minProduction;
+		stock = produced-sold;
+
+		// place purchase orders for all elements required for production
+		for (auto e : tables.ProductionMap[name])
+		{
+			tables.ChemNodes[e.element]->Purchase(quant * e.n, tables);
+		}
+	}
+	int GetOreConsumption()
+	{
+		if (name == "ORE") return produced;
 		else
 		{
-			tables.Stock[r.element] += quant * r.n;
-			OreRequired(r.element, quant * r.n, tables);
+			for (auto e : suppliers) return e->GetOreConsumption();
 		}
 	}
-	//return sum;
-}
+	std::string name;
+	int produced=0;
+	int sold=0;
+	int stock=0;
+	std::vector<ChemNode*> suppliers;
+};
 
 void Day14()
 {
 	std::map<std::string, int> MinProduction;
 	std::map<std::string, int> Stock;
 	std::map<std::string, std::vector<R>> ProductionMap;
-
+	std::map<std::string, ChemNode*> ChemNodes;
+	std::map<std::string, int> OreConvertingChemicals;
 	// File Loading to fill data structures
 	{ 
 		std::ifstream in("day14input.txt");
@@ -1077,41 +1096,17 @@ void Day14()
 				}
 			}
 		}
-	} // END of file loading
+	} MinProduction["ORE"] = 1;// END of file loading
 	// Cluster containers in one struct
-	ProdTables tables = { MinProduction,Stock,ProductionMap };
+	ProdTables tables = { MinProduction,Stock,ProductionMap,ChemNodes,OreConvertingChemicals  };
 	
-	
-	//R start = R{ "C",6 };
-	//R start = R{ "FUEL",1 };
-	//int k = OreRequired("FUEL",1, tables);
-	OreRequired("FUEL", 1, tables);
-	
-	// Deduce ore converstion elements
-	std::vector<std::string> OCE;
-	for (auto e : ProductionMap)
-	{
-		if (e.second[0].element == "ORE") OCE.push_back(e.first);
-	}
+	//Build tree
+	ChemNode tree("FUEL",1,  tables);
+	tree.Purchase(100, tables);
+	int k = tree.GetOreConsumption();
 
-	// Calculate required ORE
-	int OreRequired = 0;
-	for (auto e : OCE)
-	{
-		int nRequired = tables.Stock[e];
-		int minprod = tables.MinProduction[e];
-		int quant = 0;
-		if (minprod >= nRequired) quant = 1; else quant = std::ceil(float(nRequired) / float(minprod));
-		OreRequired += quant * tables.ProductionMap[e][0].n;
-	}
+	std::cout << "Ore required: " << k << std::endl;
 	
-	std::cout << "Ore required: " << OreRequired << std::endl;
-	std::cout << "\nStock:\n";
-	for (auto e : tables.Stock) std::cout << e.first << "," << e.second << std::endl;
-	
-	std::cout << "Ore Conversersion Elements: \n";
-	for (auto e : OCE) std::cout << e << std::endl;
-
 }
 	
 
