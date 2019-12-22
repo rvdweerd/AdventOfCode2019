@@ -910,14 +910,14 @@ void Day13()
 	{
 		for (int i = 0; i < 3; i++)
 		{
-			int x = arcadeComputer.Run(-10);
+			int x = (int)arcadeComputer.Run(-10);
 			if (x == -999)
 			{
 				GameEnd = true;
 				break;
 			}
-			int y = arcadeComputer.Run(0);
-			int id = arcadeComputer.Run(0);
+			int y = (int)arcadeComputer.Run(0);
+			int id = (int)arcadeComputer.Run(0);
 			if (x == -1)
 			{
 				arcadeComputer.PrintTextToConsole("Score= ", { 0,31 });
@@ -963,15 +963,20 @@ struct R {
 };
 struct ChemNode; // forward declaration
 struct ProdTables {
-	std::map<std::string, int>& MinProduction;
-	std::map<std::string, int>& Stock;
+	void Clear()
+	{
+
+	}
+	std::map<std::string, long long int>& MinProduction;
+	//std::map<std::string, long long int>& Stock;
 	std::map<std::string, std::vector<R>>& ProductionMap;
 	std::map<std::string, ChemNode*>& ChemNodes;
-	std::map<std::string, int>& OreConvertingChemicals;
+	std::map<std::string, long long int>& OreConvertingChemicals;
 };
+
 struct ChemNode
 {
-	ChemNode(std::string name, int orderSize, ProdTables& tables)
+	ChemNode(std::string name, ProdTables& tables)
 		:
 		name(name)
 	{
@@ -987,14 +992,17 @@ struct ChemNode
 			else
 			{
 				//create new node
-				tables.ChemNodes[e.element] = new ChemNode(e.element, 0, tables);
+				tables.ChemNodes[e.element] = new ChemNode(e.element, tables);
 				ChemNode* newnode = tables.ChemNodes[e.element];
 				suppliers.push_back(newnode);
 			}
+			//if next node = ORE, add to table of base ore converting chemicals
+			if (e.element == "ORE") tables.OreConvertingChemicals[name];
 		}	
 	}
-	void Purchase(int orderSize, ProdTables& tables)
+	void Purchase(long long int orderSize, ProdTables& tables)
 	{
+		long long int orderSize_orig = orderSize;
 		sold += orderSize;
 		// calculate production and manage stock
 		if (stock >= orderSize)
@@ -1007,9 +1015,9 @@ struct ChemNode
 			orderSize -= stock;
 			stock = 0;
 		}
-		int minProduction = tables.MinProduction[name];
-		int quant = 0;
-		if (minProduction >= orderSize) quant = 1; else quant = std::ceil(float(orderSize) / float(minProduction));
+		long long int minProduction = tables.MinProduction[name];
+		long long int quant = 0;
+		if (minProduction >= orderSize) quant = 1; else quant = (long long int)std::ceil(float(orderSize) / float(minProduction));
 		produced += quant * minProduction;
 		stock = produced-sold;
 
@@ -1019,28 +1027,42 @@ struct ChemNode
 			tables.ChemNodes[e.element]->Purchase(quant * e.n, tables);
 		}
 	}
-	int GetOreConsumption()
+	long long int GetOreConsumption()
 	{
 		if (name == "ORE") return produced;
 		else
 		{
 			for (auto e : suppliers) return e->GetOreConsumption();
 		}
+		return 0;
+	}
+	void Clear()
+	{
+		produced = 0; sold = 0; stock = 0;
+		if (name == "ORE") return;
+		else
+		{
+			for (auto e : suppliers) e->Clear();
+			return;
+		}
+		return;
 	}
 	std::string name;
-	int produced=0;
-	int sold=0;
-	int stock=0;
+	long long int produced=0;
+	long long int sold=0;
+	long long int stock=0;
 	std::vector<ChemNode*> suppliers;
 };
 
 void Day14()
 {
-	std::map<std::string, int> MinProduction;
-	std::map<std::string, int> Stock;
+	//======================================================================================
+	// PART 1
+	//======================================================================================
+	std::map<std::string, long long int> MinProduction;
 	std::map<std::string, std::vector<R>> ProductionMap;
 	std::map<std::string, ChemNode*> ChemNodes;
-	std::map<std::string, int> OreConvertingChemicals;
+	std::map<std::string, long long int> OreConvertingChemicals;
 	// File Loading to fill data structures
 	{ 
 		std::ifstream in("day14input.txt");
@@ -1066,7 +1088,7 @@ void Day14()
 			if (ch == '\n' || in.eof()) {
 				rhs_element = str;
 				MinProduction[rhs_element] = std::stoi(rhs_value);
-				Stock[rhs_element] = 0;
+				//Stock[rhs_element] = 0;
 				while (lhs_elements.size() != 0)
 				{
 					std::string e = lhs_elements.top(); lhs_elements.pop();
@@ -1096,20 +1118,62 @@ void Day14()
 				}
 			}
 		}
-	} MinProduction["ORE"] = 1;// END of file loading
+		MinProduction["ORE"] = 1;
+	} 
+	// END of file loading
+
 	// Cluster containers in one struct
-	ProdTables tables = { MinProduction,Stock,ProductionMap,ChemNodes,OreConvertingChemicals  };
+	ProdTables tables = { MinProduction,ProductionMap,ChemNodes,OreConvertingChemicals  };
 	
-	//Build tree
-	ChemNode tree("FUEL",1,  tables);
-	tree.Purchase(100, tables);
-	int k = tree.GetOreConsumption();
+	//Build tree (rather: a naive implementation of a graph, since branches can interconnect)
+	ChemNode tree("FUEL",tables);
+	//Populate all nodes in the tree with production data (basically: run all purchase orders)
+	tree.Purchase(1, tables);
+	//Calculate total amount of Ore (tranversing to all "bottom leaves" Ore nodes)
+	long long int k = tree.GetOreConsumption();
+	std::cout << "Ore required for 1 FUEL: " << k << std::endl;
+	std::cout << "Press return to continue to part 2\n"; 
+	std::cin.get();
 
-	std::cout << "Ore required: " << k << std::endl;
-	
+	//======================================================================================
+	// PART 2
+	//======================================================================================
+	// Brute force the solution to part 2 (no time..)
+	// It's embarrasing but it works
+	long long int OreAvailable = (long long int)1E12;
+	long long int fuel = 1;
+	long long int OreRequired =0;
+	// First find threshold value (trial through exponential growth)
+	while (OreRequired < OreAvailable)
+	{
+		fuel *= 2;
+		tree.Clear();
+		tree.Purchase(fuel, tables);
+		OreRequired = tree.GetOreConsumption();
+		std::cout << "Ore required for "<<fuel<<" FUEL: " << OreRequired << std::endl;
+	}
+	std::cout << "#####################################\n";	
+	fuel /= 2;
+	OreRequired = 0;
+	// Now iterate with decreasing linear intervals
+	int fact = std::pow(10,nDigits(fuel)-1);
+	while (fact >= 1)
+	{
+		while (OreRequired < OreAvailable)
+		{
+			tree.Clear();
+			tree.Purchase(fuel, tables);
+			OreRequired = tree.GetOreConsumption();
+			std::cout << "Ore required for " << fuel << " FUEL: " << OreRequired << std::endl;
+			fuel += fact;
+		}
+		std::cout << "#####################################\n";
+		fuel -= 2*fact;
+		OreRequired = 0;
+		fact /= 10;
+	}
+	std::cout << "#####################################\n";
 }
-	
-
 
 int main()
 {
@@ -1121,3 +1185,4 @@ int main()
 
 	while (!_kbhit());
 }
+

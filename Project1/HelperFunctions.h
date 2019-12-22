@@ -181,7 +181,16 @@ void ClearScreen()
 	/* Move the cursor home */
 	SetConsoleCursorPosition(hStdOut, homeCoords);
 }
-
+int nDigits(long long int k)
+{
+	int n = 0;
+	while (k != 0)
+	{
+		k /= 10;
+		n++;
+	}
+	return n;
+}
 //long long int LCM(long long int n)
 //{
 //
