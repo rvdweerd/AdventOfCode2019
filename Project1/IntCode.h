@@ -144,7 +144,8 @@ public:
 			}
 		}
 	}
-	long long int Run(long long int input1, long long int input2 = 0)
+	template <typename E>
+	E Run(E input1, E input2 = 0)
 	{
 		int increment = 0;
 		for (/*code_index = 0*/; (int)runCodeVec[code_index] != 99; code_index += increment)
@@ -152,16 +153,16 @@ public:
 			GetParameters(code_index);
 			if (opcode == 1) // add
 			{
-				long long int val1 = readVal<long long int>(code_index + 1, C);
-				long long int val2 = readVal<long long int>(code_index + 2, B);
-				writeVal<long long int>(code_index + 3, A, val1 + val2);
+				E val1 = readVal<E>(code_index + 1, C);
+				E val2 = readVal<E>(code_index + 2, B);
+				writeVal<E>(code_index + 3, A, val1 + val2);
 				increment = 4;
 			}
 			else if (opcode == 2) // multiply
 			{
-				long long int val1 = readVal<long long int>(code_index + 1, C);
-				long long int val2 = readVal<long long int>(code_index + 2, B);
-				writeVal<long long int>(code_index + 3, A, val1 * val2);
+				E val1 = readVal<E>(code_index + 1, C);
+				E val2 = readVal<E>(code_index + 2, B);
+				writeVal<E>(code_index + 3, A, val1 * val2);
 				increment = 4;
 			}
 			else if (opcode == 3) // input
@@ -173,12 +174,12 @@ public:
 				//PrintTextToConsole("Input: ", { 0,30 });
 				//std::cin >> k;
 				PrintTextToConsole("Input: ", { 0,30 }); std::cout << k;
-				writeVal<long long int>(code_index + 1, C, k);
+				writeVal<E>(code_index + 1, C, k);
 				increment = 2;
 			}
 			else if (opcode == 4) // output
 			{
-				long long int val1 = readVal<long long int>(code_index + 1, C);
+				E val1 = readVal<E>(code_index + 1, C);
 				//std::cout << val1 << ",";
 				//increment = 2;
 				code_index += 2;
@@ -187,8 +188,8 @@ public:
 			}
 			else if (opcode == 5) // jump-if-true
 			{
-				long long int val1 = readVal<long long int>(code_index + 1, C);
-				long long int val2 = readVal<long long int>(code_index + 2, B);
+				E val1 = readVal<E>(code_index + 1, C);
+				E val2 = readVal<E>(code_index + 2, B);
 				if (val1 != 0)
 				{
 					code_index = int(val2);
@@ -201,8 +202,8 @@ public:
 			}
 			else if (opcode == 6) // jump-if-false
 			{
-				long long int val1 = readVal<long long int>(code_index + 1, C);
-				long long int val2 = readVal<long long int>(code_index + 2, B);
+				E val1 = readVal<E>(code_index + 1, C);
+				E val2 = readVal<E>(code_index + 2, B);
 				if (val1 == 0)
 				{
 					code_index = int(val2);
@@ -215,21 +216,21 @@ public:
 			}
 			else if (opcode == 7) // less-than
 			{
-				long long int val1 = readVal<long long int>(code_index + 1, C);
-				long long int val2 = readVal<long long int>(code_index + 2, B);
-				writeVal<long long int>(code_index + 3, A, (val1 < val2 ? 1 : 0));
+				E val1 = readVal<E>(code_index + 1, C);
+				E val2 = readVal<E>(code_index + 2, B);
+				writeVal<E>(code_index + 3, A, (val1 < val2 ? 1 : 0));
 				increment = 4;
 			}
 			else if (opcode == 8) // equals
 			{
-				long long int val1 = readVal<long long int>(code_index + 1, C);
-				long long int val2 = readVal<long long int>(code_index + 2, B);
-				writeVal<long long int>(code_index + 3, A, (val1 == val2 ? 1 : 0));
+				E val1 = readVal<E>(code_index + 1, C);
+				E val2 = readVal<E>(code_index + 2, B);
+				writeVal<E>(code_index + 3, A, (val1 == val2 ? 1 : 0));
 				increment = 4;
 			}
 			else if (opcode == 9) // adjust relative base
 			{
-				long long int val1 = readVal<long long int>(code_index + 1, C);
+				E val1 = readVal<E>(code_index + 1, C);
 				relativeBase += int(val1);
 				increment = 2;
 			}
@@ -240,6 +241,101 @@ public:
 		}
 		return -999;
 	}
+	template <typename E>
+	E Run15(E input1, E input2 = 0)
+	{
+		int increment = 0;
+		for (/*code_index = 0*/; (int)runCodeVec[code_index] != 99; code_index += increment)
+		{
+			GetParameters(code_index);
+			if (opcode == 1) // add
+			{
+				E val1 = readVal<E>(code_index + 1, C);
+				E val2 = readVal<E>(code_index + 2, B);
+				writeVal<E>(code_index + 3, A, val1 + val2);
+				increment = 4;
+			}
+			else if (opcode == 2) // multiply
+			{
+				E val1 = readVal<E>(code_index + 1, C);
+				E val2 = readVal<E>(code_index + 2, B);
+				writeVal<E>(code_index + 3, A, val1 * val2);
+				increment = 4;
+			}
+			else if (opcode == 3) // input
+			{
+				writeVal<E>(code_index + 1, C, input1);
+				increment = 2;
+			}
+			else if (opcode == 4) // output
+			{
+				E val1 = readVal<E>(code_index + 1, C);
+				//std::cout << val1 << ",";
+				//increment = 2;
+				code_index += 2;
+				//if (val1 == 3||true) { std::cout << "value 3 retured, code_index=" << code_index; }
+				if (val1 == 2) 
+				{ 
+					int eggeq = 0; 
+				}
+				return val1;
+			}
+			else if (opcode == 5) // jump-if-true
+			{
+				E val1 = readVal<E>(code_index + 1, C);
+				E val2 = readVal<E>(code_index + 2, B);
+				if (val1 != 0)
+				{
+					code_index = int(val2);
+					increment = 0;
+				}
+				else
+				{
+					increment = 3;
+				}
+			}
+			else if (opcode == 6) // jump-if-false
+			{
+				E val1 = readVal<E>(code_index + 1, C);
+				E val2 = readVal<E>(code_index + 2, B);
+				if (val1 == 0)
+				{
+					code_index = int(val2);
+					increment = 0;
+				}
+				else
+				{
+					increment = 3;
+				}
+			}
+			else if (opcode == 7) // less-than
+			{
+				E val1 = readVal<E>(code_index + 1, C);
+				E val2 = readVal<E>(code_index + 2, B);
+				writeVal<E>(code_index + 3, A, (val1 < val2 ? 1 : 0));
+				increment = 4;
+			}
+			else if (opcode == 8) // equals
+			{
+				E val1 = readVal<E>(code_index + 1, C);
+				E val2 = readVal<E>(code_index + 2, B);
+				writeVal<E>(code_index + 3, A, (val1 == val2 ? 1 : 0));
+				increment = 4;
+			}
+			else if (opcode == 9) // adjust relative base
+			{
+				E val1 = readVal<E>(code_index + 1, C);
+				relativeBase += int(val1);
+				increment = 2;
+			}
+			else
+			{
+				std::cout << "error.";
+			}
+		}
+		return -999;
+	}
+
 	std::vector<long long int>& GetRunCodeVectorReference()
 	{
 		return runCodeVec;

@@ -31,12 +31,6 @@ void ReduceToLowestCommonDenom(Pos& direction)
 		direction.y /= std::abs(direction.y);
 	}
 }
-/*
-Pos operator-(Pos& p1, Pos& p2)
-{
-	return { p1.x - p2.x ,p1.y - p2.y };
-}
-*/
 float getClockAngle(std::pair<int, int> q)
 {
 	float pi = 3.14159265f;
@@ -91,7 +85,6 @@ void printMap(std::vector<std::vector<char>>& map)
 	}
 	std::cout << std::endl;
 }
-
 bool isValidPassword(int num)
 {
 	std::string number = std::to_string(num);
@@ -115,7 +108,6 @@ bool isValidPassword(int num)
 	test.push_back(adj);
 	return (std::find(test.begin(), test.end(), 1) != test.end());
 }
-
 int nToRoot(std::string p, std::map<std::string, std::string>& map)
 {
 	if (map[p] == "COM")
@@ -127,7 +119,6 @@ int nToRoot(std::string p, std::map<std::string, std::string>& map)
 		return 1 + nToRoot(map[p], map);
 	}
 }
-
 void permute(std::vector<std::string>& vec, std::string input, std::string sofar)
 {
 	int len = (int)input.size();
@@ -191,7 +182,116 @@ int nDigits(long long int k)
 	}
 	return n;
 }
-//long long int LCM(long long int n)
-//{
-//
-//}
+struct R {
+	R(std::string str, int n)
+		:
+		element(str),
+		n(n)
+	{}
+	friend bool operator==(const R& lhs, const R& rhs)
+	{
+		return (lhs.element == rhs.element && lhs.n == rhs.n);
+	}
+	friend bool operator!=(const R& lhs, const R& rhs)
+	{
+		return (lhs.element != rhs.element || lhs.n != rhs.n);
+	}
+	friend bool operator<(const R& lhs, const R& rhs)
+	{
+		return lhs.element < rhs.element;
+	}
+	std::string element;
+	int n;
+};
+struct ChemNode; // forward declaration
+struct ProdTables
+{
+	void Clear()
+	{
+
+	}
+	std::map<std::string, long long int>& MinProduction;
+	//std::map<std::string, long long int>& Stock;
+	std::map<std::string, std::vector<R>>& ProductionMap;
+	std::map<std::string, ChemNode*>& ChemNodes;
+	std::map<std::string, long long int>& OreConvertingChemicals;
+};
+struct ChemNode
+{
+	ChemNode(std::string name, ProdTables& tables)
+		:
+		name(name)
+	{
+		for (auto e : tables.ProductionMap[name])
+		{
+			auto searchnode = tables.ChemNodes.find(e.element);
+			if (searchnode != tables.ChemNodes.end())
+			{
+				//node  already exists, link to existing
+				auto supplier = tables.ChemNodes[e.element];
+				suppliers.push_back(supplier);
+			}
+			else
+			{
+				//create new node
+				tables.ChemNodes[e.element] = new ChemNode(e.element, tables);
+				ChemNode* newnode = tables.ChemNodes[e.element];
+				suppliers.push_back(newnode);
+			}
+			//if next node = ORE, add to table of base ore converting chemicals
+			if (e.element == "ORE") tables.OreConvertingChemicals[name];
+		}
+	}
+	void Purchase(long long int orderSize, ProdTables& tables)
+	{
+		long long int orderSize_orig = orderSize;
+		sold += orderSize;
+		// calculate production and manage stock
+		if (stock >= orderSize)
+		{
+			stock -= orderSize;
+			return;
+		}
+		else if (stock > 0)
+		{
+			orderSize -= stock;
+			stock = 0;
+		}
+		long long int minProduction = tables.MinProduction[name];
+		long long int quant = 0;
+		if (minProduction >= orderSize) quant = 1; else quant = (long long int)std::ceil(float(orderSize) / float(minProduction));
+		produced += quant * minProduction;
+		stock = produced - sold;
+
+		// place purchase orders for all elements required for production
+		for (auto e : tables.ProductionMap[name])
+		{
+			tables.ChemNodes[e.element]->Purchase(quant * e.n, tables);
+		}
+	}
+	long long int GetOreConsumption()
+	{
+		if (name == "ORE") return produced;
+		else
+		{
+			for (auto e : suppliers) return e->GetOreConsumption();
+		}
+		return 0;
+	}
+	void Clear()
+	{
+		produced = 0; sold = 0; stock = 0;
+		if (name == "ORE") return;
+		else
+		{
+			for (auto e : suppliers) e->Clear();
+			return;
+		}
+		return;
+	}
+	std::string name;
+	long long int produced = 0;
+	long long int sold = 0;
+	long long int stock = 0;
+	std::vector<ChemNode*> suppliers;
+};
