@@ -156,6 +156,7 @@
     <Text Include="day14input.txt" />
     <Text Include="day15input.txt" />
     <Text Include="day15test.txt" />
+    <Text Include="day15test2.txt" />
     <Text Include="day1input.txt" />
     <Text Include="day2input.txt" />
     <Text Include="day5input.txt" />
@@ -174,6 +175,10 @@
     <ClInclude Include="PastDaysSolutions.h" />
     <ClInclude Include="Planet.h" />
     <ClInclude Include="PlanetSys.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="maze_instr.bin" />
+    <None Include="maze_layout.bin" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -30,16 +30,17 @@ int OpposideDir(int dir)
 class Maze
 {
 public:
-	Maze(int width, int height)
+	Maze(int width, int height, bool simulated)
 		:
 		fieldWidth(width),
 		fieldHeight(height),
 		nPanels(width* height),
 		origin({ width / 2, height / 2 }),
-		pos({ width / 2, height / 2 })
+		pos({ width / 2, height / 2 }),
+		simulationMode(simulated)
 	{
 		LoadField();
-		LoadTestField();
+		if (simulated) LoadTestField();
 
 		// setup winapi consolescreen
 		hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -77,7 +78,7 @@ public:
 	}
 	void LoadTestField()
 	{
-		std::ifstream in("day15test.txt");
+		std::ifstream in("day15test2.txt");
 		while (!in.eof())
 		{
 			char ch;
@@ -260,43 +261,6 @@ public:
 		}
 		//PrintTextToConsole("x", { (SHORT)pos.x,(SHORT)pos.y });
 	}
-	void PrintMap()
-	{
-		ClearScreen();
-		SetConsoleCursorPosition(hStdOut, homeCoords);
-		for (int y = 0; y < fieldHeight; y++)
-		{
-			for (int x = 0; x < fieldWidth; x++)
-			{
-				std::cout << field[y * fieldWidth + x];
-			}
-			std::cout << std::endl;
-		}
-
-	}
-	void PrintMovingCenter()
-	{
-		
-		for (int y = 0; y < 40; y++)
-		{
-			for (int x = 0; x < 80; x++)
-			{
-				SetConsoleCursorPosition(hStdOut, { (SHORT)x, (SHORT)y });
-				std::cout << field[(pos.y-20+y)*fieldWidth+(pos.x-40+x)];
-			}
-		}
-		SetConsoleCursorPosition(hStdOut, { (SHORT)40, (SHORT)20 });
-		std::cout << 'O';
-	}
-	void PrintSymbol()
-	{
-		PrintTextToConsole("x", { (SHORT)pos.x,(SHORT)pos.y });
-	}
-	void PrintTextToConsole(std::string text, COORD coord)
-	{
-		SetConsoleCursorPosition(hStdOut, coord);
-		std::cout << text;
-	}
 	char GetMazeContentAt(int dir)
 
 	{
@@ -318,6 +282,58 @@ public:
 		assert(false);
 		return -1;
 	}
+	void PrintMaze()
+	{
+		//if (simulationMode)
+		{
+			PrintMap(); PrintTextToConsole("x", { (SHORT)pos.x,(SHORT)pos.y });
+		}
+		//else PrintMovingCenter(40,40);
+	}
+	void PrintTextToConsole(std::string text, COORD coord)
+	{
+		SetConsoleCursorPosition(hStdOut, coord);
+		std::cout << text;
+	}
+	bool IsInSimulationMode()
+	{
+		return simulationMode;
+	}
+
+private:
+	void PrintMap()
+	{
+		ClearScreen();
+		SetConsoleCursorPosition(hStdOut, homeCoords);
+		for (int y = 0; y < fieldHeight; y++)
+		{
+			for (int x = 0; x < fieldWidth; x++)
+			{
+				std::cout << field[y * fieldWidth + x];
+			}
+			std::cout << std::endl;
+		}
+
+	}
+	void PrintMovingCenter(int w, int h)
+	{
+
+		for (int y = 0; y < w; y++)
+		{
+			for (int x = 0; x < h; x++)
+			{
+				SetConsoleCursorPosition(hStdOut, { (SHORT)x, (SHORT)y });
+				std::cout << field[(pos.y - w/2 + y) * fieldWidth + (pos.x - h/2 + x)];
+			}
+		}
+		SetConsoleCursorPosition(hStdOut, { (SHORT)h/2, (SHORT)w/2 });
+		std::cout << 'O';
+	}
+	void PrintSymbol()
+	{
+		PrintTextToConsole("x", { (SHORT)pos.x,(SHORT)pos.y });
+	}
+
 public:
 	std::vector<char> field;
 	Pos pos;
@@ -330,6 +346,7 @@ private:
 	int nPanels;
 	const std::pair<int, int> origin;
 	const int trailLength = 5;
+	bool simulationMode;
 public:
 	int steps = 0;
 	int totalsteps = 0;

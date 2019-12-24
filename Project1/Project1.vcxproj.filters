@@ -65,6 +65,9 @@
     <Text Include="day15test.txt">
       <Filter>Resource Files</Filter>
     </Text>
+    <Text Include="day15test2.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="IntCode.h">
@@ -88,5 +91,13 @@
     <ClInclude Include="Maze.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="maze_instr.bin">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="maze_layout.bin">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>
