@@ -4,6 +4,7 @@
 #include <iostream>
 #include <fstream>
 #include <Windows.h>
+#include <cassert>
 
 class IntCode
 {
@@ -331,6 +332,7 @@ public:
 			else
 			{
 				std::cout << "error.";
+				assert(false);
 			}
 		}
 		return -999;

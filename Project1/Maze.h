@@ -4,6 +4,8 @@
 #include <string>
 #include <Windows.h>
 #include <iostream>
+#include <cassert>
+
 int OpposideDir(int dir)
 {
 	switch (dir)
@@ -21,6 +23,9 @@ int OpposideDir(int dir)
 		return 3;
 		break;
 	}
+	std::cout << "Error";
+	assert( false );
+	return -1;
 }
 class Maze
 {
@@ -31,12 +36,8 @@ public:
 		fieldHeight(height),
 		nPanels(width* height),
 		origin({ width / 2, height / 2 }),
-		//testField(nPanels, ' '),
-		//field(nPanels, ' '),
 		pos({ width / 2, height / 2 })
 	{
-		//std::vector<int> testField(nPanels, ' ');
-		//std::vector<int> field(nPanels, ' ');
 		LoadField();
 		LoadTestField();
 
@@ -80,16 +81,21 @@ public:
 		while (!in.eof())
 		{
 			char ch;
-			//i = 0;
+			int i = 0;
 			std::string str;
 			for (ch = in.get(); !in.eof(); ch = in.get())
 			{
 				if (ch != '\n')
 				{
+					if (ch == 'x')
+					{
+						pos.y = i / fieldWidth;
+						pos.x = i-pos.y*fieldWidth;
+						ch = ' ';
+					}
 					testField.push_back(ch);
-					//i++;
+					i++;
 				}
-
 			}
 		}
 	}
@@ -116,6 +122,7 @@ public:
 		if (targetfield == ' ')  return 1;
 		if (targetfield == '.')  return 0;
 		std::cout << "error";
+		return -1;
 
 	}
 	bool Available(int dir)
@@ -138,8 +145,12 @@ public:
 			return field[(pos.y) * fieldWidth + (pos.x + 1)] == ' ' ||
 				field[(pos.y) * fieldWidth + (pos.x + 1)] == 'O';
 			break;
-		return false;
+			assert(false);
+			return false;
 		}
+		std::cout << "Error";
+		assert(false);
+		return false;
 	}
 	bool Blocked(int dir)
 	{
@@ -161,6 +172,7 @@ public:
 			return field[(pos.y) * fieldWidth + (pos.x + 1)] == '#' ||
 				field[(pos.y) * fieldWidth + (pos.x + 1)] == '.';
 			break;
+			assert(false);
 			return false;
 		}
 	}
@@ -170,30 +182,32 @@ public:
 		{
 		case 1: //up
 			field[(pos.y - 1) * fieldWidth + (pos.x)] = '#';
-			PrintTextToConsole("#", { (SHORT)pos.x , (SHORT)pos.y - 1 });
+			//PrintTextToConsole("#", { (SHORT)pos.x , (SHORT)pos.y - 1 });
 			break;
 		case 2: //down
 			field[(pos.y + 1) * fieldWidth + (pos.x)] = '#';
-			PrintTextToConsole("#", { (SHORT)pos.x ,(SHORT)pos.y + 1 });
+			//PrintTextToConsole("#", { (SHORT)pos.x ,(SHORT)pos.y + 1 });
 			break;
 		case 3: //west
 			field[(pos.y) * fieldWidth + (pos.x - 1)] = '#';
-			PrintTextToConsole("#", { (SHORT)pos.x-1 ,(SHORT)pos.y});
+			//PrintTextToConsole("#", { (SHORT)pos.x-1 ,(SHORT)pos.y});
 			break;
 		case 4: //east
 			field[(pos.y) * fieldWidth + (pos.x + 1)] = '#';
-			PrintTextToConsole("#", { (SHORT)pos.x+1 ,(SHORT)pos.y });
+			//PrintTextToConsole("#", { (SHORT)pos.x+1 ,(SHORT)pos.y });
 			break;
+			assert(false);
 		}
 
 	}
-	void CreateWallCurrent()
+	void LeaveTrailAtCurrentPos()
 	{
 		field[(pos.y) * fieldWidth + (pos.x)] = '.';
 		//PrintTextToConsole("=", { (SHORT)pos.x  ,(SHORT)pos.y });
 	}
-	void Move(int dir)
+	void MoveTo(int dir)
 	{
+		//PrintTextToConsole(".", { (SHORT)pos.x,(SHORT)pos.y });
 		switch (dir)
 		{
 		case 1://up
@@ -212,11 +226,14 @@ public:
 			pos.x++;
 			field[pos.y * fieldWidth + pos.x] = '.';
 			break;
+			assert(false);
 		}
+		//PrintTextToConsole("x", { (SHORT)pos.x,(SHORT)pos.y });
 	}
 	void MoveBack(int dir)
 	{
 		dir = OpposideDir(dir);
+		//PrintTextToConsole(" ", { (SHORT)pos.x,(SHORT)pos.y });
 		switch (dir)
 		{
 		case 1://up
@@ -239,9 +256,10 @@ public:
 			pos.x++;
 			field[pos.y * fieldWidth + pos.x] = ' ';
 			break;
+			assert(false);
 		}
+		//PrintTextToConsole("x", { (SHORT)pos.x,(SHORT)pos.y });
 	}
-
 	void PrintMap()
 	{
 		ClearScreen();
@@ -259,15 +277,15 @@ public:
 	void PrintMovingCenter()
 	{
 		
-		for (int y = 0; y < 50; y++)
+		for (int y = 0; y < 40; y++)
 		{
-			for (int x = 0; x < 100; x++)
+			for (int x = 0; x < 80; x++)
 			{
 				SetConsoleCursorPosition(hStdOut, { (SHORT)x, (SHORT)y });
-				std::cout << field[(pos.y-25+y)*fieldWidth+(pos.x-50+x)];
+				std::cout << field[(pos.y-20+y)*fieldWidth+(pos.x-40+x)];
 			}
 		}
-		SetConsoleCursorPosition(hStdOut, { (SHORT)50, (SHORT)25 });
+		SetConsoleCursorPosition(hStdOut, { (SHORT)40, (SHORT)20 });
 		std::cout << 'O';
 	}
 	void PrintSymbol()
@@ -280,6 +298,7 @@ public:
 		std::cout << text;
 	}
 	char GetMazeContentAt(int dir)
+
 	{
 		switch (dir)
 		{
@@ -296,12 +315,15 @@ public:
 			return field[(pos.y) * fieldWidth + (pos.x + 1)];
 			break;
 		}
+		assert(false);
 		return -1;
 	}
 public:
 	std::vector<char> field;
 	Pos pos;
 	std::vector<char> testField;
+	bool errorflag = false;
+
 private:
 	const int fieldWidth;
 	const int fieldHeight;
@@ -310,6 +332,7 @@ private:
 	const int trailLength = 5;
 public:
 	int steps = 0;
+	int totalsteps = 0;
 	int stackDepth = 0;
 private:
 	HANDLE                     hStdOut;

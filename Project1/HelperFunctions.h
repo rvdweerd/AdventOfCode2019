@@ -11,7 +11,10 @@ struct Pos
 {
 	int x;
 	int y;
-	//friend Pos operator-(Pos& p1, Pos& p2);
+	friend bool operator==(Pos& p1, Pos& p2)
+	{
+		return (p1.x == p2.x) && (p1.y == p2.y);
+	}
 };
 void ReduceToLowestCommonDenom(Pos& direction)
 {
