@@ -57,7 +57,7 @@ void Day16a()
 	// Load data from file
 	std::vector<int> signal;
 	{
-		std::ifstream in("day16input.txt");
+		std::ifstream in("Resources/day16input.txt");
 		char ch;
 		for (in >> ch; !in.eof(); in >> ch)
 		{
@@ -80,7 +80,7 @@ void Day16b()
 	std::vector<int> signal_orig;
 	int offset = 0;
 	{
-		std::ifstream in("day16input.txt");
+		std::ifstream in("Resources/day16input.txt");
 		int count = 0;
 		char ch;
 		for (in >> ch; !in.eof(); in >> ch)
@@ -124,11 +124,10 @@ int main()
 {
 	// Instruction: load data in appropriate .txt input file and run the function associated with a specific day
 	// So, for example, to run Day 7 challenge:
-	// --> save data to "day7ainput.txt" and "day7binput.txt"
+	// --> save data to "Resources/day7ainput.txt" and "Resources/day7binput.txt"
 	// --> run the functions Day7a(); and/or Day7b(); in main()
-	Day16b();
+	Day16a();
 	
-
 	while (!_kbhit());
 	return 0;
 }

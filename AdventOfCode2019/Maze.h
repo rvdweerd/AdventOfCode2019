@@ -103,8 +103,8 @@ public: // All methods related to test code (int code simulation)
 	{
 		// Note: size of maze in .txt file should match field size
 		std::ifstream in(filename);
-		//std::ifstream in("maze_layout.txt");
-		//std::ifstream in("day15test.txt");
+		//std::ifstream in("Resources/maze_layout.txt");
+		//std::ifstream in("Resources/day15test.txt");
 		while (!in.eof())
 		{
 			char ch;

@@ -20,68 +20,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="day5input.txt">
-      <Filter>Resource Files</Filter>
-    </Text>
-    <Text Include="day1input.txt">
-      <Filter>Resource Files</Filter>
-    </Text>
-    <Text Include="day2input.txt">
-      <Filter>Resource Files</Filter>
-    </Text>
-    <Text Include="day3input.txt">
-      <Filter>Resource Files</Filter>
-    </Text>
-    <Text Include="day6input.txt">
-      <Filter>Resource Files</Filter>
-    </Text>
-    <Text Include="day7binput.txt">
-      <Filter>Resource Files</Filter>
-    </Text>
-    <Text Include="day7ainput.txt">
-      <Filter>Resource Files</Filter>
-    </Text>
-    <Text Include="day8ainput.txt">
-      <Filter>Resource Files</Filter>
-    </Text>
-    <Text Include="day9input.txt">
-      <Filter>Resource Files</Filter>
-    </Text>
-    <Text Include="day10input.txt">
-      <Filter>Resource Files</Filter>
-    </Text>
-    <Text Include="day11input.txt">
-      <Filter>Resource Files</Filter>
-    </Text>
-    <Text Include="day13input.txt">
-      <Filter>Resource Files</Filter>
-    </Text>
-    <Text Include="day14input.txt">
-      <Filter>Resource Files</Filter>
-    </Text>
-    <Text Include="day15input.txt">
-      <Filter>Resource Files</Filter>
-    </Text>
-    <Text Include="day15test.txt">
-      <Filter>Resource Files</Filter>
-    </Text>
-    <Text Include="day15test2.txt">
-      <Filter>Resource Files</Filter>
-    </Text>
-    <Text Include="maze_layout.txt">
-      <Filter>Resource Files</Filter>
-    </Text>
-    <Text Include="day15test3.txt">
-      <Filter>Resource Files</Filter>
-    </Text>
-    <Text Include="day16input.txt">
-      <Filter>Resource Files</Filter>
-    </Text>
-    <Text Include="Resources\Text.txt">
-      <Filter>Resource Files</Filter>
-    </Text>
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="IntCode.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -105,10 +43,69 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="maze_instr.bin">
+    <Text Include="Resources\day11input.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="Resources\day13input.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="Resources\day14input.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="Resources\day15input.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="Resources\day15test.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="Resources\day15test2.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="Resources\day15test3.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="Resources\day16input.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="Resources\maze_layout.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="Resources\day1input.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="Resources\day2input.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="Resources\day3input.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="Resources\day5input.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="Resources\day6input.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="Resources\day7ainput.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="Resources\day7binput.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="Resources\day8ainput.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="Resources\day9input.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="Resources\day10input.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\maze_instr.bin">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="maze_layout.bin">
+    <None Include="Resources\maze_layout.bin">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

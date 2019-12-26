@@ -3,7 +3,7 @@
 
 void Day1()
 {
-	std::ifstream in("day1input.txt");
+	std::ifstream in("Resources/day1input.txt");
 	std::vector<int> mass;
 	while (!in.eof())
 	{
@@ -32,7 +32,7 @@ void Day1()
 }
 void Day2a()
 {
-	IntCode comp("day2input.txt");
+	IntCode comp("Resources/day2input.txt");
 	comp.GetRunCodeVectorReference()[1] = 12;
 	comp.GetRunCodeVectorReference()[2] = 2;
 	comp.Run();
@@ -40,7 +40,7 @@ void Day2a()
 }
 void Day2b()
 {
-	IntCode comp("day2input.txt");
+	IntCode comp("Resources/day2input.txt");
 
 	int noun = 0;
 	int verb = 0;
@@ -77,7 +77,7 @@ void Day3()
 	for (int i = 0; i < fieldSize; i++) map1.push_back(row);
 	map2 = map1;
 
-	std::ifstream in("day3input.txt");
+	std::ifstream in("Resources/day3input.txt");
 	//BUILD MAP1
 	int x = fieldSize / 2;
 	int y = fieldSize / 2;
@@ -276,7 +276,7 @@ void Day3()
 	}
 
 	//Traverse map1.
-	std::ifstream in2("day3input.txt");
+	std::ifstream in2("Resources/day3input.txt");
 	std::map<int, std::pair<int, int>> distdata;
 	x = fieldSize / 2;
 	y = fieldSize / 2;
@@ -437,7 +437,7 @@ void Day4()
 }
 void Day5()
 {
-	IntCode comp("day5input.txt");
+	IntCode comp("Resources/day5input.txt");
 	comp.Run(); // (supply code 1 as only input for 1st part of day1, code 5 for 2nd part)
 	std::cout << "\nEnded.\n";
 }
@@ -446,7 +446,7 @@ void Day6()
 	std::vector<std::string> planets;// = { "A", "B","C","D","E","F","G","H" };
 	std::map<std::string, std::string> map;
 
-	std::ifstream in("day6input.txt");
+	std::ifstream in("Resources/day6input.txt");
 	std::vector<int> mass;
 	char ch = 0;
 	while (!in.eof())
@@ -506,11 +506,11 @@ void Day6()
 void Day7a()
 {
 	//Load Intcode computers for the Amps
-	IntCode ampA("day7ainput.txt");
-	IntCode ampB("day7ainput.txt");
-	IntCode ampC("day7ainput.txt");
-	IntCode ampD("day7ainput.txt");
-	IntCode ampE("day7ainput.txt");
+	IntCode ampA("Resources/day7ainput.txt");
+	IntCode ampB("Resources/day7ainput.txt");
+	IntCode ampC("Resources/day7ainput.txt");
+	IntCode ampD("Resources/day7ainput.txt");
+	IntCode ampE("Resources/day7ainput.txt");
 
 	// Generate all permutations of input signal and put in "options", a vector of strings 
 	std::string input = "01234";
@@ -541,11 +541,11 @@ void Day7a()
 void Day7b()
 {
 	//Load Intcode computers for the Amps
-	IntCode ampA("day7binput.txt");
-	IntCode ampB("day7binput.txt");
-	IntCode ampC("day7binput.txt");
-	IntCode ampD("day7binput.txt");
-	IntCode ampE("day7binput.txt");
+	IntCode ampA("Resources/day7binput.txt");
+	IntCode ampB("Resources/day7binput.txt");
+	IntCode ampC("Resources/day7binput.txt");
+	IntCode ampD("Resources/day7binput.txt");
+	IntCode ampE("Resources/day7binput.txt");
 
 	// Generate all permutations of input signal and put in "options", a vector of strings 
 	std::string input = "56789";
@@ -591,7 +591,7 @@ void Day7b()
 }
 void Day8()
 {
-	std::ifstream in("day8ainput.txt");
+	std::ifstream in("Resources/day8ainput.txt");
 	std::string str;
 	in >> str;
 	std::vector<char> pixelArray;
@@ -640,7 +640,7 @@ void Day8()
 }
 void Day9()
 {
-	IntCode comp("day9input.txt");
+	IntCode comp("Resources/day9input.txt");
 	comp.Run();
 }
 void Day10()
@@ -649,7 +649,7 @@ void Day10()
 	// PART 1
 	// ##############################################################################
 	// Load astroid map
-	std::ifstream in("day10input.txt");
+	std::ifstream in("Resources/day10input.txt");
 	std::vector<Pos> astroids;
 	char ch;
 	int x = 0;
@@ -777,7 +777,7 @@ void Day11()
 	directionMap[Direction::DOWN] = { 0, 1 };
 	directionMap[Direction::LEFT] = { -1, 0 };
 
-	IntCode comp("day11input.txt");
+	IntCode comp("Resources/day11input.txt");
 	std::pair<int, int> pos = { fieldWidth / 2 - 5, fieldHeight / 2 + 20 };
 	std::vector<int> field(nPanels);
 	std::vector<int> field_copy(nPanels);
@@ -878,7 +878,7 @@ void Day12b()
 }
 void Day13()
 {
-	IntCode arcadeComputer("day13input.txt");
+	IntCode arcadeComputer("Resources/day13input.txt");
 
 	int fieldWidth = 45;
 	int fieldHeight = 32;
@@ -931,7 +931,7 @@ void Day14()
 	std::map<std::string, long long int> OreConvertingChemicals;
 	// File Loading to fill data structures
 	{
-		std::ifstream in("day14input.txt");
+		std::ifstream in("Resources/day14input.txt");
 		char ch;
 		std::stack<std::string> lhs_values;
 		std::stack<std::string> lhs_elements;
@@ -1105,7 +1105,7 @@ void Day15a_RNG()
 	// (very inefficient but it works. Number of moves will differ between runs
 
 	// Initialization
-	IntCode mazeComputer("day15input.txt");
+	IntCode mazeComputer("Resources/day15input.txt");
 	std::random_device rn;
 	std::mt19937 rng(rn());
 	std::uniform_int_distribution<int> distr(1, 4);
@@ -1179,10 +1179,10 @@ void Day15a_RNG()
 	}
 	std::cout << "Method 2, n=" << positions.size() << std::endl;
 
-	// Save instructions vector to file "maze_instr.bin"
+	// Save instructions vector to file "Resources/maze_instr.bin"
 	// first: write size of vector, then write all elements
 	{
-		std::ofstream out("maze_instr.bin", std::ios::binary);
+		std::ofstream out("Resources/maze_instr.bin", std::ios::binary);
 		int vecsize = instructions.size();
 		out.write(reinterpret_cast<char*>(&vecsize), sizeof vecsize);
 		for (int v : instructions)
@@ -1200,13 +1200,13 @@ void Day15a_ApplyPath()
 	// This function applies the instruction set derived in Day15a_RNG() to visualize the maze
 	// Used to debug & understand the maze layout
 	// Day15a_RNG() should be run first to write data to maze_instr.bin
-	IntCode mazeComputer("day15input.txt");
+	IntCode mazeComputer("Resources/day15input.txt");
 	Maze maze(20000, 45000, false, "nofile");
 	maze.PrintMaze(false);
 
 	{
 		std::vector<int> instructions;
-		std::ifstream in("maze_instr.bin", std::ios::binary);
+		std::ifstream in("Resources/maze_instr.bin", std::ios::binary);
 		int vecsize = 0;
 		in.read(reinterpret_cast<char*>(&vecsize), sizeof vecsize);
 		for (int i = 0; i < vecsize; i++)
@@ -1246,25 +1246,25 @@ void Day15a_Simulated()
 {
 	// this runs on a small custom made maze to test the backtracking algo 
 	// (no int computer involved to make debugging easier)
-	IntCode mazeComputer("day15input.txt");
+	IntCode mazeComputer("Resources/day15input.txt");
 	//Maze maze(20000, 45000);
 	//maze.PrintMovingCenter();
 
-	Maze maze(25, 8, true, "day15test.txt");
+	Maze maze(25, 8, true, "Resources/day15test.txt");
 	maze.PrintMaze(true);
 	MazeSolutionExists(maze, mazeComputer, 4);
 	return;
 }
 void Day15a()
 {
-	IntCode mazeComputer("day15input.txt");
+	IntCode mazeComputer("Resources/day15input.txt");
 	Maze maze(72, 72, false, "nofile");
 	MazeSolutionExists(maze, mazeComputer, 4);
 
-	// Write field vector of maze to "maze_layout.bin", binary mode
+	// Write field vector of maze to "Resources/maze_layout.bin", binary mode
 	/*
 	{
-		std::ofstream out("maze_layout.bin", std::ios::binary);
+		std::ofstream out("Resources/maze_layout.bin", std::ios::binary);
 		int vecsize = maze.field.size();
 		out.write(reinterpret_cast<char*>(&vecsize), sizeof vecsize);
 		for (char c : maze.field)
@@ -1275,10 +1275,10 @@ void Day15a()
 	}
 	*/
 
-	// Write field vector of maze to "maze_layout.txt", text mode
+	// Write field vector of maze to "Resources/maze_layout.txt", text mode
 	/*
 	{
-		std::ofstream out2("maze_layout2.txt", std::ios::out);
+		std::ofstream out2("Resources/maze_layout2.txt", std::ios::out);
 		int count = 0;
 		for (char c : maze.field)
 		{
@@ -1295,7 +1295,7 @@ void Day15b()
 {
 	// Solution can be made more efficient, but this will do
 
-	Maze maze(41, 41, true, "maze_layout.txt"); //Load the maze as found on Part 1 of Day15
+	Maze maze(41, 41, true, "Resources/maze_layout.txt"); //Load the maze as found on Part 1 of Day15
 
 	// Initialize
 	std::set<std::pair<int, int>> set;

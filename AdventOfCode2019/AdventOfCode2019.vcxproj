@@ -21,9 +21,9 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <ProjectGuid>{D736F89E-A6CE-49F4-B4B1-D4A97ADED23A}</ProjectGuid>
-    <RootNamespace>Project1</RootNamespace>
+    <RootNamespace>AdventOfCode2019</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
-    <ProjectName>AdventOfCode</ProjectName>
+    <ProjectName>AdventOfCode2019</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -150,28 +150,6 @@
     <ClCompile Include="Source.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <Text Include="day10input.txt" />
-    <Text Include="day11input.txt" />
-    <Text Include="day13input.txt" />
-    <Text Include="day14input.txt" />
-    <Text Include="day15input.txt" />
-    <Text Include="day15test.txt" />
-    <Text Include="day15test2.txt" />
-    <Text Include="day15test3.txt" />
-    <Text Include="day16input.txt" />
-    <Text Include="day1input.txt" />
-    <Text Include="day2input.txt" />
-    <Text Include="day5input.txt" />
-    <Text Include="day3input.txt" />
-    <Text Include="day6input.txt" />
-    <Text Include="day7ainput.txt" />
-    <Text Include="day7binput.txt" />
-    <Text Include="day8ainput.txt" />
-    <Text Include="day9input.txt" />
-    <Text Include="maze_layout.txt" />
-    <Text Include="Resources\Text.txt" />
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="HelperFunctions.h" />
     <ClInclude Include="IncludesUsed.h" />
     <ClInclude Include="IntCode.h" />
@@ -181,8 +159,29 @@
     <ClInclude Include="PlanetSys.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="maze_instr.bin" />
-    <None Include="maze_layout.bin" />
+    <Text Include="Resources\day10input.txt" />
+    <Text Include="Resources\day11input.txt" />
+    <Text Include="Resources\day13input.txt" />
+    <Text Include="Resources\day14input.txt" />
+    <Text Include="Resources\day15input.txt" />
+    <Text Include="Resources\day15test.txt" />
+    <Text Include="Resources\day15test2.txt" />
+    <Text Include="Resources\day15test3.txt" />
+    <Text Include="Resources\day16input.txt" />
+    <Text Include="Resources\day1input.txt" />
+    <Text Include="Resources\day2input.txt" />
+    <Text Include="Resources\day3input.txt" />
+    <Text Include="Resources\day5input.txt" />
+    <Text Include="Resources\day6input.txt" />
+    <Text Include="Resources\day7ainput.txt" />
+    <Text Include="Resources\day7binput.txt" />
+    <Text Include="Resources\day8ainput.txt" />
+    <Text Include="Resources\day9input.txt" />
+    <Text Include="Resources\maze_layout.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\maze_instr.bin" />
+    <None Include="Resources\maze_layout.bin" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
