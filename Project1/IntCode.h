@@ -57,8 +57,8 @@ public:
 	{
 		runCodeVec = originalCodeVec;
 		code_index = 0;
-	}
-	void Run()
+	} 
+	void Run() // Run in manual mode (I/O by user)
 	{
 		int increment = 0;
 		for (code_index = 0; (int)runCodeVec[code_index] != 99; code_index += increment)
@@ -144,9 +144,9 @@ public:
 				std::cout << "error.";
 			}
 		}
-	}
-	template <typename E>
-	E Run(E input1, E input2 = 0)
+	} 
+	template <typename E>	// Run automated Int computer commands (I/O connected with function caller)
+	E Run(E input1, E input2 = 0) 
 	{
 		int increment = 0;
 		for (/*code_index = 0*/; (int)runCodeVec[code_index] != 99; code_index += increment)
@@ -241,9 +241,9 @@ public:
 			}
 		}
 		return -999;
-	}
-	template <typename E>
-	E Run15(E input1, E input2 = 0)
+	} 
+	template <typename E>	// Adjustments made to use Intode for Day15 challeng
+	E Run15(E input1, E input2 = 0) 
 	{
 		int increment = 0;
 		for (/*code_index = 0*/; (int)runCodeVec[code_index] != 99; code_index += increment)
@@ -337,7 +337,6 @@ public:
 		}
 		return -999;
 	}
-
 	std::vector<long long int>& GetRunCodeVectorReference()
 	{
 		return runCodeVec;

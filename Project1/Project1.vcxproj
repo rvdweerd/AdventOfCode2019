@@ -169,6 +169,7 @@
     <Text Include="day8ainput.txt" />
     <Text Include="day9input.txt" />
     <Text Include="maze_layout.txt" />
+    <Text Include="Resources\Text.txt" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="HelperFunctions.h" />
