@@ -185,6 +185,13 @@ int nDigits(long long int k)
 	}
 	return n;
 }
+int LastDigit(int n)
+{
+	return n % 10;
+	//this is stupid:
+	//std::string str = std::to_string(n);
+	//return (int(str.back() - '0'));
+}
 struct R {
 	R(std::string str, int n)
 		:
@@ -299,3 +306,4 @@ struct ChemNode
 	long long int stock = 0;
 	std::vector<ChemNode*> suppliers;
 };
+
