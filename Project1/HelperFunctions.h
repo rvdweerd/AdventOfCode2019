@@ -221,6 +221,7 @@ struct ProdTables
 };
 struct ChemNode
 {
+	//STILL NEED TO MAKE A DESTRUCTOR FOR THIS DUDE, BUT NO TIME (MEM LEAKS? NOT SURE IF std::vector does garbage collection)
 	ChemNode(std::string name, ProdTables& tables)
 		:
 		name(name)

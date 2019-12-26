@@ -68,6 +68,12 @@
     <Text Include="day15test2.txt">
       <Filter>Resource Files</Filter>
     </Text>
+    <Text Include="maze_layout.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="day15test3.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="IntCode.h">

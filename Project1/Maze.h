@@ -27,10 +27,31 @@ int OpposideDir(int dir)
 	assert( false );
 	return -1;
 }
+Pos AddDirToPos(int dir, Pos pos)
+{
+	switch (dir)
+	{
+	case 1:
+		return { pos.x , pos.y-1 };
+		break;
+	case 2:
+		return { pos.x , pos.y+1 };
+		break;
+	case 3:
+		return { pos.x-1 , pos.y };
+		break;
+	case 4:
+		return { pos.x+1 , pos.y };
+		break;
+	}
+	std::cout << "Error";
+	assert(false);
+	return { 0,0 };
+}
 class Maze
 {
 public:
-	Maze(int width, int height, bool simulated)
+	Maze(int width, int height, bool simulated, std::string filename)
 		:
 		fieldWidth(width),
 		fieldHeight(height),
@@ -40,7 +61,7 @@ public:
 		simulationMode(simulated)
 	{
 		LoadField();
-		if (simulated) LoadTestField();
+		if (simulated) LoadTestField(filename);
 
 		// setup winapi consolescreen
 		hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -76,9 +97,14 @@ public:
 		field.resize(nPanels, ' ');
 		field[pos.y * fieldWidth + pos.x] = ' ';
 	}
-	void LoadTestField()
+	
+public: // All methods related to test code (int code simulation)
+	void LoadTestField(std::string filename)
 	{
-		std::ifstream in("day15test2.txt");
+		// Note: size of maze in .txt file should match field size
+		std::ifstream in(filename);
+		//std::ifstream in("maze_layout.txt");
+		//std::ifstream in("day15test.txt");
 		while (!in.eof())
 		{
 			char ch;
@@ -126,56 +152,62 @@ public:
 		return -1;
 
 	}
-	bool Available(int dir)
+	bool AvailableInTestField(Pos p,int dir)
+	{
+		return (!BlockedInTestField(p,dir));
+	}
+	bool BlockedInTestField(Pos p, int dir)
 	{
 		switch (dir)
 		{
 		case 1: //up
-			return field[(pos.y - 1) * fieldWidth + (pos.x)] == ' ' ||
-				field[(pos.y - 1) * fieldWidth + (pos.x)] == 'O';
+			return testField[(p.y - 1) * fieldWidth + (p.x)] == '#' ||
+				testField[(p.y - 1) * fieldWidth + (p.x)] == '.';
 			break;
 		case 2: //down
-			return field[(pos.y + 1) * fieldWidth + (pos.x)] == ' ' ||
-				field[(pos.y + 1) * fieldWidth + (pos.x)] == 'O';
+			return testField[(p.y + 1) * fieldWidth + (p.x)] == '#' ||
+				testField[(p.y + 1) * fieldWidth + (p.x)] == '.';
 			break;
 		case 3: //west
-			return field[(pos.y) * fieldWidth + (pos.x - 1)] == ' '||
-				field[(pos.y) * fieldWidth + (pos.x - 1)] == 'O';
+			return testField[(p.y) * fieldWidth + (p.x - 1)] == '#' ||
+				testField[(p.y) * fieldWidth + (p.x - 1)] == '.';
 			break;
 		case 4: //east
-			return field[(pos.y) * fieldWidth + (pos.x + 1)] == ' ' ||
-				field[(pos.y) * fieldWidth + (pos.x + 1)] == 'O';
+			return testField[(p.y) * fieldWidth + (p.x + 1)] == '#' ||
+				testField[(p.y) * fieldWidth + (p.x + 1)] == '.';
 			break;
-			assert(false);
-			return false;
 		}
-		std::cout << "Error";
 		assert(false);
 		return false;
+	}
+public: // All methods used to navigate the map (using the int code responses)
+	bool Available(int dir)
+	{
+		return (!Blocked(dir));
 	}
 	bool Blocked(int dir)
 	{
 		switch (dir)
 		{
 		case 1: //up
-			return field[(pos.y - 1) * fieldWidth + (pos.x)] == '#' || 
+			return field[(pos.y - 1) * fieldWidth + (pos.x)] == '#' ||
 				field[(pos.y - 1) * fieldWidth + (pos.x)] == '.';
 			break;
 		case 2: //down
-			return field[(pos.y + 1) * fieldWidth + (pos.x)] == '#' || 
+			return field[(pos.y + 1) * fieldWidth + (pos.x)] == '#' ||
 				field[(pos.y + 1) * fieldWidth + (pos.x)] == '.';
 			break;
 		case 3: //west
-			return field[(pos.y) * fieldWidth + (pos.x - 1)] == '#' || 
+			return field[(pos.y) * fieldWidth + (pos.x - 1)] == '#' ||
 				field[(pos.y) * fieldWidth + (pos.x - 1)] == '.';
 			break;
 		case 4: //east
 			return field[(pos.y) * fieldWidth + (pos.x + 1)] == '#' ||
 				field[(pos.y) * fieldWidth + (pos.x + 1)] == '.';
 			break;
-			assert(false);
-			return false;
 		}
+		assert(false);
+		return false;
 	}
 	void CreateWallNext(int dir)
 	{
@@ -199,12 +231,11 @@ public:
 			break;
 			assert(false);
 		}
-
+		return;
 	}
 	void LeaveTrailAtCurrentPos()
 	{
 		field[(pos.y) * fieldWidth + (pos.x)] = '.';
-		//PrintTextToConsole("=", { (SHORT)pos.x  ,(SHORT)pos.y });
 	}
 	void MoveTo(int dir)
 	{
@@ -214,21 +245,25 @@ public:
 		case 1://up
 			pos.y--;
 			field[pos.y * fieldWidth + pos.x] = '.';
+			return;
 			break;
 		case 2://down
 			pos.y++;
 			field[pos.y * fieldWidth + pos.x] = '.';
+			return;
 			break;
 		case 3://west
 			pos.x--;
 			field[pos.y * fieldWidth + pos.x] = '.';
+			return;
 			break;
 		case 4://east
 			pos.x++;
 			field[pos.y * fieldWidth + pos.x] = '.';
+			return;
 			break;
-			assert(false);
 		}
+		assert(false);
 		//PrintTextToConsole("x", { (SHORT)pos.x,(SHORT)pos.y });
 	}
 	void MoveBack(int dir)
@@ -246,6 +281,7 @@ public:
 			field[pos.y * fieldWidth + pos.x] = ' ';
 			pos.y++;
 			field[pos.y * fieldWidth + pos.x] = ' ';
+
 			break;
 		case 3://west
 			field[pos.y * fieldWidth + pos.x] = ' ';
@@ -259,6 +295,7 @@ public:
 			break;
 			assert(false);
 		}
+		return;
 		//PrintTextToConsole("x", { (SHORT)pos.x,(SHORT)pos.y });
 	}
 	char GetMazeContentAt(int dir)
@@ -282,13 +319,78 @@ public:
 		assert(false);
 		return -1;
 	}
-	void PrintMaze()
+	void ExploreCurrentPosition(IntCode c) // not by reference to avoid screwups
 	{
-		//if (simulationMode)
+		if (simulationMode)
 		{
-			PrintMap(); PrintTextToConsole("x", { (SHORT)pos.x,(SHORT)pos.y });
+			for (int dir = 1; dir < 5; dir++)
+			{
+				int computerOutput = GetTestOutput(dir);
+				if (computerOutput == 0)
+				{
+					CreateWallNext(dir);
+				}
+			}
 		}
-		//else PrintMovingCenter(40,40);
+		else
+		{
+			for (int dir = 1; dir < 5; dir++)
+			{
+				int computerOutput = c.Run15<int>(dir);
+				if (computerOutput == 0)
+				{
+					CreateWallNext(dir);
+				}
+				else if (computerOutput == 1)
+				{
+					c.Run15<int>(OpposideDir(dir));
+				}
+				else if (computerOutput == 2)
+				{
+					/* MANUAL MODE
+					Pos pos_orig = pos;
+					MoveTo(dir);
+					PrintMaze();
+					int num=0;
+					while (num != 9)
+					{
+						PrintTextToConsole("input (9=quit): ", { 0,7 });
+						std::cin >> num;
+						{
+							if (num > 0 && num < 5)
+							{
+								int cOutLocal = c.Run15<int>(num);
+								if (cOutLocal == 0)
+								{
+									CreateWallNext(num);
+								}
+								else if (cOutLocal == 1 || cOutLocal == 2)
+								{
+									MoveTo(num);
+								}
+							}
+						}
+						PrintMaze();
+					}
+					pos = pos_orig;
+					dir = 100;
+					*/
+					c.Run15<int>(OpposideDir(dir));
+				}
+			}
+		}
+	}
+	void PrintMaze(bool fixed)
+	{
+		if (fixed)
+		{
+			PrintMap(); PrintTextToConsole("O", { (SHORT)pos.x,(SHORT)pos.y });
+		}
+		else PrintMovingCenter(min(40,fieldWidth/2),min(40,fieldHeight /2));
+	}
+	void PrintTestMaze()
+	{
+		PrintTestMap();// PrintTextToConsole("O", { (SHORT)pos.x,(SHORT)pos.y });
 	}
 	void PrintTextToConsole(std::string text, COORD coord)
 	{
@@ -300,7 +402,7 @@ public:
 		return simulationMode;
 	}
 
-private:
+private: // Print support functions
 	void PrintMap()
 	{
 		ClearScreen();
@@ -314,6 +416,19 @@ private:
 			std::cout << std::endl;
 		}
 
+	}
+	void PrintTestMap()
+	{
+		ClearScreen();
+		SetConsoleCursorPosition(hStdOut, homeCoords);
+		for (int y = 0; y < fieldHeight; y++)
+		{
+			for (int x = 0; x < fieldWidth; x++)
+			{
+				std::cout << testField[y * fieldWidth + x];
+			}
+			std::cout << std::endl;
+		}
 	}
 	void PrintMovingCenter(int w, int h)
 	{
@@ -331,15 +446,14 @@ private:
 	}
 	void PrintSymbol()
 	{
-		PrintTextToConsole("x", { (SHORT)pos.x,(SHORT)pos.y });
+		PrintTextToConsole("O", { (SHORT)pos.x,(SHORT)pos.y });
 	}
 
-public:
+public: // quick fix; should be kept private
 	std::vector<char> field;
 	Pos pos;
 	std::vector<char> testField;
 	bool errorflag = false;
-
 private:
 	const int fieldWidth;
 	const int fieldHeight;
@@ -351,6 +465,7 @@ public:
 	int steps = 0;
 	int totalsteps = 0;
 	int stackDepth = 0;
+	int totalbacksteps = 0;
 private:
 	HANDLE                     hStdOut;
 	CONSOLE_SCREEN_BUFFER_INFO csbi;

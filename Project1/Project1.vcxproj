@@ -157,6 +157,7 @@
     <Text Include="day15input.txt" />
     <Text Include="day15test.txt" />
     <Text Include="day15test2.txt" />
+    <Text Include="day15test3.txt" />
     <Text Include="day1input.txt" />
     <Text Include="day2input.txt" />
     <Text Include="day5input.txt" />
@@ -166,6 +167,7 @@
     <Text Include="day7binput.txt" />
     <Text Include="day8ainput.txt" />
     <Text Include="day9input.txt" />
+    <Text Include="maze_layout.txt" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="HelperFunctions.h" />
