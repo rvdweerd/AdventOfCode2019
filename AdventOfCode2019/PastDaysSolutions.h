@@ -1142,11 +1142,11 @@ void Day15a_RNG()
 	// Using a loop with (int i instead of iterator) because we need to remove elements from both
 	// the instructions and positions vectors
 	auto positions_copy = positions;
-	int len = positions_copy.size();
+	size_t len = positions_copy.size();
 
-	for (int i = 0; i < len; i++)
+	for (size_t i = 0; i < len; i++)
 	{
-		for (int j = i + 1; j < len; j++)
+		for (size_t j = i + 1; j < len; j++)
 		{
 			if (positions_copy[j] == positions_copy[i])
 			{
@@ -1183,7 +1183,7 @@ void Day15a_RNG()
 	// first: write size of vector, then write all elements
 	{
 		std::ofstream out("Resources/maze_instr.bin", std::ios::binary);
-		int vecsize = instructions.size();
+		int vecsize = (int)instructions.size();
 		out.write(reinterpret_cast<char*>(&vecsize), sizeof vecsize);
 		for (int v : instructions)
 		{
@@ -1309,7 +1309,7 @@ void Day15b()
 	// until the set doesn't grow anymore (all rooms filled)
 	while (true)
 	{
-		size_start = set.size();
+		size_start = (int)set.size();
 		for (auto p : set)
 		{
 			for (int dir = 1; dir < 5; dir++)
@@ -1325,10 +1325,78 @@ void Day15b()
 		{
 			set.insert(p_local);
 		}
-		size_end = set.size();
+		size_end = (int)set.size();
 		if (size_end == size_start) break; //all rooms are filled
 		count++;
 	}
 	std::cout << "Minutes required: " << count;
 
 }
+void Day16a()
+{
+	// Load data from file
+	std::vector<int> signal;
+	{
+		std::ifstream in("Resources/day16input.txt");
+		char ch;
+		for (in >> ch; !in.eof(); in >> ch)
+		{
+			signal.push_back(int(ch - '0'));
+		}
+	}
+
+	// Initialization
+	std::vector<int> basic_pattern = { 0,1,0,-1 };
+	std::vector<std::vector<int>> maskMatrix = FFTBuildMaskMatrix(basic_pattern, (int)signal.size());
+
+	// Apply FFT 100 times
+	std::vector<int> result = FFT(signal, maskMatrix, 100);
+	std::cout << "The first eight digits of the result: ";
+	for (int i = 0; i < 8; i++) std::cout << result[i];
+}
+void Day16b()
+{
+	// Load data from file
+	std::vector<int> signal_orig;
+	int offset = 0;
+	{
+		std::ifstream in("Resources/day16input.txt");
+		int count = 0;
+		char ch;
+		for (in >> ch; !in.eof(); in >> ch)
+		{
+			signal_orig.push_back(int(ch - '0'));
+			if (count < 7)
+			{
+				offset += int(std::pow(10, 7 - count - 1)) * int(ch - '0');
+				count++;
+			}
+		}
+	}
+	// Fill signal vetor x10.000
+	std::vector<int> signal_full;
+	for (int i = 0; i < 10000; i++)
+	{
+		std::copy(signal_orig.begin(), signal_orig.end(), std::back_inserter(signal_full));
+	}
+	std::vector<int> sub_signal(signal_full.begin() + offset, signal_full.end());
+	size_t sub_signalLength = sub_signal.size();
+
+	// FFT on sub-signal
+	std::vector<int> temp;
+	for (int n = 0; n < 100; n++)
+	{
+		temp.clear();
+		temp.push_back(sub_signal.back());
+		for (size_t i = sub_signalLength - 1; i > 0; i--)
+		{
+			int elem = temp.back() + sub_signal[i - 1];
+			temp.push_back(elem % 10);
+		}
+		std::reverse(temp.begin(), temp.end());
+		sub_signal.swap(temp);
+	}
+	std::cout << "The first eight digits of the result: ";
+	for (int i = 0; i < 8; i++) std::cout << sub_signal[i];
+}
+

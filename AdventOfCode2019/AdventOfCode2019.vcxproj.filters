@@ -100,6 +100,9 @@
     <Text Include="Resources\day10input.txt">
       <Filter>Resource Files</Filter>
     </Text>
+    <Text Include="Resources\day17input.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\maze_instr.bin">

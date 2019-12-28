@@ -168,6 +168,7 @@
     <Text Include="Resources\day15test2.txt" />
     <Text Include="Resources\day15test3.txt" />
     <Text Include="Resources\day16input.txt" />
+    <Text Include="Resources\day17input.txt" />
     <Text Include="Resources\day1input.txt" />
     <Text Include="Resources\day2input.txt" />
     <Text Include="Resources\day3input.txt" />

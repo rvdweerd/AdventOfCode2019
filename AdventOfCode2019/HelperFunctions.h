@@ -306,4 +306,55 @@ struct ChemNode
 	long long int stock = 0;
 	std::vector<ChemNode*> suppliers;
 };
+std::vector<int> FFTnPattern(std::vector<int> basicPattern, int n)
+{
+	// basicPattern size: [a]  --> return vector size: [a*n];
+	std::vector<int> tempVec;
+	size_t a = basicPattern.size();
+	for (size_t i = 0; i < a; i++)
+	{
+		for (size_t j = 0; j < n; j++)
+		{
+			tempVec.push_back(basicPattern[i]);
+		}
+	}
+	return tempVec;
+}
+std::vector<std::vector<int>> FFTBuildMaskMatrix(std::vector<int> basicPattern, int FFTsize)
+{
+	// basicPattern size: [a] --> return Matrix size [ FFT x [a ... a*FFTsize] ]
+	std::vector<std::vector<int>> tempMatrix;
+	for (int i = 1; i <= FFTsize; i++)
+	{
+		tempMatrix.push_back(FFTnPattern(basicPattern, i));
+	}
+	return tempMatrix;
+}
+int FFTrow(std::vector<int> signal, std::vector<int> maskVector)
+{
+	int temp = 0;
+	const size_t signalLength = signal.size();
+	const size_t maskLength = maskVector.size();
+	for (size_t i = 0; i < signalLength; i++)
+	{
+		temp += signal[i] * maskVector[(i + 1) % maskLength];
+	}
+	temp = std::abs(temp);
+	return LastDigit(temp);
+}
+std::vector<int> FFT(std::vector<int> signal, std::vector<std::vector<int>> maskMatrix, int n = 1)
+{
+	std::vector<int> tempVec;
+	size_t nDigits = signal.size();
+	for (size_t numberOfTransforms = 0; numberOfTransforms < (size_t)n; numberOfTransforms++)
+	{
+		tempVec.clear();
+		for (size_t i = 0; i < nDigits; i++)
+		{
+			tempVec.push_back(FFTrow(signal, maskMatrix[i]));
+		}
+		signal = tempVec;
+	}
+	return tempVec;
+}
 

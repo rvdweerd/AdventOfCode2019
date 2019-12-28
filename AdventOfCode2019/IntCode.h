@@ -53,6 +53,10 @@ public:
 		/* Move the cursor home */
 		SetConsoleCursorPosition(hStdOut, homeCoords);
 	}
+	void SetFirstDigit(int n)
+	{
+		runCodeVec[0] = n;
+	}
 	void Reset()
 	{
 		runCodeVec = originalCodeVec;
@@ -81,14 +85,19 @@ public:
 			else if (opcode == 3) // input
 			{
 				int k;
-				std::cout << "Input:"; std::cin >> k;
-				writeVal<long long int>(code_index + 1, C, k);
+				//std::cin.ignore(1000, '\n');
+				//std::cin.clear();
+
+				std::cout << "Input:"; 
+				std::cin >> k;
+				writeVal<char>(code_index + 1, C, (char)k);
 				increment = 2;
 			}
 			else if (opcode == 4) // output
 			{
-				long long int val1 = readVal<long long int>(code_index + 1, C);
-				std::cout << val1 << ",";
+				//long long int val1 = readVal<long long int>(code_index + 1, C);
+				char val1 = readVal<char>(code_index + 1, C);
+				std::cout << val1;// << ",";
 				increment = 2;
 			}
 			else if (opcode == 5) // jump-if-true
@@ -240,7 +249,7 @@ public:
 				std::cout << "error.";
 			}
 		}
-		return -999;
+		return (int)runCodeVec[code_index];
 	} 
 	template <typename E>	// Adjustments made to use Intode for Day15 challeng
 	E Run15(E input1, E input2 = 0) 
@@ -337,6 +346,101 @@ public:
 		}
 		return -999;
 	}
+	int Run(std::vector<char> instructions)
+	{
+		int vectorIndex = 0;
+		int increment = 0;
+		for (/*code_index = 0*/; (int)runCodeVec[code_index] != 99; code_index += increment)
+		{
+			GetParameters(code_index);
+			if (opcode == 1) // add
+			{
+				int val1 = readVal<int>(code_index + 1, C);
+				int val2 = readVal<int>(code_index + 2, B);
+				writeVal<int>(code_index + 3, A, val1 + val2);
+				increment = 4;
+			}
+			else if (opcode == 2) // multiply
+			{
+				int val1 = readVal<int>(code_index + 1, C);
+				int val2 = readVal<int>(code_index + 2, B);
+				writeVal<int>(code_index + 3, A, val1 * val2);
+				increment = 4;
+			}
+			else if (opcode == 3) // input
+			{
+				//int k;
+				std::cout << "Input read: " << instructions[vectorIndex];
+				//std::cout << instructions[vectorIndex];
+				writeVal<int>(code_index + 1, C, (int)instructions[vectorIndex]);
+				vectorIndex++;
+				increment = 2;
+			}
+			else if (opcode == 4) // output
+			{
+				int val1 = readVal<int>(code_index + 1, C);
+				std::cout << (int)val1<< ",";
+				increment = 2;
+				//code_index += 2;
+				//if (val1 == 3||true) { std::cout << "value 3 retured, code_index=" << code_index; }
+				//return val1;
+			}
+			else if (opcode == 5) // jump-if-true
+			{
+				int val1 = readVal<int>(code_index + 1, C);
+				int val2 = readVal<int>(code_index + 2, B);
+				if (val1 != 0)
+				{
+					code_index = int(val2);
+					increment = 0;
+				}
+				else
+				{
+					increment = 3;
+				}
+			}
+			else if (opcode == 6) // jump-if-false
+			{
+				int val1 = readVal<int>(code_index + 1, C);
+				int val2 = readVal<int>(code_index + 2, B);
+				if (val1 == 0)
+				{
+					code_index = int(val2);
+					increment = 0;
+				}
+				else
+				{
+					increment = 3;
+				}
+			}
+			else if (opcode == 7) // less-than
+			{
+				int val1 = readVal<int>(code_index + 1, C);
+				int val2 = readVal<int>(code_index + 2, B);
+				writeVal<int>(code_index + 3, A, (val1 < val2 ? 1 : 0));
+				increment = 4;
+			}
+			else if (opcode == 8) // equals
+			{
+				int val1 = readVal<int>(code_index + 1, C);
+				int val2 = readVal<int>(code_index + 2, B);
+				writeVal<int>(code_index + 3, A, (val1 == val2 ? 1 : 0));
+				increment = 4;
+			}
+			else if (opcode == 9) // adjust relative base
+			{
+				int val1 = readVal<int>(code_index + 1, C);
+				relativeBase += int(val1);
+				increment = 2;
+			}
+			else
+			{
+				std::cout << "error.";
+			}
+		}
+		return (int)runCodeVec[code_index];
+	}
+
 	std::vector<long long int>& GetRunCodeVectorReference()
 	{
 		return runCodeVec;
