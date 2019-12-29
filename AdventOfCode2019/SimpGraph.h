@@ -44,6 +44,11 @@ public:
 	void BFS(std::string startname);
 	void BFS(Node* startnode);
 	void VisitFunction1(Node* node);
+
+	std::vector<Arc*> findShortestPath(Node* start, Node* finish);
+	int getPathCost(const std::vector<Arc*>& path);
+
+
 private:
 	void visitUsingDFS(Node* node);
 	void visitUsingBFS();
