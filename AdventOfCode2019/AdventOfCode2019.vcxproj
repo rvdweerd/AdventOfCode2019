@@ -147,6 +147,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="SimpGraph.cpp" />
     <ClCompile Include="Source.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -157,6 +158,7 @@
     <ClInclude Include="PastDaysSolutions.h" />
     <ClInclude Include="Planet.h" />
     <ClInclude Include="PlanetSys.h" />
+    <ClInclude Include="SimpGraph.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Resources\day10input.txt" />

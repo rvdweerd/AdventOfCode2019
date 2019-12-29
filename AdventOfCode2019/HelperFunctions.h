@@ -357,4 +357,98 @@ std::vector<int> FFT(std::vector<int> signal, std::vector<std::vector<int>> mask
 	}
 	return tempVec;
 }
+class Field
+{
+public:
+	Field()
+		:
+		ASCIIcomp("Resources/day17input.txt")
+	{
+		{
+			int xcounter = 0;
+			int ycounter = 0;
+			char ch_prev = 0;
+			std::cout << "***** START OF INITIALIZATION\n";
+			for (char ch = ASCIIcomp.Run(0); ch != 99; ch = ASCIIcomp.Run(0))
+			{
+				if (ch == 10 && ch_prev == 10) break;
+				if (ch == 10) {
+					ycounter++; width = xcounter; xcounter = 0;
+				}
+				else {
+					std::pair<int, int> pos(xcounter, ycounter);
+					field.push_back(ch);
+					xcounter++;
+					if (ch == '#')
+					{
+						scafPositions.insert(pos);
+					}
+					else if (ch != '.')
+					{
+						robotPos = { xcounter,ycounter };
+						scafPositions.insert(robotPos);
+						switch (ch)
+						{
+						case '<':
+							robotDir = 3;
+							break;
+						case '>':
+							robotDir = 4;
+							break;
+						case '^':
+							robotDir = 1;
+							break;
+						case 'v':
+							robotDir = 2;
+							break;
+							std::cout << "Error, character in field not recognized";
+						}
+					}
+				}
+				std::cout << ch;
+				ch_prev = ch;
+			}
+			height = ycounter;
+		}
+		int calibration_at_start = 0;
+		for (auto pos : scafPositions)
+		{
+			auto e = scafPositions.end();
+			int neighbors = 0;
+			if (scafPositions.find({ pos.first + 1,pos.second }) != e) neighbors++;
+			if (scafPositions.find({ pos.first - 1,pos.second }) != e) neighbors++;
+			if (scafPositions.find({ pos.first    ,pos.second + 1 }) != e) neighbors++;
+			if (scafPositions.find({ pos.first    ,pos.second - 1 }) != e) neighbors++;
+			if (neighbors > 2)
+			{
+				scafIntersections.insert(pos);
+				calibration_at_start += pos.first * pos.second;
+			}
+		}
+		std::cout << "\nField dimensions: w=" << width << ", h=" << height << std::endl;
+		std::cout << "Position of Robot: x=" << robotPos.first << ", y=" << robotPos.second << std::endl;
+		std::cout << "Direction code for Robot (1=UP, DOWN, WEST, EAST): " << robotDir << std::endl;
+		std::cout << "Number of scaffold positions: " << scafPositions.size() << std::endl;
+		std::cout << "Number of intersections: " << scafIntersections.size() << std::endl;
+		std::cout << "Intersections are at: ";
+		for (auto pos : scafIntersections) std::cout << "(" << pos.first << "," << pos.second << "),"; std::cout << std::endl;
+		std::cout << "Calibration value: " << calibration_at_start << std::endl;
+		std::cout << "***** END OF INITIALIZATION\n";
+		//ASCIIcomp.Reset();
+	}
+	void Print()
+	{
+
+	}
+private:
+	IntCode ASCIIcomp;
+	std::vector<char> field;
+	int width = 0;
+	int height = 0;
+	std::set<std::pair<int, int>> scafPositions;
+	std::set<std::pair<int, int>> scafIntersections;
+	std::pair<int, int> robotPos = { 0,0 };
+	int robotDir = 0;
+
+};
 

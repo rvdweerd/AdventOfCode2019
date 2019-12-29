@@ -1399,4 +1399,47 @@ void Day16b()
 	std::cout << "The first eight digits of the result: ";
 	for (int i = 0; i < 8; i++) std::cout << sub_signal[i];
 }
+void Day17()
+{
+	//Field field; // field is printed and calibration value shown upon initialization (construction)
+
+	// Upon manual inspection of the field and with quite manageable constraints, we deduce:
+	//   Main routine: [A,B,C,A,B,C,B,C,A]
+	//    Function A: [L,12,R,4,R,4,L,6]
+	//    Function B: [L,12,R,4,R,4,R,12]
+	//    Function C: [L,10,L,6,R,4]
+	// However, step instructions only run up to 9, so we rearrange into:
+	//   Main routine: [A,B,C,A,B,C,B,C,A]
+	//    Function A: [L,6,6,R,4,R,4,L,6]
+	//    Function B: [L,6,6,R,4,R,4,R,6,6]
+	//    Function C: [L,5,5,L,6,R,4]
+
+
+
+	// Compose full string of instructions
+	// (Note that the C++ string type is an array of chars, so:
+	//		std::string a = "a\nb";
+	//		char b = a[1];
+	// Will yield b='\n' (or: b=10). Type casting between char and int is trivial
+	std::vector<char> Main = { 'A',44,'B',44,'A',44,'C',44,'A',44,'B',44,'C',44,'B',44,'C',44,'A', 10 };
+	std::vector<char> FuncA = { 'L',44,6 + '0',44,6 + '0',44,'R',44,4 + '0',44,'R',44,4 + '0',44,'L',44,6 + '0',		10 };
+	std::vector<char> FuncB = { 'L',44,6 + '0',44,6 + '0',44,'R',44,4 + '0',44,'R',44,4 + '0',44,'R',44,6 + '0',44,6 + '0',	10 };
+	std::vector<char> FuncC = { 'L',44,5 + '0',44,5 + '0',44,'L',44,6 + '0',44,'R',44,4 + '0', 10 };
+	std::vector<char> Other = { 'n',							10 };
+	std::vector<char> FullInstructions;
+	FullInstructions.insert(FullInstructions.end(), Main.begin(), Main.end());
+	FullInstructions.insert(FullInstructions.end(), FuncA.begin(), FuncA.end());
+	FullInstructions.insert(FullInstructions.end(), FuncB.begin(), FuncB.end());
+	FullInstructions.insert(FullInstructions.end(), FuncC.begin(), FuncC.end());
+	FullInstructions.insert(FullInstructions.end(), Other.begin(), Other.end());
+
+	// Create new instance of intcode
+	IntCode ASCIIcomp("Resources/day17input.txt");
+	ASCIIcomp.SetFirstDigit(2);
+	std::cout << "\n\nDust cleaned: \n" << ASCIIcomp.Run(FullInstructions);
+	//ASCIIcomp.Run();
+
+
+
+}
 
