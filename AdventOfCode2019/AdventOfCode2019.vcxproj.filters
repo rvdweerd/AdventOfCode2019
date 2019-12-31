@@ -47,6 +47,12 @@
     <ClInclude Include="SimpGraph.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="TestingPqueues.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Maze_simple.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="Resources\day11input.txt">
@@ -107,6 +113,9 @@
       <Filter>Resource Files</Filter>
     </Text>
     <Text Include="Resources\day17input.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="Resources\day18input.txt">
       <Filter>Resource Files</Filter>
     </Text>
   </ItemGroup>

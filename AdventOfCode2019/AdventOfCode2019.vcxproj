@@ -155,10 +155,12 @@
     <ClInclude Include="IncludesUsed.h" />
     <ClInclude Include="IntCode.h" />
     <ClInclude Include="Maze.h" />
+    <ClInclude Include="Maze_simple.h" />
     <ClInclude Include="PastDaysSolutions.h" />
     <ClInclude Include="Planet.h" />
     <ClInclude Include="PlanetSys.h" />
     <ClInclude Include="SimpGraph.h" />
+    <ClInclude Include="TestingPqueues.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Resources\day10input.txt" />
@@ -171,6 +173,7 @@
     <Text Include="Resources\day15test3.txt" />
     <Text Include="Resources\day16input.txt" />
     <Text Include="Resources\day17input.txt" />
+    <Text Include="Resources\day18input.txt" />
     <Text Include="Resources\day1input.txt" />
     <Text Include="Resources\day2input.txt" />
     <Text Include="Resources\day3input.txt" />

@@ -4,13 +4,17 @@
 
 void SimpGraph::AddNode(std::string name)
 {
-	Node* newnode = new Node(name);
-	nodeMap[name] = newnode;
-	nodes.insert(newnode);
+	if (nodeMap.find(name) == nodeMap.end()) // only add if new (std::set<Node*> works on pointers, not the name)
+	{
+		Node* newnode = new Node(name);
+		nodeMap[name] = newnode;
+		nodes.insert(newnode);
+	}
 }
 
 void SimpGraph::AddArc(Node* start, Node* finish, int cost)
 {
+	// TO BE IMPLEMENTED: SAFETY TO AVOID DUPLICATION OF ARCS
 	Arc* newarc = new Arc(start, finish, cost);
 	start->arcs.insert(newarc);
 	arcs.insert(newarc);
@@ -94,29 +98,29 @@ void SimpGraph::VisitFunction1(Node* node)
 std::vector<SimpGraph::Arc*> SimpGraph::findShortestPath(Node* start, Node* finish)
 {
 	std::vector<Arc*> path;   
-	std::priority_queue< std::vector<Arc*> > queue;
+	std::priority_queue< std::vector<Arc*> , std::vector<std::vector<Arc*>>, GreaterPathLength> queue;
 	std::map<std::string, int> fixed;  
 	while (start != finish) 
 	{ 
 		if (fixed.find(start->name)==fixed.end())
 		{ 
-			fixed[start->name] = getPathCost(path));         
+			fixed[start->name] = getPathCost(path);         
 			for (Arc* arc : start->arcs) 
 			{ 
 				if (fixed.find(arc->finish->name)==fixed.end()) 
 				{ 
 					path.push_back(arc);               
-					queue.enqueue(path, getPathCost(path));               
-					path.removeAt(path.size() - 1); 
+					queue.push(path);               
+					path.pop_back();
 				} 
 			} 
 		}      
-		if (queue.isEmpty()) 
+		if (queue.size()==0) 
 		{ 
 			path.clear();
 			return path; 
 		}      
-		path = queue.dequeue();
+		path = queue.top(); queue.pop();
 		start = path[path.size() - 1]->finish; 
 	}   
 	return path;

@@ -11,9 +11,29 @@ struct Pos
 {
 	int x;
 	int y;
-	friend bool operator==(Pos& p1, Pos& p2)
+	int n=0;
+	friend bool operator==(const Pos& p1, const Pos& p2)
 	{
 		return (p1.x == p2.x) && (p1.y == p2.y);
+	}
+	friend bool operator<(const Pos& p1, const Pos& p2)
+	{
+		return (p1.x + p1.y) < (p2.x + p2.y) ;
+	}
+
+	Pos Add(int dir)
+	{
+		switch (dir)
+		{
+		case 1:
+			return { x,y - 1 ,n};
+		case 2:
+			return { x,y + 1 ,n};
+		case 3:
+			return { x - 1,y ,n};
+		case 4:
+			return { x + 1,y ,n};
+		}
 	}
 };
 void ReduceToLowestCommonDenom(Pos& direction)

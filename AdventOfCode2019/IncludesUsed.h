@@ -21,8 +21,10 @@
 #include <utility>
 #include <stack>
 #include "Maze.h"
+#include "Maze_simple.h"
 #include <cassert>
 #include <random>
 #include <fstream>
 #include <iostream>
+#include "SimpGraph.h"
 
