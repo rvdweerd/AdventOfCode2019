@@ -44,21 +44,26 @@ void DijkstraTest()
 		std::cout << a->finish->name << "->";
 	}
 }
-void CreateGraphFromMaze(Maze_simple& maze, SimpGraph& graph, Pos startpos, std::string keys)
+void CreateGraphFromMaze(Maze_simple& maze, SimpGraph& graph, Pos startpos, std::string keys, std::map<std::string, std::vector<pathToKey>>& cache, int& cacheused)
 {
 	std::vector<pathToKey> pathsToNewKeysFromCurrentPos;
-
-	// get all available directions from startposition and initialize the queue for BFS
-	std::queue<Pos> newPositionsQueue;
-	std::string edgeStart = keys;
-	std::vector<Pos> visited; visited.push_back(startpos);
-	for (int dir : maze.GetAvailableDirectionsFromPos(startpos, keys))
+	
+	std::string orderedkeys = keys;
+	std::sort(orderedkeys.begin(), orderedkeys.end());
+	orderedkeys += std::to_string(startpos.x);
+	orderedkeys += "_";
+	orderedkeys += std::to_string(startpos.y);
+	
+	if (cache.find(orderedkeys) == cache.end())
 	{
-		Pos newpos = startpos.Add(dir);
-		newpos.n++;
-		newPositionsQueue.push(newpos);
+		maze.BFSforKeys(pathsToNewKeysFromCurrentPos, startpos, keys, 0, cache);
 	}
-	maze.BFSforKeys(pathsToNewKeysFromCurrentPos, newPositionsQueue, visited, keys, 0);
+	else
+	{
+		pathsToNewKeysFromCurrentPos = cache[orderedkeys];
+		cacheused++;
+	}
+	   	
 	for (pathToKey p : pathsToNewKeysFromCurrentPos)
 	{
 		//if (p.endKeyChar == maze.endkey)
@@ -74,7 +79,7 @@ void CreateGraphFromMaze(Maze_simple& maze, SimpGraph& graph, Pos startpos, std:
 			graph.AddNode(newNodeName);
 			graph.AddOneWayConnection(keys, newNodeName, p.distance);
 			p.endpos.n = 0;
-			CreateGraphFromMaze(maze, graph, p.endpos, newNodeName);
+			CreateGraphFromMaze(maze, graph, p.endpos, newNodeName, cache, cacheused);
 		}
 	}
 	return;
@@ -91,7 +96,9 @@ void Day18()
 
 	SimpGraph graph;
 	graph.AddNode("@");
-	CreateGraphFromMaze(maze, graph, startpos, keys);
+	std::map<std::string , std::vector<pathToKey>> cache;
+	int cacheused = 0;
+	CreateGraphFromMaze(maze, graph, startpos, keys, cache,cacheused);
 	
 	//Find shortest path (vector of arcs)
 	//std::string endpoint = "@"; endpoint += maze.endkey;

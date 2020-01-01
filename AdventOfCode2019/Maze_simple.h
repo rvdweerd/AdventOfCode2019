@@ -257,16 +257,31 @@ public: // methods for solution Day18
 		return availableDirs;
 	}
 	void BFSforKeys(std::vector<pathToKey>& pathToKeys, 
-					std::queue<Pos>& newPositionsQueue, 
-					std::vector<Pos> visited, //By reference?
+					//std::queue<Pos>& newPositionsQueue, 
+					//std::vector<Pos> visited, //By reference?
+					Pos startpos,
 					std::string keys, 
-					int nSteps)
+					int nSteps,
+					std::map<std::string, std::vector<pathToKey>>& cache)
 	{
-		
+		std::vector<Pos> allCheckedPositions;
+		allCheckedPositions.push_back(startpos);
+
+		// get all available directions from startposition and initialize the queue for BFS
+		std::queue<Pos> newPositionsQueue;
+		//std::string edgeStart = keys;
+		std::vector<Pos> visited; visited.push_back(startpos);
+		for (int dir : GetAvailableDirectionsFromPos(startpos, keys))
+		{
+			Pos temppos = startpos.Add(dir);
+			temppos.n++;
+			newPositionsQueue.push(temppos);
+		}
 		// main BFS loop
 		while (newPositionsQueue.size() != 0)
 		{
 			Pos newpos = newPositionsQueue.front(); newPositionsQueue.pop();
+			allCheckedPositions.push_back(newpos);
 			visited.push_back(newpos);
 			char ch = GetMazeContentAtPos(newpos);
 			// If you find a new key, add it to the vector
@@ -291,6 +306,17 @@ public: // methods for solution Day18
 
 			}
 		}
+		// Write result to the cache
+		for (Pos p : allCheckedPositions)
+		{
+			std::string orderedkeys = keys;
+			std::sort(orderedkeys.begin(), orderedkeys.end());
+			orderedkeys += std::to_string(p.x);
+			orderedkeys += "_";
+			orderedkeys += std::to_string(p.y);
+			cache[orderedkeys] = pathToKeys;
+		}
+		return;
 	}
 	void PrintMaze()
 	{
