@@ -1,3 +1,4 @@
+/* ABANDONED CODE
 #pragma once
 #include "Planet.h"
 #include <vector>
@@ -7,49 +8,6 @@
 #include <cassert>
 #include "HelperFunctions.h"
 #include <queue>
-
-//int OpposideDir(int dir)
-//{
-//	switch (dir)
-//	{
-//	case 1:
-//		return 2;
-//		break;
-//	case 2:
-//		return 1;
-//		break;
-//	case 3:
-//		return 4;
-//		break;
-//	case 4:
-//		return 3;
-//		break;
-//	}
-//	std::cout << "Error";
-//	assert(false);
-//	return -1;
-//}
-//Pos AddDirToPos(int dir, Pos pos)
-//{
-//	switch (dir)
-//	{
-//	case 1:
-//		return { pos.x , pos.y - 1 };
-//		break;
-//	case 2:
-//		return { pos.x , pos.y + 1 };
-//		break;
-//	case 3:
-//		return { pos.x - 1 , pos.y };
-//		break;
-//	case 4:
-//		return { pos.x + 1 , pos.y };
-//		break;
-//	}
-//	std::cout << "Error";
-//	assert(false);
-//	return { 0,0 };
-//}
 
 struct pathToKey
 {
@@ -68,11 +26,11 @@ public:
 		hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
 		if (hStdOut == INVALID_HANDLE_VALUE) std::cout << "ERROR INITIALIZING WINAPI";
 
-		/* Get the number of cells in the current buffer */
+		// Get the number of cells in the current buffer //
 		if (!GetConsoleScreenBufferInfo(hStdOut, &csbi)) std::cout << "ERROR INITIALIZING WINAPI";
 		cellCount = csbi.dwSize.X * csbi.dwSize.Y;
 
-		/* Fill the entire buffer with spaces */
+		// Fill the entire buffer with spaces //
 		if (!FillConsoleOutputCharacter(
 			hStdOut,
 			(TCHAR)' ',
@@ -81,7 +39,7 @@ public:
 			&count
 		)) std::cout << "ERROR INITIALIZING WINAPI";
 
-		/* Fill the entire buffer with the current colors and attributes */
+		// Fill the entire buffer with the current colors and attributes //
 		if (!FillConsoleOutputAttribute(
 			hStdOut,
 			csbi.wAttributes,
@@ -90,7 +48,7 @@ public:
 			&count
 		)) std::cout << "ERROR INITIALIZING WINAPI";
 
-		/* Move the cursor home */
+		// Move the cursor home //
 		SetConsoleCursorPosition(hStdOut, homeCoords);
 	}
 	void LoadField(std::string filename)
@@ -352,7 +310,7 @@ public: // quick fix; should be kept private
 	bool errorflag = false;
 	char endkey='a';
 	int nKeys;
-private:
+public:
 	int fieldWidth;
 	int fieldHeight;
 	int nPanels;
@@ -369,3 +327,4 @@ private:
 	DWORD                      cellCount;
 	COORD                      homeCoords = { 0, 0 };
 };
+*/

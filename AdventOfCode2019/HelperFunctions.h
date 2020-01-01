@@ -12,6 +12,7 @@ struct Pos
 	int x;
 	int y;
 	int n=0;
+	std::string keys;
 	friend bool operator==(const Pos& p1, const Pos& p2)
 	{
 		return (p1.x == p2.x) && (p1.y == p2.y);
@@ -333,7 +334,7 @@ std::vector<int> FFTnPattern(std::vector<int> basicPattern, int n)
 	size_t a = basicPattern.size();
 	for (size_t i = 0; i < a; i++)
 	{
-		for (size_t j = 0; j < n; j++)
+		for (int j = 0; j < n; j++)
 		{
 			tempVec.push_back(basicPattern[i]);
 		}

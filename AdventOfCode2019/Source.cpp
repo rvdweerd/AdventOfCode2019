@@ -1,5 +1,8 @@
 #include "IncludesUsed.h"
 #include "PastDaysSolutions.h"
+
+// THIS CODE WAS MY FIRST TRY AND (ALTHOUGH IT CAN BE MADE TO WORK-NEED TO FIX THE MEMOIZING/CACHING) I ABANDONED THE APPROACH: TOO COMPLEX AND SLOW
+/*
 #include "SimpGraph.h"
 
 void NavigateMazeByHand(Maze_simple maze_tmp)
@@ -84,9 +87,10 @@ void CreateGraphFromMaze(Maze_simple& maze, SimpGraph& graph, Pos startpos, std:
 	}
 	return;
 }
-
-void Day18()
+void Day18abandoned()
 {
+	// Although this is a working implementation of a solution using Dijkstra's algo, it is overly complicated and way too slow.
+	// I chose to abandon this approach entirely and simplfy the solution to a basic BFS. Code kept in for own learning documentation
 	Maze_simple maze("Resources/day18input.txt");
 	maze.PrintMaze();
 	//NavigateMazeByHand(maze);
@@ -110,6 +114,143 @@ void Day18()
 		std::cout << a->finish->name << ", ";
 	}
 }
+*/
+// END OF ABANDONED CODE
+
+std::string SerializeIntoString(Pos pos) // used to enable a hash lookup of visited nodes in the BFS
+{
+	std::sort(pos.keys.begin(), pos.keys.end());
+	pos.keys.append(std::to_string(pos.x));
+	pos.keys.append("_");
+	pos.keys.append(std::to_string(pos.y));
+	return pos.keys;
+}
+std::vector<Pos> FindNeighbors(const std::vector<char>& field, const int& fieldWidth, const Pos& pos, const std::set<std::string>& visited)
+{
+	std::vector<Pos> availablePositions;
+	int newX, newY;
+	for (int dir = 1; dir < 5; dir++)
+	{
+		if (dir == 1) // NORTH
+		{
+			newX = pos.x;
+			newY = pos.y - 1;
+		}
+		else if (dir == 2) // SOUTH
+		{
+			newX = pos.x;
+			newY = pos.y + 1;
+		}
+		else if (dir == 3) // WEST
+		{
+			newX = pos.x -1;
+			newY = pos.y;
+		}
+		else if (dir == 4) // EAST
+		{
+			newX = pos.x + 1;
+			newY = pos.y;
+		}
+		
+		char ch = field[newY * fieldWidth + newX];
+		if ((ch == '#') || // If neighbor is [wall] or [door without key] don't include
+			(ch > 64 && ch <= 90 && (pos.keys.find(std::tolower(ch)) == std::string::npos)) )
+		{
+		}
+		else // Else, include neighbor, if not already visited, add key if found
+		{
+			std::string newkeys = pos.keys;
+			if (ch > 96 && ch <= 122 && (newkeys.find(ch) == std::string::npos)) // If new key is found, add it to newpos.keys
+			{
+				newkeys += ch; // This will retain the order in which the keys are found. We sort when serializing
+			}
+			Pos newpos = { newX,newY,pos.n+1, newkeys };
+			if (visited.find(SerializeIntoString(newpos)) == visited.end())
+			{
+				availablePositions.push_back(newpos);
+			}
+		}
+	}
+	return availablePositions;
+}
+void LoadField(std::string filename, std::vector<char>& field, int& fieldWidth, Pos& startpos, int& nKeys)
+{
+	fieldWidth = 1; // we don't know this yet, this is the starting assumption
+	bool fieldWidthSet = false;
+	std::ifstream in(filename);
+	while (!in.eof())
+	{
+		char ch;
+		int i = 0;
+		std::string str;
+		for (ch = in.get(); !in.eof(); ch = in.get())
+		{
+			if (ch == '\n')
+			{
+				if (!fieldWidthSet)
+				{
+					fieldWidth = i;
+					fieldWidthSet = true;
+				}
+			}
+			else
+			{
+				if (ch == '@')
+				{
+					startpos.y = i / fieldWidth;
+					startpos.x = i - startpos.y * fieldWidth;
+				}
+				field.push_back(ch);
+				i++;
+			}
+		}
+	}
+
+	// Scan for number of keys in the maze
+	nKeys = 0; // in case not initialized by caller
+	for (char c : field)
+	{
+		if (c >= 97 && c < 123)
+		{
+			nKeys++;
+		}
+	}
+
+}
+void Day18a()
+{
+	// Initialize
+	std::vector<char> field;
+	int fieldWidth;
+	Pos startpos;
+	int nKeys;
+	LoadField("Resources/day18input.txt", field, fieldWidth, startpos, nKeys);
+
+	// BFS to find all keys
+	std::queue<Pos> queue;
+	std::set<std::string> visited;
+	queue.push(startpos);
+	visited.insert(SerializeIntoString(startpos));
+	
+
+	while (!queue.empty())
+	{
+		Pos currentpos = queue.front(); queue.pop();
+		std::vector<Pos> neighbors = FindNeighbors(field, fieldWidth, currentpos, visited);
+		for (Pos p : neighbors)
+		{
+			if (p.keys.size() == nKeys)
+			{
+				std::cout << "Last step to: (" << p.x << "," << p.y << "), keys = " << p.keys << std::endl;
+				std::cout << "All keys obtained, " << p.n << "steps taken.";
+				while (!queue.empty()) queue.pop();
+				break;
+			}
+			visited.insert(SerializeIntoString(p));
+			queue.push(p);
+		}
+	}
+}
 
 int main()
 {
@@ -117,7 +258,7 @@ int main()
 	// So, for example, to run Day 7 challenge:
 	// --> save data to "Resources/day7ainput.txt" and "Resources/day7binput.txt"
 	// --> run the functions Day7a(); and/or Day7b(); in main()
-	Day18();
+	Day18a();
 	
 	while (!_kbhit());
 	return 0;
