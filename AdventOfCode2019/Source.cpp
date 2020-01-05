@@ -31,7 +31,6 @@ void DebugPrint(std::vector<char> field, const int& fieldWidth, const std::vecto
 	}
 	PrintField(field, fieldWidth);
 }
-
 void DebugPrintWithActiveQueue(std::vector<char> field, const int& fieldWidth, const Pos& pos, std::queue<Pos> queue)
 {
 	for (char& c : field)
@@ -43,10 +42,10 @@ void DebugPrintWithActiveQueue(std::vector<char> field, const int& fieldWidth, c
 	{
 		Pos p = queue.front(); queue.pop();
 		field[p.y * fieldWidth + p.x] = '$';
+		std::cout << "(" << p.x << "," << p.y << "), ";
 	}
 	PrintField(field, fieldWidth);
 }
-
 void DebugPrintWithActiveQueue(std::vector<char> field, const int& fieldWidth, const std::vector<Pos>& pos, std::queue<std::vector<Pos>> queue)
 {
 	for (char& c : field)
@@ -67,8 +66,6 @@ void DebugPrintWithActiveQueue(std::vector<char> field, const int& fieldWidth, c
 	}
 	PrintField(field, fieldWidth);
 }
-
-
 std::string SerializeIntoString(Pos pos) // used to enable a hash lookup of visited nodes in the BFS
 {
 	std::sort(pos.keys.begin(), pos.keys.end());
@@ -178,7 +175,7 @@ std::vector<Pos> LoadField(std::string filename, std::vector<char>& field, int& 
 }
 void Day18a()
 {
-	bool DEBUG = true;
+	bool DEBUG = false;
 	// Initialize
 	std::vector<char> field;
 	int fieldWidth;
@@ -201,12 +198,11 @@ void Day18a()
 	queue.push(startpos);
 	visited.insert(SerializeIntoString(startpos));
 	
-
 	while (!queue.empty())
 	{
 		Pos currentpos = queue.front(); queue.pop();
 		std::vector<Pos> neighbors = FindNeighborsNoHovering(field, fieldWidth, currentpos, visited);
-		
+
 		if (DEBUG)
 		{
 			std::cout << "\nMain loop. \n==========\nFront queue position taken. ";
@@ -224,13 +220,12 @@ void Day18a()
 			else
 			{
 				std::cout << "Found no accessible neighbors. ";
-				std::cout<<"Nothing added to the queue.\n";
+				std::cout << "Nothing added to the queue.\n";
 			}
-
 			std::cout << "Current key string: " << currentpos.keys << '\n';
 			DebugPrintWithActiveQueue(field, fieldWidth, currentpos, queue);
 		}
-		
+
 		for (Pos p : neighbors)
 		{
 			if (p.keys.size() == nKeys)
@@ -242,149 +237,311 @@ void Day18a()
 			}
 			visited.insert(SerializeIntoString(p));
 			queue.push(p);
-			
+
 			if (DEBUG)
 			{
 				std::cout << "Adding serialized position to the visited set: " << SerializeIntoString(p);
 				std::cout << "; New queue size: " << queue.size() << '\n';
+				std::cin.get();
 			}
 		}
-		std::cin.get();
 	}
 }
-std::string SerializeIntoString(std::vector<Pos> startPositions) // used to enable a hash lookup of visited nodes in the BFS
+
+struct KeyDependencies
 {
+	std::string globalKeys;
+	int stepAccumulator = 0; // add # steps everytime a key is found by a position in the queue
+	std::map<char, std::string> keyQuarter;
+	std::map<char, std::string> doorQuarter;
+	std::map<std::string, std::string> dependencyKeysMap;
+};
+std::string GetDependencyKeys(char door, KeyDependencies keyDependencies)
+{
+	std::string testString = keyDependencies.dependencyKeysMap[keyDependencies.doorQuarter[door]];
+	auto indexOfDoor = testString.find(door);
+	testString = testString.substr(0, indexOfDoor);
 	std::string outputString;
-	for (Pos p : startPositions)
+	for (char c : testString)
 	{
-		std::sort(p.keys.begin(), p.keys.end());
-		outputString += p.keys;
-		outputString.append(std::to_string(p.x));
-		outputString.append("_");
-		outputString.append(std::to_string(p.y));
-		outputString.append(";");
+		if (c > 96 && c <= 122) outputString.push_back(c);
 	}
 	return outputString;
 }
-std::vector<std::vector<Pos>> FindNeighborsNoHovering(	const std::vector<char>& field, 
-														const int& fieldWidth, 
-														const std::vector<Pos>& currentPositions, 
-														const std::set<std::string>& visited,
-														std::string& globalKeys )
+bool PositionOwnsAllDependencyKeys(const Pos& pos, std::string dependencyKeys)
 {
-	std::vector<std::vector<Pos>> availablePositionVectors;
-	for (size_t i = 0; i < currentPositions.size(); i++)
+	for (char c : dependencyKeys)
 	{
-		Pos pos = currentPositions[i];
-		//std::vector<Pos> availablePositions;
-		int newX, newY;
-		for (int dir = 1; dir < 5; dir++)
+		if (pos.keys.find(c) == std::string::npos)
 		{
-			if (dir == 1) // NORTH
-			{
-				newX = pos.x;
-				newY = pos.y - 1;
-			}
-			else if (dir == 2) // SOUTH
-			{
-				newX = pos.x;
-				newY = pos.y + 1;
-			}
-			else if (dir == 3) // WEST
-			{
-				newX = pos.x - 1;
-				newY = pos.y;
-			}
-			else if (dir == 4) // EAST
-			{
-				newX = pos.x + 1;
-				newY = pos.y;
-			}
+			return false;
+		}
+	}
+	return true;
+}
+std::string SerializeIntoStringB(Pos pos, const KeyDependencies& keyDependencies) // used to enable a hash lookup of visited nodes in the BFS
+{
+	std::string outString = keyDependencies.globalKeys;
+	std::sort(outString.begin(), outString.end());
+	//std::sort(pos.keys.begin(), pos.keys.end());
+	outString.append(std::to_string(pos.x));
+	outString.append("_");
+	outString.append(std::to_string(pos.y));
+	return outString;
+}
 
-			char ch = field[newY * fieldWidth + newX];
-			if ((ch == '#') || // If neighbor is [wall] or [door without key] don't include
-				(ch > 64 && ch <= 90 && (globalKeys.find(std::tolower(ch)) == std::string::npos)))
-			{
-			}
-			else // Else, include neighbor, if not already visited, add key if found
-			{
-				std::vector<Pos> newPositionsVec = currentPositions;
+std::vector<Pos> FindNeighborsWithHovering(
+	const std::vector<char>& field,
+	const int& fieldWidth,
+	Pos& pos,
+	const std::set<std::string>& visited,
+	KeyDependencies& keyDependencies)
+{
+	std::cout << "Finding neighbors for: (" << pos.x << "," << pos.y << '\n';
+	std::vector<Pos> availablePositions;
+	int newX, newY;
+	//for (int dir = 1; dir < 5; dir++)
+	for (int dir = 4; dir > 0; dir--)
+	{
+		if (dir == 1) // NORTH
+		{
+			newX = pos.x;
+			newY = pos.y - 1;
+		}
+		else if (dir == 2) // SOUTH
+		{
+			newX = pos.x;
+			newY = pos.y + 1;
+		}
+		else if (dir == 3) // WEST
+		{
+			newX = pos.x - 1;
+			newY = pos.y;
+		}
+		else if (dir == 4) // EAST
+		{
+			newX = pos.x + 1;
+			newY = pos.y;
+		}
 
-				std::string newkeys = pos.keys;
-				if (ch > 96 && ch <= 122 && (globalKeys.find(ch) == std::string::npos)) // If new global key is found, it's to your credit and your keyring is updated to global
+		char ch = field[newY * fieldWidth + newX];
+		if (ch == '#') // If neighbor is [wall] don't include
+		{
+			std::cout << "Dir "<<dir<<", wall detected\n";
+			// DISMISS
+		}
+		else if (ch > 64 && ch <= 90) // If neighbor is [door]
+		{
+			std::cout << "Dir " << dir << ", door detected. ";
+			char door = ch;
+			char doorkey = std::tolower(ch);
+			// Update keyDependencies
+			if (keyDependencies.doorQuarter.find(door) == keyDependencies.doorQuarter.end()) // door has not been opened before
+			{
+				if (keyDependencies.globalKeys.find(doorkey) != std::string::npos)	//(doorkey x is in globalkeys)
 				{
-					globalKeys += ch;
-					newkeys += ch;
+					keyDependencies.doorQuarter[door] = pos.quarter; // add to doorQuarter map
+					if (keyDependencies.keyQuarter[doorkey] != pos.quarter) // key was found in another quarter
+					{
+						keyDependencies.dependencyKeysMap[pos.quarter] += door;
+						keyDependencies.dependencyKeysMap[keyDependencies.keyQuarter[doorkey]] += doorkey;
+					}
 				}
-				else if (ch > 96 && ch <= 122 && (pos.keys.find(ch) == std::string::npos)) // You encounter a previously found key
+			}
+			// Check if new position (door) is available to this current postion instance (pos) that was taken off the BFS queue
+			if (keyDependencies.globalKeys.find(doorkey) != std::string::npos)	//(doorkey x is in globalkeys)
+			{
+				std::string dependencyKeys = GetDependencyKeys(door, keyDependencies);
+				if (keyDependencies.keyQuarter[doorkey] == pos.quarter) //(doorkey was found in own quarter)
 				{
-					newkeys += ch;
+					if (pos.keys.find(doorkey) != std::string::npos) // pos owns own quarter's matching key)
+					{
+						std::cout << "Can open with local key, owns all local dep-keys and local key:";
+						// OPEN & PASS if not already visited
+						Pos newpos = { newX,newY,pos.n + 1, pos.keys,pos.quarter };
+						if (visited.find(SerializeIntoStringB(newpos, keyDependencies)) == visited.end())
+						{
+							std::cout << "->PASS (not visited earlier in this status)\n";
+							availablePositions.push_back(newpos);
+						}
+						else
+						{
+							std::cout << "->DISMISS (visited earlier in this status)\n";
+						}
+					}
+					else
+					{
+						std::cout << "Position Dismissed, doen'st have dependency keys and/or local key\n";
+						// DISMISS
+					}
 				}
-				Pos newpos = { newX,newY,pos.n + 1, newkeys ,pos.quarter};
-				newPositionsVec[i] = newpos;
-				if (visited.find(SerializeIntoString(newPositionsVec)) == visited.end())
+				else if (PositionOwnsAllDependencyKeys(pos, dependencyKeys)) //position owns all the dependencykeys for door 
 				{
-					availablePositionVectors.push_back(newPositionsVec);
+					std::cout << "Can open with global key AND owns all local dep-keys ";
+					// OPEN & PASS if not already visited
+					Pos newpos = { newX,newY,pos.n + 1, pos.keys,pos.quarter };
+					if (visited.find(SerializeIntoStringB(newpos, keyDependencies)) == visited.end())
+					{
+						std::cout << "->PASS, because not visited earlier\n";
+						availablePositions.push_back(newpos);
+					}
+					else
+					{
+						std::cout << "->DISMISS, new position has been visited earlier in this status\n";
+					}
 				}
+				else //(= > position does NOT owns all the dependencykeys for door X)
+				{
+					std::cout << "DISMISS, position does not own all the dependency keys for door.\n";
+					// DISMISS
+				}
+			}
+			else //(=>doorkey x is not in globalkeys)
+			{
+				// HOVER
+				availablePositions.push_back(pos);
+				//####START DEBUG STATEMENT#####
+				std::cout << "HOVERING, no global key yet. ";
+				std::cout << "Pos " << pos.quarter + ": " + SerializeIntoStringB(pos, keyDependencies) << "), nPos = " << pos.n << "\n";
+				//####END DEBUG STATEMENT#####
+			}
+		}
+		else if (ch > 96 && ch <= 122) //(neighbor is key) 
+		{
+			std::cout << "Dir " << dir << ", key detected. ";
+			char key = ch;
+			keyDependencies.keyQuarter[key] = pos.quarter;
+			std::string newlocalkeys = pos.keys;
+
+			if (pos.keys.find(key) == std::string::npos) // If new (local) key is found, add it to newpos.keys
+			{
+				newlocalkeys += key; // This will retain the order in which the keys are found. We sort when serializing
+				//####START DEBUG STATEMENT#####
+				std::cout << "Local key added [" << ch <<"] to ("<<newlocalkeys<<")." ; 
+				//####END DEBUG STATEMENT#####
+				if (keyDependencies.globalKeys.find(key) == std::string::npos) // if this key was not found before, add it to the keyDependencies struct
+				{
+					keyDependencies.globalKeys += key;
+					keyDependencies.stepAccumulator += pos.n + 1;
+					pos.n = -1; // reset step counter of the new position 
+					//####START DEBUG STATEMENT#####
+					std::cout << "Fist global find, added [" << ch << "] to (" << keyDependencies.globalKeys << "), total steps: " << keyDependencies.stepAccumulator << "\n";
+					//####END DEBUG STATEMENT#####
+				}
+				else
+				{
+					std::cout << '\n';
+				}
+			}
+			else
+			{
+				std::cout << "Already found, not added.";
+			}
+			Pos newpos = { newX,newY,pos.n + 1, newlocalkeys,pos.quarter };
+			if (visited.find(SerializeIntoStringB(newpos, keyDependencies)) == visited.end())
+			{
+				std::cout << "PASS, not visited earlier\n";
+				availablePositions.push_back(newpos);
+			}
+			else
+			{
+				std::cout << "NO PASS, visited earlier in this status.\n";
+			}
+		}
+		else // neighbor is free position
+		{
+			std::cout << "Dir " << dir << ", free passage, ";
+			// PASS if not already visited
+			Pos newpos = { newX,newY,pos.n + 1, pos.keys,pos.quarter };
+			if (visited.find(SerializeIntoStringB(newpos, keyDependencies)) == visited.end())
+			{
+				std::cout << " not visited earlier so pass.\n";
+				availablePositions.push_back(newpos);
+			}
+			else
+			{
+				std::cout << " but visited earlier so Dismissing.\n";
 			}
 		}
 	}
-	return availablePositionVectors;
+	
+	//std::cin.get();
+	//ClearScreen();
+	return availablePositions;
+}
+int TimesInQueue(Pos p, std::queue<Pos> queue)
+{
+	int count = 0;
+	while (!queue.empty())
+	{
+		Pos q = queue.front(); queue.pop();
+		if (p == q) count++;
+	}
+	return count;
 }
 void Day18b()
 {
 	bool DEBUG = true;
+
 	// Initialize
 	std::vector<char> field;
 	int fieldWidth;
 	int nKeys;
+	KeyDependencies keyDependencies;
 	std::vector<Pos> startPositions = LoadField("Resources/day18binput.txt", field, fieldWidth, nKeys);
-	std::string globalKeys;
-	
+	int maxQueueSize = 0;
+
+	// Initialize queue and visited vector for BFS
+	std::queue<Pos> queue;
+	std::set<std::string> visited;
+	for (auto s : startPositions)
+	{
+		queue.push(s);
+		visited.insert(SerializeIntoStringB(s, keyDependencies));
+	}
+
 	if (DEBUG)
 	{
 		std::cout << "STARTING GRID\n";
 		DebugPrint(field, fieldWidth, startPositions);
 		std::cout << "\nMOVEMENT TRACKING\n";
 	}
-	   
+
+
 	// BFS to find all keys
-	std::queue<std::vector<Pos>> queue;
-	std::set<std::string> visited;
-	queue.push(startPositions);
-	visited.insert(SerializeIntoString(startPositions));
-
-
 	while (!queue.empty())
 	{
-		std::vector<Pos> currentPositions = queue.front(); 
-		queue.pop();
-		std::vector<std::vector<Pos>> neighborVecs = FindNeighborsNoHovering(field, fieldWidth, currentPositions, visited, globalKeys);
-
+		maxQueueSize = max(maxQueueSize, queue.size());
+		Pos currentpos = queue.front(); queue.pop();
+		std::vector<Pos> neighbors = FindNeighborsWithHovering(field, fieldWidth, currentpos, visited, keyDependencies);
+		
 		if (DEBUG)
 		{
-			ClearScreen();
-			DebugPrint(field, fieldWidth, currentPositions);
+			//ClearScreen();
+			DebugPrint(field, fieldWidth, currentpos);
+			//std::cin.get();
+			//ClearScreen();
 			std::cout << "\nMain loop. \n==========\nFront queue position taken. ";
 			std::cout << "New queue size: " << queue.size() << '\n';
 			std::cout << "Current positions investigated:\n";
-			for (Pos p : currentPositions)
+			//for (Pos p : currentPositions)
 			{
-				std::cout<< "(" << p.x << ", " << p.y << "),n=" << p.n << ", "<<p.quarter<<", pos.keys="<<p.keys<<".\n";
+				std::cout << "(" << currentpos.x << ", " << currentpos.y << "),n=" << currentpos.n << ", " << currentpos.quarter << ", pos.keys=" << currentpos.keys << "\n";
 			}
-				
-			if (neighborVecs.size() > 0)
+
+			if (neighbors.size() > 0)
 			{
-				std::cout << "Found " << neighborVecs.size() << " accessible neighbor vectors:\n";
-				for (std::vector<Pos> v : neighborVecs)
-				{
-					for (Pos p : v)
+				std::cout << "Found " << neighbors.size() << " accessible neighbor positions:\n";
+				//for (std::vector<Pos> v : neighborVecs)
+				//{
+					for (Pos p : neighbors)
 					{
 						std::cout << "(" << p.x << ", " << p.y << "),n=" << p.n << ", " << p.quarter << ", pos.keys=" << p.keys << ".\n";
 					}
-					std::cout << "------------------------------";
-				}
-				std::cout << neighborVecs.size() << " new position vectors added to the queue.\n";
+					std::cout << neighbors.size() << " new position vectors added to the queue.\n";
+					std::cout << "------------------------------\n";
+				//}
+				
 			}
 			else
 			{
@@ -392,39 +549,54 @@ void Day18b()
 				std::cout << "Nothing added to the queue.\n";
 			}
 
-			std::cout << "Current global key string: " << globalKeys << '\n';
-			DebugPrintWithActiveQueue(field, fieldWidth, currentPositions, queue);
+			std::cout << "Current global key string: " << keyDependencies.globalKeys << '\n';
+			std::cout << "Current status of queue:\n";
+			DebugPrintWithActiveQueue(field, fieldWidth, currentpos, queue);
 		}
-			   		 
-		for (std::vector<Pos> pVec : neighborVecs)
+		
+		
+		
+		for (Pos p : neighbors)
 		{
-			
-			if (globalKeys.size() == nKeys)
+			if (keyDependencies.globalKeys.size() == nKeys)
 			{
-				int result = 0;
-				std::string check;
-				for (Pos p : currentPositions)
-				{
-					result += p.n;
-					check += p.keys;
-				}
-				//std::cout << "Last step to: (" << p.x << "," << p.y << "), keys = " << p.keys << std::endl;
-				if (check.size() == nKeys)
-				{
-					std::cout << "All keys obtained, " << result << "steps taken.";
-					while (!queue.empty()) queue.pop();
-					break;
-				}
+				std::cout << "Last step to: (" << p.x << "," << p.y << "), keys = " << keyDependencies.globalKeys << std::endl;
+				std::cout << "All keys obtained, " << keyDependencies.stepAccumulator << "steps taken.";
+				while (!queue.empty()) queue.pop();
+				break;
 			}
-			visited.insert(SerializeIntoString(pVec));
-			queue.push(pVec);
+			auto pstr = SerializeIntoStringB(p, keyDependencies);
+			if (visited.find(pstr) == visited.end())
+			{
+				visited.insert(pstr);
+				//####START DEBUG STATEMENT#####
+				if (DEBUG)
+				{
+					std::cout << "New position added to visited set" << p.quarter + "_" + pstr << "\n";
+				}
+				//####END DEBUG STATEMENT#####
+			}
+			//if (!(queue.back() == p))
+			//if (TimesInQueue(p,queue)<2)
+			{
+				queue.push(p);
+			}
 		}
 		if (DEBUG)
 		{
+			std::cout << "Visited set: ";
+			for (auto a : visited)
+			{
+				std::cout << a << ",";
+			}
+			std::cout << '\n';
 			std::cin.get();
+			ClearScreen();
 		}
-		
+	
 	}
+	
+
 
 }
 
