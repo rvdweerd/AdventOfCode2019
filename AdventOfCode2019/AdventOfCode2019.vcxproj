@@ -151,6 +151,7 @@
     <ClCompile Include="Source.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Day18b_MUTEX_HOVER.h" />
     <ClInclude Include="HelperFunctions.h" />
     <ClInclude Include="IncludesUsed.h" />
     <ClInclude Include="IntCode.h" />
@@ -173,6 +174,7 @@
     <Text Include="Resources\day15test3.txt" />
     <Text Include="Resources\day16input.txt" />
     <Text Include="Resources\day17input.txt" />
+    <Text Include="Resources\day18binput.txt" />
     <Text Include="Resources\day18input.txt" />
     <Text Include="Resources\day1input.txt" />
     <Text Include="Resources\day2input.txt" />
