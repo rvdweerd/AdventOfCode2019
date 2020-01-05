@@ -28,4 +28,5 @@
 #include <iostream>
 #include "SimpGraph.h"
 #include <queue>
+#include <cassert>
 

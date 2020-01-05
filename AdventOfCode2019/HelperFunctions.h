@@ -90,6 +90,19 @@ float getClockAngle(std::pair<int, int> q)
 		return 0;
 	}
 }
+bool StringHasDuplicateCharacters(const std::string& str)
+{
+	char count[256] = { 0 };
+	for (char c : str)
+	{
+		count[int(c)]++;
+		if (count[int(c)] > 1)
+		{
+			return true;
+		}
+	}
+	return false;
+}
 enum class Direction
 {
 	UP = 0,

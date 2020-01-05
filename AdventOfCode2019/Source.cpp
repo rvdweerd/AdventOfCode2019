@@ -281,9 +281,10 @@ bool PositionOwnsAllDependencyKeys(const Pos& pos, std::string dependencyKeys)
 }
 std::string SerializeIntoStringB(Pos pos, const KeyDependencies& keyDependencies) // used to enable a hash lookup of visited nodes in the BFS
 {
-	std::string outString = keyDependencies.globalKeys;
-	std::sort(outString.begin(), outString.end());
-	//std::sort(pos.keys.begin(), pos.keys.end());
+	//std::string outString = keyDependencies.globalKeys;
+	//std::sort(outString.begin(), outString.end());
+	std::string outString = pos.keys;
+	std::sort(pos.keys.begin(), pos.keys.end());
 	outString.append(std::to_string(pos.x));
 	outString.append("_");
 	outString.append(std::to_string(pos.y));
@@ -294,12 +295,15 @@ std::vector<Pos> FindNeighborsWithHovering(
 	const std::vector<char>& field,
 	const int& fieldWidth,
 	Pos& pos,
-	const std::set<std::string>& visited,
+	std::set<std::string>& visited,
 	KeyDependencies& keyDependencies)
 {
+	KeyDependencies keyDependencies_orig = keyDependencies;
+	Pos pos_orig = pos;
 	std::cout << "Finding neighbors for: (" << pos.x << "," << pos.y << '\n';
 	std::vector<Pos> availablePositions;
 	int newX, newY;
+	int countReset = 0;
 	//for (int dir = 1; dir < 5; dir++)
 	for (int dir = 4; dir > 0; dir--)
 	{
@@ -336,30 +340,36 @@ std::vector<Pos> FindNeighborsWithHovering(
 			char door = ch;
 			char doorkey = std::tolower(ch);
 			// Update keyDependencies
-			if (keyDependencies.doorQuarter.find(door) == keyDependencies.doorQuarter.end()) // door has not been opened before
+			if (keyDependencies_orig.doorQuarter.find(door) == keyDependencies_orig.doorQuarter.end()) // door has not been opened before
 			{
-				if (keyDependencies.globalKeys.find(doorkey) != std::string::npos)	//(doorkey x is in globalkeys)
+				if (keyDependencies_orig.globalKeys.find(doorkey) != std::string::npos)	//(doorkey x is in globalkeys)
 				{
-					keyDependencies.doorQuarter[door] = pos.quarter; // add to doorQuarter map
-					if (keyDependencies.keyQuarter[doorkey] != pos.quarter) // key was found in another quarter
+					keyDependencies.doorQuarter[door] = pos_orig.quarter; // add to doorQuarter map
+					if (keyDependencies_orig.keyQuarter[doorkey] != pos_orig.quarter) // key was found in another quarter
 					{
-						keyDependencies.dependencyKeysMap[pos.quarter] += door;
+						keyDependencies.dependencyKeysMap[pos_orig.quarter] += door;
 						keyDependencies.dependencyKeysMap[keyDependencies.keyQuarter[doorkey]] += doorkey;
+						keyDependencies_orig.dependencyKeysMap[pos_orig.quarter] += door;
+						keyDependencies_orig.dependencyKeysMap[keyDependencies.keyQuarter[doorkey]] += doorkey;
+						assert(!StringHasDuplicateCharacters(keyDependencies.dependencyKeysMap[keyDependencies.keyQuarter[doorkey]]));
+						assert(!StringHasDuplicateCharacters(keyDependencies.dependencyKeysMap[pos_orig.quarter]));
+						assert(!StringHasDuplicateCharacters(keyDependencies_orig.dependencyKeysMap[keyDependencies.keyQuarter[doorkey]]));
+						assert(!StringHasDuplicateCharacters(keyDependencies_orig.dependencyKeysMap[pos_orig.quarter]));
 					}
 				}
 			}
 			// Check if new position (door) is available to this current postion instance (pos) that was taken off the BFS queue
-			if (keyDependencies.globalKeys.find(doorkey) != std::string::npos)	//(doorkey x is in globalkeys)
+			if (keyDependencies_orig.globalKeys.find(doorkey) != std::string::npos)	//(doorkey x is in globalkeys)
 			{
 				std::string dependencyKeys = GetDependencyKeys(door, keyDependencies);
-				if (keyDependencies.keyQuarter[doorkey] == pos.quarter) //(doorkey was found in own quarter)
+				if (keyDependencies_orig.keyQuarter[doorkey] == pos_orig.quarter) //(doorkey was found in own quarter)
 				{
-					if (pos.keys.find(doorkey) != std::string::npos) // pos owns own quarter's matching key)
+					if (pos_orig.keys.find(doorkey) != std::string::npos) // pos owns own quarter's matching key)
 					{
 						std::cout << "Can open with local key, owns all local dep-keys and local key:";
 						// OPEN & PASS if not already visited
-						Pos newpos = { newX,newY,pos.n + 1, pos.keys,pos.quarter };
-						if (visited.find(SerializeIntoStringB(newpos, keyDependencies)) == visited.end())
+						Pos newpos = { newX,newY,pos.n + 1, pos_orig.keys,pos.quarter };
+						if (visited.find(SerializeIntoStringB(newpos, keyDependencies_orig)) == visited.end())
 						{
 							std::cout << "->PASS (not visited earlier in this status)\n";
 							availablePositions.push_back(newpos);
@@ -379,8 +389,8 @@ std::vector<Pos> FindNeighborsWithHovering(
 				{
 					std::cout << "Can open with global key AND owns all local dep-keys ";
 					// OPEN & PASS if not already visited
-					Pos newpos = { newX,newY,pos.n + 1, pos.keys,pos.quarter };
-					if (visited.find(SerializeIntoStringB(newpos, keyDependencies)) == visited.end())
+					Pos newpos = { newX,newY,pos.n + 1, pos_orig.keys,pos_orig.quarter };
+					if (visited.find(SerializeIntoStringB(newpos, keyDependencies_orig)) == visited.end())
 					{
 						std::cout << "->PASS, because not visited earlier\n";
 						availablePositions.push_back(newpos);
@@ -402,7 +412,7 @@ std::vector<Pos> FindNeighborsWithHovering(
 				availablePositions.push_back(pos);
 				//####START DEBUG STATEMENT#####
 				std::cout << "HOVERING, no global key yet. ";
-				std::cout << "Pos " << pos.quarter + ": " + SerializeIntoStringB(pos, keyDependencies) << "), nPos = " << pos.n << "\n";
+				std::cout << "Pos " << pos.quarter + ": " + SerializeIntoStringB(pos, keyDependencies_orig) << "), nPos = " << pos.n << "\n";
 				//####END DEBUG STATEMENT#####
 			}
 		}
@@ -410,42 +420,44 @@ std::vector<Pos> FindNeighborsWithHovering(
 		{
 			std::cout << "Dir " << dir << ", key detected. ";
 			char key = ch;
-			keyDependencies.keyQuarter[key] = pos.quarter;
-			std::string newlocalkeys = pos.keys;
+			keyDependencies.keyQuarter[key] = pos_orig.quarter;
+			std::string newlocalkeys = pos_orig.keys;
 
-			if (pos.keys.find(key) == std::string::npos) // If new (local) key is found, add it to newpos.keys
+			if (pos_orig.keys.find(key) == std::string::npos) // If new (local) key is found, add it to newpos.keys
 			{
 				newlocalkeys += key; // This will retain the order in which the keys are found. We sort when serializing
 				//####START DEBUG STATEMENT#####
 				std::cout << "Local key added [" << ch <<"] to ("<<newlocalkeys<<")." ; 
 				//####END DEBUG STATEMENT#####
-				if (keyDependencies.globalKeys.find(key) == std::string::npos) // if this key was not found before, add it to the keyDependencies struct
+				if (keyDependencies_orig.globalKeys.find(key) == std::string::npos) // if this key was not found before, add it to the keyDependencies struct
 				{
 					keyDependencies.globalKeys += key;
+					assert(!StringHasDuplicateCharacters(keyDependencies.globalKeys));
 					keyDependencies.stepAccumulator += pos.n + 1;
-					pos.n = -1; // reset step counter of the new position 
+					countReset = pos.n+1; // reset step counter of the new position HERE IS A PROBLEM!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 					//####START DEBUG STATEMENT#####
-					std::cout << "Fist global find, added [" << ch << "] to (" << keyDependencies.globalKeys << "), total steps: " << keyDependencies.stepAccumulator << "\n";
+					std::cout << "Fist global find, added [" << ch << "] to (" << keyDependencies.globalKeys << "), add steps: "<<countReset<<", total steps: " << keyDependencies.stepAccumulator ;
 					//####END DEBUG STATEMENT#####
 				}
 				else
 				{
-					std::cout << '\n';
+					//std::cout << '\n';
 				}
 			}
 			else
 			{
-				std::cout << "Already found, not added.";
+				std::cout << "Key already found, not added.";
 			}
-			Pos newpos = { newX,newY,pos.n + 1, newlocalkeys,pos.quarter };
-			if (visited.find(SerializeIntoStringB(newpos, keyDependencies)) == visited.end())
+			Pos newpos = { newX,newY,pos.n + 1-countReset, newlocalkeys,pos_orig.quarter };
+			if (visited.find(SerializeIntoStringB(newpos, keyDependencies_orig)) == visited.end())
 			{
-				std::cout << "PASS, not visited earlier\n";
+				std::cout << "->PASS, not visited earlier\n";
 				availablePositions.push_back(newpos);
+				visited.insert(SerializeIntoStringB(newpos, keyDependencies));
 			}
 			else
 			{
-				std::cout << "NO PASS, visited earlier in this status.\n";
+				std::cout << "->DISMISS, visited earlier in this status.\n";
 			}
 		}
 		else // neighbor is free position
@@ -453,9 +465,9 @@ std::vector<Pos> FindNeighborsWithHovering(
 			std::cout << "Dir " << dir << ", free passage, ";
 			// PASS if not already visited
 			Pos newpos = { newX,newY,pos.n + 1, pos.keys,pos.quarter };
-			if (visited.find(SerializeIntoStringB(newpos, keyDependencies)) == visited.end())
+			if (visited.find(SerializeIntoStringB(newpos, keyDependencies_orig)) == visited.end())
 			{
-				std::cout << " not visited earlier so pass.\n";
+				std::cout << " not visited earlier in this setup so pass.\n";
 				availablePositions.push_back(newpos);
 			}
 			else
@@ -536,7 +548,7 @@ void Day18b()
 				//{
 					for (Pos p : neighbors)
 					{
-						std::cout << "(" << p.x << ", " << p.y << "),n=" << p.n << ", " << p.quarter << ", pos.keys=" << p.keys << ".\n";
+						std::cout << "(" << p.x << ", " << p.y << "),n=" << p.n << ", " << p.quarter << ", pos.keys=" << p.keys << "\n";
 					}
 					std::cout << neighbors.size() << " new position vectors added to the queue.\n";
 					std::cout << "------------------------------\n";
@@ -550,7 +562,7 @@ void Day18b()
 			}
 
 			std::cout << "Current global key string: " << keyDependencies.globalKeys << '\n';
-			std::cout << "Current status of queue:\n";
+			std::cout << "Current status of queue: (<--front    back-->)\n";
 			DebugPrintWithActiveQueue(field, fieldWidth, currentpos, queue);
 		}
 		
@@ -569,7 +581,7 @@ void Day18b()
 			if (visited.find(pstr) == visited.end())
 			{
 				visited.insert(pstr);
-				//####START DEBUG STATEMENT#####
+				//####START DEBUG STATEMENT#####  
 				if (DEBUG)
 				{
 					std::cout << "New position added to visited set" << p.quarter + "_" + pstr << "\n";
