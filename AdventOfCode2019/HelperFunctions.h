@@ -14,6 +14,7 @@ struct Pos
 	int n=0;
 	std::string keys;
 	std::string quarter;
+	std::string path;
 	friend bool operator==(const Pos& p1, const Pos& p2)
 	{
 		return (p1.x == p2.x) && (p1.y == p2.y);

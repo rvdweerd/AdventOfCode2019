@@ -56,6 +56,12 @@
     <ClInclude Include="Day18b_MUTEX_HOVER.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Day18_Old Working.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Day18HelperFunctions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="Resources\day11input.txt">
