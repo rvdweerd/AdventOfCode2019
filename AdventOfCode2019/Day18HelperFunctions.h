@@ -1,5 +1,9 @@
 #pragma once
 #include "IncludesUsed.h"
+static bool route_compare(std::pair<std::string, int> a, std::pair<std::string, int> b)
+{
+	return (a.second < b.second);
+}
 struct Coi2
 {
 	int x;
@@ -7,16 +11,27 @@ struct Coi2
 };
 struct Key
 {
-	char key;
+	char keychar;
 	Coi2 coordinates;
 };
 struct KeyPosition
 {
-	char key;
+	Key key;
 	std::string keys;
 	int steps = 0;
-	Coi2 coordinates;
 	std::string path;
+};
+struct CacheInfo
+{
+	std::vector<std::pair<Key, int>> cachedAvailablePositions;
+	int cumulativeSteps;
+};
+struct DiagnosticData
+{
+	int loopCount_OuterBFS=0;
+	int loopCount_InnerBFS=0;
+	int MaxQueueSize_OuterBFS=0;
+	int MaxQueueSize_InnerBFS=0;
 };
 struct Vei2
 {
@@ -37,8 +52,7 @@ std::string Hash(const KeyPosition& p) // used to enable a hash lookup of visite
 	std::string keys = p.keys;
 	std::sort(keys.begin(), keys.end());
 	std::string Hash = "";
-	Hash +=p.key;
-	Hash.append("_");
+	Hash +=p.key.keychar;
 	Hash.append(keys);
 	return Hash;
 }
@@ -98,7 +112,7 @@ void PrintField(std::vector<char> field, const int& fieldWidth)
 	for (int i = 0; i < (int)field.size(); i++)
 	{
 		if (i % fieldWidth == 0) std::cout << '\n';
-		if ((i > 2 * fieldWidth && (i < (int)field.size() - 2 * fieldWidth)) && //away from top/bottom
+		/*if ((i > 2 * fieldWidth && (i < (int)field.size() - 2 * fieldWidth)) && //away from top/bottom
 			(field[i - fieldWidth] == '.' || field[i - fieldWidth] > 65) &&
 			(field[i + fieldWidth] == '.' || field[i + fieldWidth] > 65) && // above and below is corridor
 			(field[i] == '#')) // cell is barrier
@@ -117,17 +131,16 @@ void PrintField(std::vector<char> field, const int& fieldWidth)
 		{
 			std::cout << ' ';
 		}
-		else
+		else*/
 		{
 			std::cout << field[i];
 		}
 	}
-	std::cout << "\n";
 }
 std::vector<Vei2> GetNewCoordinates(Vei2& curPos, const std::vector<char>& field, const int& fieldWidth, std::set<std::string>& visited)
 {
 	std::vector<Vei2> NewCoordinates;
-	for (unsigned dir = 1; dir < 5; dir++)
+	for (unsigned dir = 4; dir >0; dir--)
 	{
 		Vei2 newPos = curPos;
 		if (dir == 1) newPos.coord[1]--;		// NORTH
@@ -152,43 +165,63 @@ std::vector<std::pair<Key,int>> GetAvailableKeyPositions(
 	const std::vector<char>& field, 
 	const int& fieldWidth, 
 	std::set<std::string>& visitedKeys,
-	std::map<std::string, std::vector<std::pair<Key, int>>>& cache )
+	std::map<std::string, CacheInfo>& cache,
+	DiagnosticData& diagData )
 {
-	std::vector<std::pair<Key, int>> newKeyOptions;
+	std::vector<std::pair<Key, int>> availableKeyOptions;
 
-	Vei2 p0 = { {curKeyPos.coordinates.x,curKeyPos.coordinates.y},curKeyPos.keys,curKeyPos.steps};
-	std::set<std::string> visited;
-	visited.insert(Hash(p0));
-	std::queue<Vei2> queue;
-	queue.push(p0);
-
-	while (!queue.empty())
+	auto cache_it = cache.find(Hash(curKeyPos));
+	if (cache_it == cache.end())
 	{
-		Vei2 curPos = queue.front(); queue.pop();
-		std::vector<Vei2> newPositions = GetNewCoordinates(curPos, field, fieldWidth, visited);
-		for (Vei2 newPos : newPositions)
+
+		Vei2 p0 = { {curKeyPos.key.coordinates.x,curKeyPos.key.coordinates.y},curKeyPos.keys,curKeyPos.steps };
+		std::set<std::string> visited;
+		visited.insert(Hash(p0));
+		std::queue<Vei2> queue;
+		queue.push(p0);
+
+		while (!queue.empty())
 		{
-			// New status allocation
-			newPos.steps++;
-			char ch = field[newPos.coord[1] * fieldWidth + newPos.coord[0]];
-			
-			if (IsKey(ch) && (newPos.keys.find(ch) == std::string::npos)) // If newpos is a new key => add it to newKeyPositions, don't push to queue
+			if (queue.size() > diagData.MaxQueueSize_InnerBFS) diagData.MaxQueueSize_InnerBFS = queue.size();
+			diagData.loopCount_InnerBFS++;
+			Vei2 curPos = queue.front(); queue.pop();
+			std::vector<Vei2> newPositions = GetNewCoordinates(curPos, field, fieldWidth, visited);
+			for (Vei2 newPos : newPositions)
 			{
-				Key newkey = { ch,{newPos.coord[0],newPos.coord[1]} };
-				newKeyOptions.push_back({newkey,newPos.steps- curKeyPos.steps });
-			}
-			else if (IsDoor(ch) && (newPos.keys.find(std::tolower(ch)) == std::string::npos)) // If Door is found, you don't have the key => don't push to queue
-			{
-			}
-			else // continue with new position
-			{
-				visited.insert(Hash(newPos));
-				queue.push(newPos);
+				// New status allocation
+				newPos.steps++;
+				char ch = field[newPos.coord[1] * fieldWidth + newPos.coord[0]];
+
+				if (IsKey(ch) && (newPos.keys.find(ch) == std::string::npos)) // If newpos is a new key => add it to newKeyPositions, don't push to queue
+				{
+					Key newkey = { ch,{newPos.coord[0],newPos.coord[1]} };
+					availableKeyOptions.push_back({ newkey,newPos.steps - curKeyPos.steps });
+				}
+				else if (IsDoor(ch) && (newPos.keys.find(std::tolower(ch)) == std::string::npos)) // If Door is found, you don't have the key => don't push to queue
+				{
+				}
+				else // continue with new position
+				{
+					visited.insert(Hash(newPos));
+					queue.push(newPos);
+				}
 			}
 		}
+		// Update cache
+		cache[Hash(curKeyPos)] = { availableKeyOptions, curKeyPos.steps };
 	}
-	// Update cache
-	cache[Hash(curKeyPos)] = newKeyOptions;//.push_back({ p.first,p.second });
-	return newKeyOptions;
+	else
+	{
+		if (cache_it->second.cumulativeSteps <= curKeyPos.steps)
+		{
+			return {};
+		}
+		else
+		{
+			cache_it->second.cumulativeSteps = curKeyPos.steps;
+			availableKeyOptions = cache_it->second.cachedAvailablePositions;
+			//std::cout << "cache used.";
+		}
+	}
+	return availableKeyOptions;
 }
-

@@ -16,26 +16,29 @@ void Day18a()
 	Coi2 pos0 = LoadField("Resources/day18input.txt", field, fieldWidth, nKeys, keyIndices, keyFieldCoordinates);
 	PrintField(field, fieldWidth);
 	// Initialize for BFS ----------------
-	KeyPosition P0 = { '@',"@",0, keyFieldCoordinates['@'], "@"};
+	KeyPosition P0 = { {'@',keyFieldCoordinates['@']},"@",0,"@" };
 	std::set<std::string> visitedKeys;
 	std::queue<KeyPosition> keyQueue;
 	keyQueue.push(P0);
-	std::map<std::string, std::vector<std::pair<Key, int>>> cache;
+	std::map<std::string,CacheInfo> cache;
+	DiagnosticData diagData;
 	// End Init ==========================
 
 	// Main BFS loop
 	std::vector<std::pair<std::string, int>> result;
 	while (!keyQueue.empty())
 	{
+		if (keyQueue.size() > diagData.MaxQueueSize_OuterBFS) diagData.MaxQueueSize_OuterBFS = keyQueue.size();
+		diagData.loopCount_OuterBFS++;
 		KeyPosition curKeyPos = keyQueue.front(); keyQueue.pop();
-		std::vector<std::pair<Key, int>> newKeys = GetAvailableKeyPositions(curKeyPos, field, fieldWidth, visitedKeys, cache);
+		std::vector<std::pair<Key, int>> newKeys = GetAvailableKeyPositions(curKeyPos, field, fieldWidth, visitedKeys, cache, diagData);
 		
 		std::vector<KeyPosition> newPositions;
 		for (std::pair<Key, int> p : newKeys)
 		{
-			std::string newkeys = curKeyPos.keys + p.first.key;
+			std::string newkeys = curKeyPos.keys + p.first.keychar;
 			std::sort(newkeys.begin(), newkeys.end());
-			KeyPosition newKeyPosition = { p.first.key , newkeys, curKeyPos.steps + p.second,p.first.coordinates,curKeyPos.path + p.first.key };
+			KeyPosition newKeyPosition = { p.first , newkeys, curKeyPos.steps + p.second, curKeyPos.path + p.first.keychar };
 			newPositions.push_back(newKeyPosition);
 		}
 
@@ -43,7 +46,7 @@ void Day18a()
 		{
 			if (p.keys.size() == nKeys) // end condition
 			{
-				std::cout << "Keys found, route = " << p.path <<", steps = "<<p.steps<<'\n';
+				//std::cout << "Keys found, route = " << p.path <<", steps = "<<p.steps<<'\n';
 				result.push_back({ p.path,p.steps });
 			}
 			else
@@ -53,6 +56,45 @@ void Day18a()
 			}
 		}
 	}
+
+	// Display Results:
+	std::cout << "\n\nResults found.\n";
+	std::cout << "==============\n";
+	std::cout << "Number of keys found: " << nKeys << '\n';
+	std::cout << "Number of unique routes: " << result.size() << '\n';
+	
+	std::vector<std::pair<std::string, int>>::iterator max_it = std::max_element(result.begin(), result.end(), route_compare);
+	std::vector<std::pair<std::string, int>>::iterator min_it = std::min_element(result.begin(), result.end(), route_compare);
+	std::cout << "Range of route lengths found: [" << min_it->second << "..." << max_it->second<<"]\n";
+	std::cout << "Example of shortest path: " << min_it->first << '\n';
+	std::cout << "Example of longest path : " << max_it->first << '\n';
+
+	std::cout << "\nAlgorithm diagnostics: \n";
+	std::cout << "====================== \n";
+	std::cout << "Outer BFS loop (key-to-key): \n";
+	std::cout << "> Maximum queue size: "<< diagData.MaxQueueSize_OuterBFS<< '\n';
+	std::cout << "> Loop count: " << diagData.loopCount_OuterBFS<<'\n';
+	std::cout << "Inner BFS loop (cell-to-cell): \n";
+	std::cout << "> Maximum queue size: " << diagData.MaxQueueSize_InnerBFS<< '\n';
+	std::cout << "> Loop count: " << diagData.loopCount_InnerBFS<<'\n';
+	std::cout << "\nSize of key-to-key cache (#nodes in keyGraph): " << cache.size();
+	
+	//std::cout << "\n(press Enter to show keyGraph adjacency list)\n\n";
+	//std::cin.get();
+	std::cout << "\n\nAdjacency list (Node name is keylocation + keys_owned)\n";
+	std::cout << "NODE         ARCS\n";
+	std::cout << "======================================================\n";
+	for (auto e : cache)
+	{
+		std::cout << std::left<< std::setw(nKeys+2) << e.first;
+		std::cout << "->  ";
+		for (auto p : e.second.cachedAvailablePositions)
+		{
+			std::cout << p.first.keychar << "[" << p.second << "], ";
+		}
+		std::cout << '\n';
+	}
+	return;
 }
 void Day18b()
 {
