@@ -151,9 +151,8 @@
     <ClCompile Include="Source.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Day18b_MUTEX_HOVER.h" />
-    <ClInclude Include="Day18HelperFunctions.h" />
-    <ClInclude Include="Day18_Old Working.h" />
+    <ClInclude Include="Day18AHelperFunctions.h" />
+    <ClInclude Include="Day18BHelperFunctions.h" />
     <ClInclude Include="HelperFunctions.h" />
     <ClInclude Include="IncludesUsed.h" />
     <ClInclude Include="IntCode.h" />

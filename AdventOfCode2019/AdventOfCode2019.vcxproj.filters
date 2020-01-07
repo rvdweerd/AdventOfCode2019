@@ -53,13 +53,10 @@
     <ClInclude Include="Maze_simple.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Day18b_MUTEX_HOVER.h">
+    <ClInclude Include="Day18AHelperFunctions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Day18_Old Working.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Day18HelperFunctions.h">
+    <ClInclude Include="Day18BHelperFunctions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
