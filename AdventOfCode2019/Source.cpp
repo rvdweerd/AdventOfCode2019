@@ -6,117 +6,56 @@
 
 void Day18a()
 {
-	// Init =====================
+	// Init global data structs===========
 	std::vector<char> field;
 	int fieldWidth;
 	int nKeys;
-	Vei2 Pos0 = LoadField("Resources/day18input.txt", field, fieldWidth, nKeys);
+	std::map<char, int> keyIndices;
+	std::map<char, Coi2> keyFieldCoordinates;
+	// Load the field & ------------------
+	Coi2 pos0 = LoadField("Resources/day18input.txt", field, fieldWidth, nKeys, keyIndices, keyFieldCoordinates);
 	PrintField(field, fieldWidth);
-	std::set<std::string> visited;
-	visited.insert(Hash(Pos0));
-	std::queue<Vei2> queue;
-	queue.push(Pos0);
-	// END Init ==================
+	// Initialize for BFS ----------------
+	KeyPosition P0 = { '@',"@",0, keyFieldCoordinates['@'], "@"};
+	std::set<std::string> visitedKeys;
+	std::queue<KeyPosition> keyQueue;
+	keyQueue.push(P0);
+	std::map<std::string, std::vector<std::pair<Key, int>>> cache;
+	// End Init ==========================
 
 	// Main BFS loop
-	std::string globalkeys;
-	while (!queue.empty())
+	std::vector<std::pair<std::string, int>> result;
+	while (!keyQueue.empty())
 	{
-		Vei2 curPos = queue.front(); queue.pop();
-		std::vector<Vei2> newPositions = GetNewCoordinates(curPos,field, fieldWidth, visited);
-		for (Vei2 newPos : newPositions)
+		KeyPosition curKeyPos = keyQueue.front(); keyQueue.pop();
+		std::vector<std::pair<Key, int>> newKeys = GetAvailableKeyPositions(curKeyPos, field, fieldWidth, visitedKeys, cache);
+		
+		std::vector<KeyPosition> newPositions;
+		for (std::pair<Key, int> p : newKeys)
 		{
-			// New status allocation
-			newPos.steps++;
-			char ch = field[newPos.coord[1] * fieldWidth + newPos.coord[0]];
-			if (ch > 96 && ch <= 122 && (newPos.keys.find(ch) == std::string::npos)) // If new key is found, add it to keyring
+			std::string newkeys = curKeyPos.keys + p.first.key;
+			std::sort(newkeys.begin(), newkeys.end());
+			KeyPosition newKeyPosition = { p.first.key , newkeys, curKeyPos.steps + p.second,p.first.coordinates,curKeyPos.path + p.first.key };
+			newPositions.push_back(newKeyPosition);
+		}
+
+		for (KeyPosition p : newPositions)
+		{
+			if (p.keys.size() == nKeys) // end condition
 			{
-				newPos.keys += ch;
+				std::cout << "Keys found, route = " << p.path <<", steps = "<<p.steps<<'\n';
+				result.push_back({ p.path,p.steps });
 			}
-			// visited mapping of new position/status
-			visited.insert(Hash(newPos));
-			// Place on queue
-			queue.push(newPos);
-			
-			// Objective testing, break if reached
-			if (newPos.keys.size() == nKeys)
+			else
 			{
-				std::cout << "Result reached. Number of steps: " << newPos.steps;
-				while (!queue.empty()) queue.pop();
-				break;
+				visitedKeys.insert(Hash(p));
+				keyQueue.push(p);
 			}
 		}
 	}
 }
 void Day18b()
 {
-	// Init =====================
-	std::vector<char> field;
-	int fieldWidth;
-	int nKeys;
-	std::string globalKeys;
-	Vei8 Pos0 = LoadField4C("Resources/day18binput.txt", field, fieldWidth, nKeys);
-	PrintField(field, fieldWidth);
-	std::set<std::string> visited;
-	visited.insert(Hash4C(Pos0,globalKeys));
-	std::queue<Vei8> queue;
-	queue.push(Pos0);
-	// END Init ==================
-
-	// Main BFS loop
-	bool mutexevent1 = false;
-	bool mutexevent2 = false;
-	int mutex = 0;
-	while (!queue.empty())
-	{
-		Vei8 curPos = queue.front(); queue.pop();
-		if (mutexevent1 || mutexevent2)
-		{
-			mutex = (mutex+1) % 4;
-			if (mutexevent1) mutexevent1 = false;
-			if (mutexevent2) mutexevent2 = false;
-		}
-		std::vector<Vei8> newPositions = GetNewCoordinates4C(curPos, field, fieldWidth, visited, globalKeys, mutex);
-		if (newPositions.size() == 0)
-		{
-			mutexevent1 = true;
-			queue.push(curPos);
-		}
-		for (Vei8 newPos : newPositions)
-		{
-			// New status allocation
-			newPos.steps++;
-			for (size_t i = 0; i < 4; i++)
-			{
-				char ch = field[newPos.coord[2*i+1] * fieldWidth + newPos.coord[2*i]];
-				if (ch > 96 && ch <= 122 && (globalKeys.find(ch) == std::string::npos)) // If new key is found, add it to keyring
-				{
-					newPos.keys += ch;
-					mutexevent2 = true;
-					if (globalKeys.find(ch) == std::string::npos)
-					{
-						globalKeys += ch;
-						std::cout << ch;
-					}
-				}
-			}
-			// visited mapping of new position/status
-			std::string hash = Hash4C(newPos,globalKeys);
-			visited.insert(hash);
-			std::cout << hash<<", n="<<newPos.steps<<'\n';
-			
-			// Place on queue
-			queue.push(newPos);
-
-			// Objective testing, break if reached
-			if (newPos.keys.size() == nKeys)
-			{
-				std::cout << "Result reached. Number of steps: " << newPos.steps;
-				while (!queue.empty()) queue.pop();
-				break;
-			}
-		}
-	}
 }
 
 int main()
@@ -125,7 +64,7 @@ int main()
 	// So, for example, to run Day 7 challenge:
 	// --> save data to "Resources/day7ainput.txt" and "Resources/day7binput.txt"
 	// --> run the functions Day7a(); and/or Day7b(); in main()
-	Day18b();
+	Day18a();
 	
 	while (!_kbhit());
 	return 0;

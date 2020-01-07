@@ -1,113 +1,63 @@
 #pragma once
 #include "IncludesUsed.h"
-
+struct Coi2
+{
+	int x;
+	int y;
+};
+struct Key
+{
+	char key;
+	Coi2 coordinates;
+};
+struct KeyPosition
+{
+	char key;
+	std::string keys;
+	int steps = 0;
+	Coi2 coordinates;
+	std::string path;
+};
 struct Vei2
 {
 	std::vector<int> coord = { 0,0 };
 	std::string keys;
 	int steps = 0;
 };
-struct Vei8
+bool IsKey(char c)
 {
-	std::vector<int> coord = { 0,0,0,0,0,0,0,0 };
-	std::string keys;
-	int steps = 0;
-};
-std::string Hash(const Vei2& pos) // used to enable a hash lookup of visited nodes in the BFS
+	return ((c > 96 && c <= 122) || (c == '@'));
+}
+bool IsDoor(char c)
 {
-	std::string keys = pos.keys;
+	return (c > 64 && c <= 90);
+}
+std::string Hash(const KeyPosition& p) // used to enable a hash lookup of visited nodes in the BFS
+{
+	std::string keys = p.keys;
 	std::sort(keys.begin(), keys.end());
-	std::string Hash = "(";
-	Hash.append(std::to_string(pos.coord[0]));
-	Hash.append(",");
-	Hash.append(std::to_string(pos.coord[1]));
-	Hash.append(")[");
+	std::string Hash = "";
+	Hash +=p.key;
+	Hash.append("_");
 	Hash.append(keys);
-	Hash.append("]");
 	return Hash;
 }
-std::string Hash4C(const Vei8& pos,std::string keys) // used to enable a hash lookup of visited nodes in the BFS
+std::string Hash(const Vei2& p0)
 {
-	std::sort(keys.begin(), keys.end());
-	std::string Hash = "(";
-	Hash.append(std::to_string(pos.coord[0]));
-	Hash.append(",");
-	Hash.append(std::to_string(pos.coord[1]));
-	Hash.append(",");
-	Hash.append(std::to_string(pos.coord[2]));
-	Hash.append(",");
-	Hash.append(std::to_string(pos.coord[3]));	
-	Hash.append(",");
-	Hash.append(std::to_string(pos.coord[4]));
-	Hash.append(",");
-	Hash.append(std::to_string(pos.coord[5]));
-	Hash.append(",");
-	Hash.append(std::to_string(pos.coord[6]));
-	Hash.append(",");
-	Hash.append(std::to_string(pos.coord[7]));
-	Hash.append(")[");
-	Hash.append(keys);
-	Hash.append("]");
-	return Hash;
+	return std::to_string(p0.coord[0]) + "_" + std::to_string(p0.coord[1]);
 }
-
-Vei2 LoadField(const std::string filename, std::vector<char>& field, int& fieldWidth, int& nKeys)
-	{
-		fieldWidth = 1; // we don't know this yet, this is the starting assumption
-		bool fieldWidthSet = false;
-		std::ifstream in(filename);
-		Vei2 Pos0;
-		while (!in.eof())
-		{
-			char ch;
-			std::string str;
-			int i = 0;
-			for (ch = in.get(); !in.eof(); ch = in.get())
-			{
-				if (ch == '\n')
-				{
-					if (!fieldWidthSet)
-					{
-						fieldWidth = i;
-						fieldWidthSet = true;
-					}
-				}
-				else
-				{
-					if (ch == '@')
-					{
-						Pos0.coord[1] = i / fieldWidth;
-						Pos0.coord[0] = i - Pos0.coord[1] * fieldWidth;
-					}
-					field.push_back(ch);
-					i++;
-				}
-			}
-		}
-
-		// Scan for number of keys in the maze
-		nKeys = 0; // in case not initialized by caller
-		for (char c : field)
-		{
-			if (c >= 97 && c < 123)
-			{
-				nKeys++;
-			}
-		}
-		return Pos0;
-	}
-Vei8 LoadField4C(const std::string filename, std::vector<char>& field, int& fieldWidth, int& nKeys)
+Coi2 LoadField(const std::string filename, std::vector<char>& field, int& fieldWidth, int& nKeys, std::map<char, int>& keyIndices, std::map<char,Coi2>& keyPositions)
 {
 	fieldWidth = 1; // we don't know this yet, this is the starting assumption
+	nKeys = 0;
 	bool fieldWidthSet = false;
 	std::ifstream in(filename);
-	Vei8 Pos0;
+	Coi2 pos0;
 	while (!in.eof())
 	{
 		char ch;
 		std::string str;
 		int i = 0;
-		int dim = 0;
 		for (ch = in.get(); !in.eof(); ch = in.get())
 		{
 			if (ch == '\n')
@@ -120,36 +70,35 @@ Vei8 LoadField4C(const std::string filename, std::vector<char>& field, int& fiel
 			}
 			else
 			{
+				if (IsKey(ch))
+				{
+					keyIndices[ch] = i;
+					int keyY = i / fieldWidth;
+					int keyX = i - keyY * fieldWidth;
+					keyPositions[ch] = { keyX , keyY };
+					nKeys++;
+				}
 				if (ch == '@')
 				{
-					Pos0.coord[dim+1] = i / fieldWidth;
-					Pos0.coord[dim] = i - Pos0.coord[dim+1] * fieldWidth;
-					dim += 2;
+					{
+						pos0.y = i / fieldWidth;
+						pos0.x = i - pos0.y * fieldWidth;
+					}
 				}
 				field.push_back(ch);
 				i++;
 			}
 		}
 	}
-
-	// Scan for number of keys in the maze
-	nKeys = 0; // in case not initialized by caller
-	for (char c : field)
-	{
-		if (c >= 97 && c < 123)
-		{
-			nKeys++;
-		}
-	}
-	return Pos0;
+	return pos0;
 }
 void PrintField(std::vector<char> field, const int& fieldWidth)
 {
 	//std::cout << '\n';
-	for (size_t i = 0; i < field.size(); i++)
+	for (int i = 0; i < (int)field.size(); i++)
 	{
 		if (i % fieldWidth == 0) std::cout << '\n';
-		if ((i > 2 * fieldWidth && (i < field.size() - 2 * fieldWidth)) && //away from top/bottom
+		if ((i > 2 * fieldWidth && (i < (int)field.size() - 2 * fieldWidth)) && //away from top/bottom
 			(field[i - fieldWidth] == '.' || field[i - fieldWidth] > 65) &&
 			(field[i + fieldWidth] == '.' || field[i + fieldWidth] > 65) && // above and below is corridor
 			(field[i] == '#')) // cell is barrier
@@ -186,14 +135,10 @@ std::vector<Vei2> GetNewCoordinates(Vei2& curPos, const std::vector<char>& field
 		else if (dir == 3) newPos.coord[0]--;	// WEST
 		else if (dir == 4) newPos.coord[0]++;	// EAST
 
-		if (visited.find(Hash(newPos)) == visited.end()) // New position was not previsously visited in current state
+		char ch = field[newPos.coord[1] * fieldWidth + newPos.coord[0]];
+		if (ch != '#')
 		{
-			char ch = field[newPos.coord[1] * fieldWidth + newPos.coord[0]];
-			if ((ch > 64 && ch <= 90) && (curPos.keys.find(std::tolower(ch)) == std::string::npos) || // Door, no key
-				(ch == '#'))  // Wall
-			{
-			} // Position is not available
-			else
+			if (visited.find(Hash(newPos)) == visited.end()) // New position was not previsously visited in current state
 			{
 				NewCoordinates.push_back(newPos);
 			}
@@ -201,34 +146,49 @@ std::vector<Vei2> GetNewCoordinates(Vei2& curPos, const std::vector<char>& field
 	}
 	return NewCoordinates;
 }
-std::vector<Vei8> GetNewCoordinates4C(Vei8& curPos, const std::vector<char>& field, const int& fieldWidth, std::set<std::string>& visited, const std::string& globalKeys, int mutex)
-{
-	std::vector<Vei8> NewCoordinates;
 
-	//for (size_t i = 0; i < 4; i++) // loop the 4 coordinates
-	size_t i = (size_t)mutex;
+std::vector<std::pair<Key,int>> GetAvailableKeyPositions(
+	KeyPosition& curKeyPos, 
+	const std::vector<char>& field, 
+	const int& fieldWidth, 
+	std::set<std::string>& visitedKeys,
+	std::map<std::string, std::vector<std::pair<Key, int>>>& cache )
+{
+	std::vector<std::pair<Key, int>> newKeyOptions;
+
+	Vei2 p0 = { {curKeyPos.coordinates.x,curKeyPos.coordinates.y},curKeyPos.keys,curKeyPos.steps};
+	std::set<std::string> visited;
+	visited.insert(Hash(p0));
+	std::queue<Vei2> queue;
+	queue.push(p0);
+
+	while (!queue.empty())
 	{
-		for (unsigned dir = 1; dir < 5; dir++)
+		Vei2 curPos = queue.front(); queue.pop();
+		std::vector<Vei2> newPositions = GetNewCoordinates(curPos, field, fieldWidth, visited);
+		for (Vei2 newPos : newPositions)
 		{
-			Vei8 newPos = curPos;
-			if		(dir == 1) newPos.coord[2*i+1]--;	// NORTH
-			else if (dir == 2) newPos.coord[2*i+1]++;	// SOUTH
-			else if (dir == 3) newPos.coord[2*i]--;		// WEST
-			else if (dir == 4) newPos.coord[2*i]++;		// EAST
-	//???????? // Moet dit met globalkeys of met localkeys (2x) ?????
-			if (visited.find(Hash4C(newPos,globalKeys)) == visited.end()) // New position was not previsously visited in current state
+			// New status allocation
+			newPos.steps++;
+			char ch = field[newPos.coord[1] * fieldWidth + newPos.coord[0]];
+			
+			if (IsKey(ch) && (newPos.keys.find(ch) == std::string::npos)) // If newpos is a new key => add it to newKeyPositions, don't push to queue
 			{
-				char ch = field[newPos.coord[2*i+1] * fieldWidth + newPos.coord[2*i]];
-				if ((ch > 64 && ch <= 90) && (globalKeys.find(std::tolower(ch)) == std::string::npos) || // Door, no key
-					(ch == '#'))  // Wall
-				{
-				} // Position is not available
-				else
-				{
-					NewCoordinates.push_back(newPos);
-				}
+				Key newkey = { ch,{newPos.coord[0],newPos.coord[1]} };
+				newKeyOptions.push_back({newkey,newPos.steps- curKeyPos.steps });
+			}
+			else if (IsDoor(ch) && (newPos.keys.find(std::tolower(ch)) == std::string::npos)) // If Door is found, you don't have the key => don't push to queue
+			{
+			}
+			else // continue with new position
+			{
+				visited.insert(Hash(newPos));
+				queue.push(newPos);
 			}
 		}
 	}
-	return NewCoordinates;
+	// Update cache
+	cache[Hash(curKeyPos)] = newKeyOptions;//.push_back({ p.first,p.second });
+	return newKeyOptions;
 }
+
