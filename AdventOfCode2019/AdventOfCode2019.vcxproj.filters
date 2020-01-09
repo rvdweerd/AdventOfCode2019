@@ -59,6 +59,12 @@
     <ClInclude Include="Day18BHelperFunctions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="IntCode_simple.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Day19HelperFunctions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="Resources\day11input.txt">
@@ -125,6 +131,12 @@
       <Filter>Resource Files</Filter>
     </Text>
     <Text Include="Resources\day18binput.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="Resources\day19input.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="Resources\day19testinput.txt">
       <Filter>Resource Files</Filter>
     </Text>
   </ItemGroup>

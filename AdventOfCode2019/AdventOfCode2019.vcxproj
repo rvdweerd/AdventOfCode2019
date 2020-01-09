@@ -153,9 +153,11 @@
   <ItemGroup>
     <ClInclude Include="Day18AHelperFunctions.h" />
     <ClInclude Include="Day18BHelperFunctions.h" />
+    <ClInclude Include="Day19HelperFunctions.h" />
     <ClInclude Include="HelperFunctions.h" />
     <ClInclude Include="IncludesUsed.h" />
     <ClInclude Include="IntCode.h" />
+    <ClInclude Include="IntCode_simple.h" />
     <ClInclude Include="Maze.h" />
     <ClInclude Include="Maze_simple.h" />
     <ClInclude Include="PastDaysSolutions.h" />
@@ -177,6 +179,8 @@
     <Text Include="Resources\day17input.txt" />
     <Text Include="Resources\day18binput.txt" />
     <Text Include="Resources\day18input.txt" />
+    <Text Include="Resources\day19input.txt" />
+    <Text Include="Resources\day19testinput.txt" />
     <Text Include="Resources\day1input.txt" />
     <Text Include="Resources\day2input.txt" />
     <Text Include="Resources\day3input.txt" />

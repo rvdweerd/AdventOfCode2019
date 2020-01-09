@@ -10,6 +10,7 @@
 #include <sstream>
 #include <conio.h>
 #include "IntCode.h"
+#include "IntCode_simple.h"
 #include "HelperFunctions.h"
 #include "Planet.h"
 #include <iomanip>
@@ -29,4 +30,6 @@
 #include "SimpGraph.h"
 #include <queue>
 #include <cassert>
+#include "Day18BHelperFunctions.h"
+#include "Day19HelperFunctions.h"
 

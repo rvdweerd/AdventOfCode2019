@@ -1,214 +1,234 @@
 #pragma once
 #include "IncludesUsed.h"
 //#include "PastDaysSolutions.h"
-#include "Day18BHelperFunctions.h"
 
-//void Day18a()
-//{
-//	// Init global data structs===========
-//	std::vector<char> field;
-//	int fieldWidth;
-//	int nKeys;
-//	std::map<char, int> keyIndices;
-//	std::map<char, Coi2> keyFieldCoordinates;
-//	// Load the field & ------------------
-//	Coi2 pos0 = LoadField("Resources/day18input.txt", field, fieldWidth, nKeys, keyIndices, keyFieldCoordinates);
-//	PrintField(field, fieldWidth);
-//	// Initialize for BFS ----------------
-//	KeyPosition P0 = { {'@',keyFieldCoordinates['@']},"@",0,"@" };
-//	std::set<std::string> visitedKeys;
-//	std::queue<KeyPosition> keyQueue;
-//	keyQueue.push(P0);
-//	std::map<std::string,CacheInfo> cache;
-//	DiagnosticData diagData;
-//	// End Init ==========================
-//
-//	// Main BFS loop
-//	std::vector<std::pair<std::string, int>> result;
-//	while (!keyQueue.empty())
-//	{
-//		if (keyQueue.size() > diagData.MaxQueueSize_OuterBFS) diagData.MaxQueueSize_OuterBFS = keyQueue.size();
-//		diagData.loopCount_OuterBFS++;
-//		KeyPosition curKeyPos = keyQueue.front(); keyQueue.pop();
-//		std::vector<std::pair<Key, int>> newKeys = GetAvailableKeyPositions(curKeyPos, field, fieldWidth, visitedKeys, cache, diagData);
-//		
-//		std::vector<KeyPosition> newPositions;
-//		for (std::pair<Key, int> p : newKeys)
-//		{
-//			std::string newkeys = curKeyPos.keys + p.first.keychar;
-//			std::sort(newkeys.begin(), newkeys.end());
-//			KeyPosition newKeyPosition = { p.first , newkeys, curKeyPos.steps + p.second, curKeyPos.path + p.first.keychar };
-//			newPositions.push_back(newKeyPosition);
-//		}
-//
-//		for (KeyPosition p : newPositions)
-//		{
-//			if (p.keys.size() == nKeys) // end condition
-//			{
-//				//std::cout << "Keys found, route = " << p.path <<", steps = "<<p.steps<<'\n';
-//				result.push_back({ p.path,p.steps });
-//			}
-//			else
-//			{
-//				visitedKeys.insert(Hash(p));
-//				keyQueue.push(p);
-//			}
-//		}
-//	}
-//
-//	// Display Results:
-//	std::cout << "\n\nResults found.\n";
-//	std::cout << "==============\n";
-//	std::cout << "Number of keys found: " << nKeys << '\n';
-//	std::cout << "Number of unique routes: " << result.size() << '\n';
-//	
-//	std::vector<std::pair<std::string, int>>::iterator max_it = std::max_element(result.begin(), result.end(), route_compare);
-//	std::vector<std::pair<std::string, int>>::iterator min_it = std::min_element(result.begin(), result.end(), route_compare);
-//	std::cout << "Range of route lengths found: [" << min_it->second << "..." << max_it->second<<"]\n";
-//	std::cout << "Example of shortest path: " << min_it->first << '\n';
-//	std::cout << "Example of longest path : " << max_it->first << '\n';
-//
-//	std::cout << "\nAlgorithm diagnostics: \n";
-//	std::cout << "====================== \n";
-//	std::cout << "Outer BFS loop (key-to-key): \n";
-//	std::cout << "> Maximum queue size: "<< diagData.MaxQueueSize_OuterBFS<< '\n';
-//	std::cout << "> Loop count: " << diagData.loopCount_OuterBFS<<'\n';
-//	std::cout << "Inner BFS loop (cell-to-cell): \n";
-//	std::cout << "> Maximum queue size: " << diagData.MaxQueueSize_InnerBFS<< '\n';
-//	std::cout << "> Loop count: " << diagData.loopCount_InnerBFS<<'\n';
-//	std::cout << "\nSize of key-to-key cache (#nodes in keyGraph): " << cache.size();
-//	
-//	//std::cout << "\n(press Enter to show keyGraph adjacency list)\n\n";
-//	//std::cin.get();
-//	std::cout << "\n\nAdjacency list (Node name is keylocation + keys_owned)\n";
-//	std::cout << "NODE         ARCS\n";
-//	std::cout << "======================================================\n";
-//	for (auto e : cache)
-//	{
-//		std::cout << std::left<< std::setw(nKeys+2) << e.first;
-//		std::cout << "->  ";
-//		for (auto p : e.second.cachedAvailablePositions)
-//		{
-//			std::cout << p.first.keychar << "[" << p.second << "], ";
-//		}
-//		std::cout << '\n';
-//	}
-//	return;
-//}
-void Day18b()
+
+void Day19a()
 {
-	// Init global data structs===========
-	std::vector<char> field;
-	int fieldWidth;
-	int nKeys;
-	std::map<char, int> keyIndices;
-	std::map<char, Coi2> keyFieldCoordinates;
-	std::vector<std::vector<char>> subFields; // 0 (NW), 1 (NE), 2(SW), 3(SE)
-	int subFieldWidth;
-	// Load the field & ------------------
-	std::vector<Coi2> pos0_vec = { }; // in local (subfield) coordinates
-	pos0_vec = LoadField4D("Resources/day18binput.txt", field, fieldWidth, nKeys, keyIndices, keyFieldCoordinates, subFields, subFieldWidth);
-	
-	// Initialize for BFS ----------------
-	KeyPosition4D P0 = { {{'1',pos0_vec[0]},{'2',pos0_vec[1]},{'3',pos0_vec[2]},{'4',pos0_vec[3]}},"@",0,"@" };
-	std::set<std::string> visitedKeys;
-	std::queue<KeyPosition4D> keyQueue;
-	keyQueue.push(P0);
-	std::map<std::string, CacheInfo4D> cache;
-	DiagnosticData diagData;
-	// End Init ==========================
-
-
-	// Main BFS loop
-	std::vector<std::pair<std::string, int>> result;
-	while (!keyQueue.empty())
+	IntCode_simple::IntCode IntComp("Resources/day19input.txt");
+	//IntComp.Run();
+	int count = 0;
+	for (int y = 0; y < 50; y++)
 	{
-		if (keyQueue.size() > diagData.MaxQueueSize_OuterBFS) diagData.MaxQueueSize_OuterBFS = keyQueue.size();
-		diagData.loopCount_OuterBFS++;
-		KeyPosition4D curKeyPos = keyQueue.front(); keyQueue.pop();
-		std::vector<std::vector<std::pair<Key, int>>> newKeys = GetAvailableKeyPositionsForSubFields(curKeyPos, field, fieldWidth, visitedKeys, cache, diagData);
-		
-		if (!newKeys.size() == 0)
+		for (int x = 0; x < 50; x++)
 		{
-			std::vector<KeyPosition4D> newPositions;
-			for (int i = 0; i < 4; i++) // loop the 4 subFields // for (std::vector<std::pair<Key, int>> pVec : newKeys)
+			count += IntComp.Run(x, y);
+			IntComp.Reset();
+		}
+	}
+	std::cout << "Count: " << count;
+}
+void Day19b_demo()
+{
+	// We can use IntComputer or load testdata from file.
+	bool UseIntComputer = true;
+	int boxSize = 10; // size of box that we want to fit
+	std::vector<int> field;
+	int fieldWidth = 0;
+	int fieldHeight = 0;
+	
+	if (UseIntComputer==true)
+	{
+		std::cout << "Demo with IntComputer (you can set this at start of function), scanning a field of 200x200 for a box size 10 to fit in the beam.\npress Enter.\n";
+		std::cin.get();
+		fieldWidth = 200;
+		fieldHeight = (int)((float)fieldWidth * 0.8f);
+		IntCode_simple::IntCode IntComp("Resources/day19input.txt");
+		// Populate the field
+		for (int y = 0; y < fieldHeight; y++)
+		{
+			for (int x = 0; x < fieldWidth; x++)
 			{
-				std::vector<std::pair<Key, int>> pVec = newKeys[i];
-				for (std::pair<Key, int> p : pVec)
-				{
-					KeyPosition4D newKeyPosition = curKeyPos;
-					newKeyPosition.key[i] = p.first;
-					newKeyPosition.steps += p.second;
-					std::string newkeys = curKeyPos.keys + p.first.keychar;
-					std::sort(newkeys.begin(), newkeys.end());
-					newKeyPosition.keys = newkeys;
-					newKeyPosition.path += p.first.keychar;
-					newPositions.push_back(newKeyPosition);
-				}
+				int cell = IntComp.Run(x, y);
+				IntComp.Reset();
+				//if (cell == 1) std::cout << '#'; else std::cout << '.';
+				field.push_back(cell);
 			}
-			for (KeyPosition4D pos : newPositions)
+		}
+	}
+	else
+	{
+		std::cout << "Demo with test input from txt file (you can set this at start of function), scanning a field of 40x35 for a box size 10 to fit in the beam.\npress Enter.\n";
+		std::cin.get();
+		bool fieldWidthSet = false;
+		std::ifstream in("Resources/day19testinput.txt");
+		while (!in.eof())
+		{
+			char ch;
+			int i = 0;
+			for (ch = in.get(); !in.eof(); ch = in.get())
 			{
-				if (pos.keys.size() == nKeys) // end condition
+				if (ch == '\n')
 				{
-					//std::cout << "Keys found, route = " << p.path <<", steps = "<<p.steps<<'\n';
-					result.push_back({ pos.path,pos.steps });
+					if (!fieldWidthSet)
+					{
+						fieldWidth = i;
+						fieldWidthSet = true;
+					}
 				}
 				else
 				{
-					//visitedKeys.insert(Hash(p));
-					keyQueue.push(pos);
+					std::string str;
+					str += ch;
+					field.push_back(std::stoi(str));
+					i++;
 				}
 			}
 		}
+		fieldHeight = field.size() / fieldWidth;
 	}
-		// Display Results:
-	std::cout << "\n\nResults found.\n";
-	std::cout << "==============\n";
-	std::cout << "Number of keys found: " << nKeys << '\n';
-	std::cout << "Number of unique routes: " << result.size() << '\n';
-	
-	std::vector<std::pair<std::string, int>>::iterator max_it = std::max_element(result.begin(), result.end(), route_compare);
-	std::vector<std::pair<std::string, int>>::iterator min_it = std::min_element(result.begin(), result.end(), route_compare);
-	std::cout << "Range of route lengths found: [" << min_it->second << "..." << max_it->second<<"]\n";
-	std::cout << "Example of shortest path: " << min_it->first << '\n';
-	std::cout << "Example of longest path : " << max_it->first << '\n';
+	PrintBeamField(field, fieldWidth);
 
-	std::cout << "\nAlgorithm diagnostics: \n";
-	std::cout << "====================== \n";
-	std::cout << "Outer BFS loop (key-to-key): \n";
-	std::cout << "> Maximum queue size: "<< diagData.MaxQueueSize_OuterBFS<< '\n';
-	std::cout << "> Loop count: " << diagData.loopCount_OuterBFS<<'\n';
-	std::cout << "Inner BFS loop (cell-to-cell): \n";
-	std::cout << "> Maximum queue size: " << diagData.MaxQueueSize_InnerBFS<< '\n';
-	std::cout << "> Loop count: " << diagData.loopCount_InnerBFS<<'\n';
-	std::cout << "\nSize of key-to-key cache (#nodes in keyGraph): " << cache.size();
-	
-	//std::cout << "\n(press Enter to show keyGraph adjacency list)\n\n";
-	//std::cin.get();
-	std::cout << "\n\nAdjacency list (Node name is keylocation + keys_owned)\n";
-	std::cout << "NODE                                 ARCS\n";
-	std::cout << "======================================================\n";
-	int count = 0;
-	for (auto e : cache)
+	std::queue<std::vector<int>> queue;
+	for (int y = 0; y < boxSize; y++)
 	{
-		std::cout << std::left<< std::setw(nKeys+2) << e.first;
-		std::cout << "->  ";
-		for (auto p : e.second.cachedAvailablePositions)
+		std::vector<int> line;
+		for (int x = 0; x < fieldWidth; x++)
 		{
-			if (p.size() > 0)
+			line.push_back(field[y * fieldWidth + x]);
+		}
+		queue.push(line);
+	}
+	int y_SantaSquare = 0;
+	while (true)
+	{
+		int beamwidth_topline = GetBeamWidth(queue.front());
+		int firstX_topline = GetFirstBeamXcoordinate(queue.front());
+		int beamwidth_bottomline = GetBeamWidth(queue.back());
+		int firstX_bottomline = GetFirstBeamXcoordinate(queue.back());
+		std::cout << "y coord of topline: " << y_SantaSquare << '\n';
+		std::cout << "beamwidth topline line: " << beamwidth_topline <<'\n';
+		std::cout << "First x coord of topline beam: " << firstX_topline <<'\n';
+		std::cout << "beamwidth bottom line: " << beamwidth_bottomline << '\n';
+		std::cout << "First x coord of bottom line beam: " << firstX_bottomline << '\n';
+		PrintQueue(queue);
+
+		int x_SantaSquare = firstX_topline + beamwidth_topline - boxSize;
+		if ((beamwidth_topline > boxSize) &&
+			(firstX_bottomline == x_SantaSquare))
+		{
+			std::cout << "Square now fits,  topleft of square: x=" << x_SantaSquare << ", y=" << y_SantaSquare << '\n';
+			std::cout << "So, the puzzle answer((x) * 10000 + (y)) = " << (10000 * (x_SantaSquare)+(y_SantaSquare)) << '\n'; // lastline correction -1 because of vertical linecount in routine used
+			break;
+		}
+		if (!UseIntComputer) std::cin.get();
+		ClearScreen();
+		std::vector<int> line;
+		for (int x = 0; x < fieldWidth; x++)
+		{
+			line.push_back(field[(y_SantaSquare + boxSize) * fieldWidth + x]);
+		}
+		y_SantaSquare++;
+		queue.pop();
+		queue.push(line);
+	}
+	return;
+}
+
+void Day19b_WithBinarySearch()
+{
+	// We can use IntComputer or load testdata from file.
+	bool UseIntComputer = false;
+	int boxSize = 100; // size of box that we need to fit
+	int yFirstFit=-1; // these are the coordinates we are looking for
+	int xFirstFit=-1;
+
+	if (UseIntComputer)
+	{
+		
+		IntCode_simple::IntCode IntComp("Resources/day19input.txt");
+		
+		// Run a Binary Search loop to establish at what minimum height y the SquareBox fits inside the beam
+		// Initialize markers:
+		int BS_y_highmark = 0;
+		int BS_y_lowmark = 2000; // begin at last line of field minus size of box that needs to fit in
+		int BS_y_test = BS_y_lowmark;
+
+		// Run the BS loop	
+		while (true)
+		{
+			if (BoxFitsAtHeight(BS_y_test, IntComp, boxSize))
 			{
-				for (int i = 0; i < p.size(); i++)
+				BS_y_lowmark = BS_y_test;
+				BS_y_test = BS_y_highmark + (BS_y_lowmark - BS_y_highmark) / 2;
+				if (BS_y_highmark - BS_y_test == 1) // success condition for finding the highest fitting y coordinate (approach from bottom)
 				{
-					std::cout << p[i].first.keychar <<  "[" << p[i].second << "], ";
+					yFirstFit = BS_y_test;
+					break;
 				}
 			}
+			else
+			{
+				if (BS_y_lowmark - BS_y_test == 1) // success condition (approach from top)
+				{
+					yFirstFit = BS_y_lowmark;
+					break;
+				}
+				BS_y_highmark = BS_y_test;
+				BS_y_test = BS_y_test + (BS_y_lowmark - BS_y_test) / 2;
+			}
 		}
-		std::cout << '\n';
-		if (count == 15) break;
-		count++;
-	}
+		int beamWidth = BeamWidthAtHeight(yFirstFit, IntComp);
+		xFirstFit = GetFirstBeamXcoordinate(GetLine(yFirstFit, IntComp)) + beamWidth - boxSize;
 
-	return;
+		std::cout << "Topleft of first " << 10 << "x" << 10 << " square that fits inside the beam: x=" << xFirstFit << ", y=" << yFirstFit << '\n';
+		std::cout << "So, the puzzle answer((x) * 10000 + (y)) = " << (10000 * (xFirstFit)+(yFirstFit)) << '\n';
+	}
+	else
+	{
+		std::cout << "\n\nExecuting function Day19b_WithBinarySearch().\n";
+		std::cout << "Will run a binary search based algorithm on test input from txt file (you can set this at start of function), \nscanning a field of 40x35 for a box size 10 to fit in the beam.\npress Enter.\n";
+		std::cin.get();
+		boxSize = 10;
+		// Load BeamField
+		BeamField field;
+		{
+			std::vector<int> fieldVec_init;
+			int fieldWidth_init;
+			LoadBeamField(fieldVec_init, fieldWidth_init);
+			field.fieldVec = fieldVec_init;
+			field.fieldWidth = fieldWidth_init;
+			field.fieldHeight = field.fieldVec.size() / field.fieldWidth;
+		}
+		PrintBeamField(field.fieldVec, field.fieldWidth);
+		
+				
+		// Run a Binary Search loop to establish at what minimum height y the SquareBox fits inside the beam
+		// Initialize markers:
+		int BS_y_highmark = 0;
+		int BS_y_lowmark  = (field.fieldHeight - 1) - boxSize; // begin at last line of field minus size of box that needs to fit in
+		int BS_y_test = BS_y_lowmark;
+		
+		// Run the BS loop	
+		while (true)
+		{
+			if (BoxFitsAtHeight(BS_y_test, field,boxSize))
+			{
+				BS_y_lowmark = BS_y_test;
+				BS_y_test = BS_y_highmark + (BS_y_lowmark - BS_y_highmark) / 2;
+				if (BS_y_highmark - BS_y_test == 1) // success condition for finding the highest fitting y coordinate (approach from bottom)
+				{
+					yFirstFit = BS_y_test;
+					break;
+				}
+			}
+			else
+			{
+				if (BS_y_lowmark - BS_y_test == 1) // success condition (approach from top)
+				{
+					yFirstFit = BS_y_lowmark;
+					break;
+				}
+				BS_y_highmark = BS_y_test;
+				BS_y_test = BS_y_test + (BS_y_lowmark - BS_y_test)/2;
+			}
+		}
+		int beamWidth = BeamWidthAtHeight(yFirstFit,field);
+		xFirstFit = GetFirstBeamXcoordinate(GetLine(yFirstFit, field)) + beamWidth - boxSize;
+
+		std::cout << "Topleft of first "<< 10 << "x"<<10<<" square that fits inside the beam: x=" << xFirstFit << ", y=" << yFirstFit << '\n';
+		std::cout << "So, the puzzle answer((x) * 10000 + (y)) = " << (10000 * (xFirstFit)+(yFirstFit)) << '\n';
+	}
 }
 
 int main()
@@ -217,9 +237,11 @@ int main()
 	// So, for example, to run Day 7 challenge:
 	// --> save data to "Resources/day7ainput.txt" and "Resources/day7binput.txt"
 	// --> run the functions Day7a(); and/or Day7b(); in main()
-	Day18b();
-	
+	Day19b_demo();
+	Day19b_WithBinarySearch();
+
 	while (!_kbhit());
 	return 0;
 }
+
 
