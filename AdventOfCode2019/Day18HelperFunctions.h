@@ -1,15 +1,37 @@
 #pragma once
-#pragma once
-#include "IncludesUsed.h"
+#include <vector>
+#include <iostream>
+#include <algorithm>
+#include <numeric>
+#include <fstream>
+#include <string>
+#include <map>
+#include <set>
+#include <sstream>
+#include <conio.h>
+#include "IntCode.h"
+#include "IntCode_simple.h"
+#include "HelperFunctions.h"
+#include "Planet.h"
+#include <iomanip>
+#include <unordered_set>
+#include <unordered_map>
+#include <chrono>
+#include <thread>
+#include "PlanetSys.h"
+#include <utility>
+#include <stack>
+#include "Maze.h"
+#include "Maze_simple.h"
+#include <random>
+#include "SimpGraph.h"
+#include <queue>
+#include <cassert>
+
 static bool route_compare(std::pair<std::string, int> a, std::pair<std::string, int> b)
 {
 	return (a.second < b.second);
 }
-struct Coi2
-{
-	int x;
-	int y;
-};
 struct Key
 {
 	char keychar;
@@ -331,7 +353,7 @@ std::vector<std::pair<Key, int>> GetAvailableKeyPositions(
 
 		while (!queue.empty())
 		{
-			if (queue.size() > diagData.MaxQueueSize_InnerBFS) diagData.MaxQueueSize_InnerBFS = queue.size();
+			if (queue.size() > (size_t)diagData.MaxQueueSize_InnerBFS) diagData.MaxQueueSize_InnerBFS = (int)queue.size();
 			diagData.loopCount_InnerBFS++;
 			Vei2 curPos = queue.front(); queue.pop();
 			std::vector<Vei2> newPositions = GetNewCoordinates(curPos, field, fieldWidth, visited);

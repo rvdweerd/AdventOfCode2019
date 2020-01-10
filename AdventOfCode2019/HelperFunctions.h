@@ -6,7 +6,19 @@
 #include <map>
 #include <math.h>
 #include <windows.h>
-
+struct Coi2
+{
+	int x;
+	int y;
+	friend bool operator==(const Coi2& p1, const Coi2& p2)
+	{
+		return (p1.x == p2.x) && (p1.y == p2.y);
+	}
+	friend bool operator<(const Coi2& p1, const Coi2& p2)
+	{
+		return (p1.x + p1.y) < (p2.x + p2.y);
+	}
+};
 struct Pos
 {
 	int x;
@@ -39,6 +51,10 @@ struct Pos
 		}
 	}
 };
+bool IsCap(char ch)
+{
+	return (ch > 64 && ch <= 90);
+}
 void ReduceToLowestCommonDenom(Pos& direction)
 {
 	if (direction.x != 0)

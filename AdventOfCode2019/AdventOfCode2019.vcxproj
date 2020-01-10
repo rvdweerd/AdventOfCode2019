@@ -151,9 +151,9 @@
     <ClCompile Include="Source.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Day18AHelperFunctions.h" />
-    <ClInclude Include="Day18BHelperFunctions.h" />
+    <ClInclude Include="Day18HelperFunctions.h" />
     <ClInclude Include="Day19HelperFunctions.h" />
+    <ClInclude Include="Day20HelperFunctions.h" />
     <ClInclude Include="HelperFunctions.h" />
     <ClInclude Include="IncludesUsed.h" />
     <ClInclude Include="IntCode.h" />
@@ -167,6 +167,7 @@
     <ClInclude Include="TestingPqueues.h" />
   </ItemGroup>
   <ItemGroup>
+    <Text Include="day20input.txt" />
     <Text Include="Resources\day10input.txt" />
     <Text Include="Resources\day11input.txt" />
     <Text Include="Resources\day13input.txt" />

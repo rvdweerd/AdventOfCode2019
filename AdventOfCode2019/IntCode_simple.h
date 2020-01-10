@@ -114,8 +114,10 @@ namespace IntCode_simple
 				else
 				{
 					std::cout << "error.";
+					return;
 				}
 			}
+			return;
 		}
 		int Run(int input1, int input2 = 0)
 		{
@@ -203,8 +205,10 @@ namespace IntCode_simple
 				else
 				{
 					std::cout << "error.";
+					return -999;
 				}
 			}
+			return -999;
 		}
 
 		std::vector<int>& GetRunCodeVectorReference()
