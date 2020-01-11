@@ -44,30 +44,29 @@ namespace MazeDay20
 				std::cout << '\n';
 			}
 		}
-		void PrintFieldWithVisited(std::set<Coi2>& visited)
+		void PrintFieldWithVisited(std::set<std::string>& visited)
 		{
-			std::vector<char> fieldCopy = this->field;
-			for (Coi2 p : visited)
-			{
-				fieldCopy[p.y * fieldWidth + p.x] = 'X';
-			}
-			for (size_t y = 0; y < fieldHeight; y++)
-			{
-				for (size_t x = 0; x < fieldWidth; x++)
-				{
-					std::cout << fieldCopy[y*fieldWidth+x];
-				}
-				std::cout << '\n';
-			}
-
+			//std::vector<char> fieldCopy = this->field;
+			//for (Coi2 p : visited)
+			//{
+			//	fieldCopy[p.y * fieldWidth + p.x] = 'X';
+			//}
+			//for (size_t y = 0; y < fieldHeight; y++)
+			//{
+			//	for (size_t x = 0; x < fieldWidth; x++)
+			//	{
+			//		std::cout << fieldCopy[y*fieldWidth+x];
+			//	}
+			//	std::cout << '\n';
+			//}
 		}
 		Coi2 GetStartPos()
 		{
-			return portals["AA"];
+			return portals["AA"][0];
 		}
 		Coi2 GetEndPos()
 		{
-			return portals["ZZ"];
+			return portals["ZZ"][0];
 		}
 		int ShortestPath(Coi2 startpos, Coi2 endpos)
 		{
@@ -88,19 +87,18 @@ namespace MazeDay20
 				{
 					if (n.x == endpos.x && n.y == endpos.y)
 					{
-						std::cout << "Steps =  " << nSteps;
-						std::cin.get();
+						nSteps = n.steps;
 						break;
 					}
 					if (visited.find(HashD20(n)) == visited.end())
 					{
+						n.steps++;
 						visited.insert(HashD20(n));
 						queue.push(n);
 					}
 				}
-				nSteps++;
 			}
-			return nSteps-2;
+			return nSteps+1;
 		}
 
 	private: // Support methods
@@ -111,6 +109,28 @@ namespace MazeDay20
 		char GetFieldChar(Coi2 pos)
 		{
 			return field[pos.y * fieldWidth + pos.x];
+		}
+		void GetWarpPosition(Coi2 pos, char ch1, int dir, std::vector<Coi2>& outputVec)
+		{
+			char ch2 = GetFieldChar(NextPosInDir(NextPosInDir(pos, dir), dir));
+			std::string str;
+			str += ch1; str += ch2; std::sort(str.begin(), str.end());
+			if (portals.find(str) != portals.end())
+			{
+				std::vector<Coi2> warpPositions = portals[str];
+				if (warpPositions.size() == 1)
+				{
+					warpPositions[0].steps = pos.steps;
+					outputVec.push_back(warpPositions[0]);
+				}
+				else
+				{
+					warpPositions[0].steps = pos.steps;
+					warpPositions[1].steps = pos.steps;
+					if (warpPositions[0] == pos) outputVec.push_back(warpPositions[1]);
+					else outputVec.push_back(warpPositions[0]);
+				}
+			}
 		}
 		std::vector<Coi2> GetNeighborsD20(Coi2 pos)
 		{
@@ -127,14 +147,11 @@ namespace MazeDay20
 						{
 							if (ch == '.')
 							{
-								outputVec.push_back({ pos.x, pos.y - 1 });
+								outputVec.push_back({ pos.x, pos.y - 1,pos.steps });
 							}
 							else
 							{
-								char ch2 = GetFieldChar(NextPosInDir(NextPosInDir(pos, dir), dir));
-								std::string str;
-								str += ch; str += ch2;
-								if (portals.find(str)==portals.end()) outputVec.push_back(portals[str]);
+								GetWarpPosition(pos, ch, dir, outputVec);
 							}
 						}
 					}
@@ -147,14 +164,11 @@ namespace MazeDay20
 						{
 							if (ch == '.')
 							{
-								outputVec.push_back({ pos.x, pos.y + 1 });
+								outputVec.push_back({ pos.x, pos.y + 1,pos.steps });
 							}
 							else
 							{
-								char ch2 = GetFieldChar(NextPosInDir(NextPosInDir(pos, dir), dir));
-								std::string str;
-								str += ch; str += ch2;
-								if (portals.find(str) == portals.end()) outputVec.push_back(portals[str]);
+								GetWarpPosition(pos, ch, dir, outputVec);
 							}
 						}
 					}
@@ -167,14 +181,11 @@ namespace MazeDay20
 						{
 							if (ch == '.')
 							{
-								outputVec.push_back({ pos.x-1, pos.y });
+								outputVec.push_back({ pos.x-1, pos.y ,pos.steps });
 							}
 							else
 							{
-								char ch2 = GetFieldChar(NextPosInDir(NextPosInDir(pos, dir), dir));
-								std::string str;
-								str += ch; str += ch2;
-								if (portals.find(str) == portals.end()) outputVec.push_back(portals[str]);
+								GetWarpPosition(pos, ch, dir, outputVec);
 							}
 						}
 					}
@@ -182,19 +193,16 @@ namespace MazeDay20
 				case 4:
 					if (pos.x != 0 || pos.x != fieldWidth - 1)
 					{
-						char ch = GetFieldChar(pos.x+1, pos.y );
+						char ch = GetFieldChar(pos.x+1, pos.y);
 						if (ch != '#')
 						{
 							if (ch == '.')
 							{
-								outputVec.push_back({ pos.x+1, pos.y });
+								outputVec.push_back({ pos.x+1, pos.y,pos.steps });
 							}
 							else
 							{
-								char ch2 = GetFieldChar(NextPosInDir(NextPosInDir(pos, dir), dir));
-								std::string str;
-								str += ch; str += ch2;
-								if (portals.find(str) == portals.end()) outputVec.push_back(portals[str]);
+								GetWarpPosition(pos, ch, dir, outputVec);
 							}
 						}
 					}
@@ -331,8 +339,12 @@ namespace MazeDay20
 						if (dir != 0)
 						{
 							char ch2 = GetFieldChar(NextPosInDir(pos,OpposideDir(dir)));
-							std::string str; str += ch2;str+=ch1;
-							portals[str] = NextPosInDir(pos, dir);
+							std::string str; str += ch2; str += ch1; std::sort(str.begin(), str.end());
+							Coi2 nextpos = NextPosInDir(pos, dir);
+							if (std::find(portals[str].begin(), portals[str].end(), nextpos) == portals[str].end())
+							{
+								portals[str].push_back(nextpos);
+							}
 						}
 						else
 						{
@@ -340,8 +352,12 @@ namespace MazeDay20
 							if (dir != 0)
 							{
 								char ch2 = GetFieldChar(NextPosInDir(pos, dir));
-								std::string str; str += ch1; str += ch2;
-								portals[str] = NextPosInDir(NextPosInDir(pos, dir),dir);
+								std::string str; str += ch1; str += ch2; std::sort(str.begin(), str.end());
+								Coi2 nextpos = NextPosInDir(NextPosInDir(pos, dir), dir);
+								if (std::find(portals[str].begin(), portals[str].end(), nextpos) == portals[str].end())
+								{
+									portals[str].push_back(nextpos);
+								}
 							}
 
 						}
@@ -351,7 +367,7 @@ namespace MazeDay20
 		}
 
 	private: // Data members
-		std::map<std::string,Coi2> portals;
+		std::map<std::string,std::vector<Coi2>> portals;
 		std::vector<char> field;
 		size_t fieldWidth;
 		size_t fieldHeight;

@@ -9,8 +9,8 @@ void Day20()
 	maze.PrintField();
 	Coi2 startpos = maze.GetStartPos();
 	Coi2 endpos = maze.GetEndPos();
-	//auto vec = maze.GetNeighborsD20({ 2,8 });
-	maze.ShortestPath(startpos, endpos);
+	int answer = maze.ShortestPath(startpos, endpos);
+	std::cout << "Steps to exit: " << answer;
 
 }
 
