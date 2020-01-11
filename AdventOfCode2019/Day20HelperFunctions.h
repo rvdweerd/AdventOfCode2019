@@ -6,92 +6,21 @@
 #include <fstream>
 #include <string>
 #include <map>
-#include <set>
 #include <conio.h>
-#include <iomanip>
-#include <unordered_set>
-#include <unordered_map>
-#include <chrono>
-#include <thread>
-#include "PlanetSys.h"
-#include <utility>
-#include <stack>
-#include "Maze.h"
-#include "Maze_simple.h"
-#include <fstream>
-#include <iostream>
 #include <queue>
-#include <cassert>
 
 namespace MazeDay20
 {
 	class Maze
 	{
-	public:
-		Maze()
+	public: // Interface
+		Maze(bool recOption)
+			:
+			isRecursiveMaze(recOption)
 		{
 			LoadField();
 			MapPortals();
 		}
-		void PrintField()
-		{
-			for (size_t y = 0; y < fieldHeight; y++)
-			{
-				for (size_t x = 0; x < fieldWidth; x++)
-				{
-					std::cout << GetFieldChar(x,y);
-				}
-				std::cout << '\n';
-			}
-			std::cout << '\n';
-		}
-		void PrintFieldWithVisited(std::set<std::string>& visited)
-		{
-			std::vector<char> fieldCopy = this->field;
-			
-			std::stringstream coord;
-			for (std::string str : visited)
-			{
-				Coi2 p;
-				std::stringstream cstream(str);
-				cstream >> p.x;
-				cstream.get();
-				cstream >> p.y;
-				fieldCopy[p.y * fieldWidth + p.x] = 'o';
-			}
-			for (size_t y = 0; y < fieldHeight; y++)
-			{
-				for (size_t x = 0; x < fieldWidth; x++)
-				{
-					char ch = fieldCopy[y * fieldWidth + x];
-					if (ch == '.') std::cout << ' ';
-					else std::cout << fieldCopy[y*fieldWidth+x];
-				}
-				std::cout << '\n';
-			}
-			std::cout << '\n';
-		}
-		void PrintFieldWithPathway(std::vector<std::pair<int,int>> history)
-		{
-			std::vector<char> fieldCopy = this->field;
-
-			for (std::pair<int,int> p : history)
-			{
-				fieldCopy[p.second * fieldWidth + p.first] = '+';
-			}
-			for (size_t y = 0; y < fieldHeight; y++)
-			{
-				for (size_t x = 0; x < fieldWidth; x++)
-				{
-					char ch = fieldCopy[y * fieldWidth + x];
-					if (ch == '.') std::cout << ' ';
-					else std::cout << fieldCopy[y * fieldWidth + x];
-				}
-				std::cout << '\n';
-			}
-			std::cout << '\n';
-		}
-
 		Coi2 GetStartPos()
 		{
 			return portals["AA"][0];
@@ -102,7 +31,7 @@ namespace MazeDay20
 		}
 		int ShortestPath(Coi2 startpos, Coi2 endpos)
 		{
-			startpos.history.push_back({ startpos.x,startpos.y });
+			startpos.history.push_back({ startpos.x,startpos.y,startpos.recursiveDepthLevel });
 			std::queue<Coi2> queue;
 			queue.push(startpos);
 			std::set<std::string> visited;
@@ -119,11 +48,10 @@ namespace MazeDay20
 				{
 					if (visited.find(HashD20(n)) == visited.end())
 					{
-						n.steps++;
 						visited.insert(HashD20(n));
 						queue.push(n);
 					}
-					if (n.x == endpos.x && n.y == endpos.y)
+					if (n.x == endpos.x && n.y == endpos.y && n.recursiveDepthLevel == 0)
 					{
 						nSteps = n.steps;
 						PrintFieldWithPathway(n.history);
@@ -136,6 +64,64 @@ namespace MazeDay20
 		}
 
 	private: // Support methods
+		void PrintField()
+		{
+			for (size_t y = 0; y < fieldHeight; y++)
+			{
+				for (size_t x = 0; x < fieldWidth; x++)
+				{
+					std::cout << GetFieldChar(x, y);
+				}
+				std::cout << '\n';
+			}
+			std::cout << '\n';
+		}
+		void PrintFieldWithVisited(std::set<std::string>& visited)
+		{
+			std::vector<char> fieldCopy = this->field;
+
+			std::stringstream coord;
+			for (std::string str : visited)
+			{
+				Coi2 p;
+				std::stringstream cstream(str);
+				cstream >> p.x;
+				cstream.get();
+				cstream >> p.y;
+				fieldCopy[p.y * fieldWidth + p.x] = 'o';
+			}
+			for (size_t y = 0; y < fieldHeight; y++)
+			{
+				for (size_t x = 0; x < fieldWidth; x++)
+				{
+					char ch = fieldCopy[y * fieldWidth + x];
+					if (ch == '.') std::cout << ' ';
+					else std::cout << fieldCopy[y * fieldWidth + x];
+				}
+				std::cout << '\n';
+			}
+			std::cout << '\n';
+		}
+		void PrintFieldWithPathway(std::vector<mazeHistory> history)
+		{
+			std::vector<char> fieldCopy = this->field;
+
+			for (mazeHistory h : history)
+			{
+				fieldCopy[h.y * fieldWidth + h.x] = std::to_string(h.recDepth)[0];
+			}
+			for (size_t y = 0; y < fieldHeight; y++)
+			{
+				for (size_t x = 0; x < fieldWidth; x++)
+				{
+					char ch = fieldCopy[y * fieldWidth + x];
+					if (ch == '.') std::cout << ' ';
+					else std::cout << fieldCopy[y * fieldWidth + x];
+				}
+				std::cout << '\n';
+			}
+			std::cout << '\n';
+		}
 		char GetFieldChar(int x, int y)
 		{
 			return field[y * fieldWidth + x];
@@ -147,28 +133,52 @@ namespace MazeDay20
 		void GetWarpPosition(Coi2 pos, char ch1, int dir, std::vector<Coi2>& outputVec)
 		{
 			char ch2 = GetFieldChar(NextPosInDir(NextPosInDir(pos, dir), dir));
-			std::string str;
-			str += ch1; str += ch2; std::sort(str.begin(), str.end());
-			if (portals.find(str) != portals.end())
+			std::string warpStartString;
+			warpStartString += ch1; warpStartString += ch2; std::sort(warpStartString.begin(), warpStartString.end());
+			if (portals.find(warpStartString) != portals.end())
 			{
-				std::vector<Coi2> warpPositions = portals[str];
-				for (Coi2& p : warpPositions)
+				std::vector<Coi2> warpPositions = portals[warpStartString];
+				for (Coi2& p : warpPositions) // copy all attributes associated with current position under evaluation
 				{
 					Coi2 p_tmp = pos;
-					p_tmp.history.push_back({ p.x,p.y });
+					p_tmp.history.push_back({ p.x,p.y,p.recursiveDepthLevel });
 					p.history = p_tmp.history;
+					p.recursiveDepthLevel = p_tmp.recursiveDepthLevel;
+					p.steps = p_tmp.steps+1; // neighbor position implies 1 step added
 				}
-				if (warpPositions.size() == 1)
+				if (warpPositions.size() == 1) // We are at start (AA) or end (ZZ) of maze, as these only have one instance
 				{
-					warpPositions[0].steps = pos.steps;
-					outputVec.push_back(warpPositions[0]);
+					// When the maze is recursive (1) we only add the associated position when we are at recursive level 0 (2)
+					if (!isRecursiveMaze || pos.recursiveDepthLevel==0)
+					{
+						//warpPositions[0].steps = pos.steps;
+						outputVec.push_back(warpPositions[0]);
+					}
 				}
 				else
 				{
-					warpPositions[0].steps = pos.steps;
-					warpPositions[1].steps = pos.steps;
-					if (warpPositions[0] == pos) outputVec.push_back(warpPositions[1]);
-					else outputVec.push_back(warpPositions[0]);
+					if (isRecursiveMaze)
+					{
+						if (warpPositions[0] == pos) // Our current location is on inner donut, we are warping INward (deeper, increasing recursive depth)
+						{
+							warpPositions[1].recursiveDepthLevel++;
+							if (warpPositions[1].recursiveDepthLevel < portals.size())  // we don't need to explore more depth than #warp portals
+							outputVec.push_back(warpPositions[1]);
+						}
+						else // Our current location is on outer donut, we are warping OUTward (shallowe, decreasing recursive depth)
+						{
+							if (pos.recursiveDepthLevel != 0) // we can only warp OUTward if are not on recursive depth 0
+							{
+								warpPositions[0].recursiveDepthLevel--;
+								outputVec.push_back(warpPositions[0]);
+							}
+						}
+					}
+					else
+					{
+						if (warpPositions[0] == pos) outputVec.push_back(warpPositions[1]);
+						else outputVec.push_back(warpPositions[0]);
+					}
 				}
 			}
 		}
@@ -188,8 +198,8 @@ namespace MazeDay20
 							if (ch == '.')
 							{
 								Coi2 p_tmp = pos;
-								p_tmp.history.push_back({ pos.x,pos.y - 1 });
-								outputVec.push_back({ pos.x, pos.y - 1,pos.steps,p_tmp.history });
+								p_tmp.history.push_back({ pos.x,pos.y - 1,pos.recursiveDepthLevel });
+								outputVec.push_back({ pos.x, pos.y - 1,pos.steps+1,p_tmp.history,pos.recursiveDepthLevel });
 							}
 							else
 							{
@@ -207,8 +217,8 @@ namespace MazeDay20
 							if (ch == '.')
 							{
 								Coi2 p_tmp = pos;
-								p_tmp.history.push_back({ pos.x,pos.y + 1 });
-								outputVec.push_back({ pos.x, pos.y + 1,pos.steps,p_tmp.history });
+								p_tmp.history.push_back({ pos.x,pos.y + 1,pos.recursiveDepthLevel });
+								outputVec.push_back({ pos.x, pos.y + 1,pos.steps+1,p_tmp.history,pos.recursiveDepthLevel });
 							}
 							else
 							{
@@ -226,8 +236,8 @@ namespace MazeDay20
 							if (ch == '.')
 							{
 								Coi2 p_tmp = pos;
-								p_tmp.history.push_back({ pos.x-1,pos.y  });
-								outputVec.push_back({ pos.x-1, pos.y ,pos.steps,p_tmp.history });
+								p_tmp.history.push_back({ pos.x-1,pos.y ,pos.recursiveDepthLevel });
+								outputVec.push_back({ pos.x-1, pos.y ,pos.steps+1,p_tmp.history,pos.recursiveDepthLevel });
 							}
 							else
 							{
@@ -245,8 +255,8 @@ namespace MazeDay20
 							if (ch == '.')
 							{
 								Coi2 p_tmp = pos;
-								p_tmp.history.push_back({ pos.x+1,pos.y  });
-								outputVec.push_back({ pos.x+1, pos.y,pos.steps,p_tmp.history });
+								p_tmp.history.push_back({ pos.x+1,pos.y ,pos.recursiveDepthLevel });
+								outputVec.push_back({ pos.x+1, pos.y,pos.steps+1,p_tmp.history,pos.recursiveDepthLevel });
 							}
 							else
 							{
@@ -340,7 +350,9 @@ namespace MazeDay20
 			str.append(std::to_string(pos.x));
 			str.append("_");
 			str.append(std::to_string(pos.y));
-			return str;
+			str.append("_");
+str.append(std::to_string(pos.recursiveDepthLevel));
+return str;
 		}
 
 	private: // Initialization methods
@@ -372,6 +384,7 @@ namespace MazeDay20
 				}
 			}
 			fieldHeight = field.size() / fieldWidth;
+			mazeCenterPoint = { ((int)fieldWidth - 1) / 2,((int)fieldHeight - 1) / 2 };
 		}
 		void MapPortals()
 		{
@@ -380,13 +393,13 @@ namespace MazeDay20
 				for (size_t x = 0; x < fieldWidth; x++)
 				{
 					Coi2 pos = { x,y };
-					char ch1 = GetFieldChar(x,y);
+					char ch1 = GetFieldChar(x, y);
 					if (IsCap(ch1))
 					{
 						int dir = NeighborIsDot(x, y);
 						if (dir != 0)
 						{
-							char ch2 = GetFieldChar(NextPosInDir(pos,OpposideDir(dir)));
+							char ch2 = GetFieldChar(NextPosInDir(pos, OpposideDir(dir)));
 							std::string str; str += ch2; str += ch1; std::sort(str.begin(), str.end());
 							Coi2 nextpos = NextPosInDir(pos, dir);
 							if (std::find(portals[str].begin(), portals[str].end(), nextpos) == portals[str].end())
@@ -412,6 +425,36 @@ namespace MazeDay20
 					}
 				}
 			}
+			//	Make sure all warp destination vectors are sorted based on distance from centerpoint of the maze. 
+			//	Reason: accounting for maze recursive depth (puzzle part 2)
+			for (auto& e : portals)
+			{
+				// This is a very interesting and crucial aspect of Day20-part 2: we determine whether warp stations are on the inner or outer
+				// side of the donut. The way we do this is by making sure the map values are always sorted from <inner donut> to <outer donut>
+				// positions.
+
+				// My first thought was sorting by distance from the centerposition of the maze. Unpon deeper reflection though,
+				// this is not correct. We need discrete logic to determine the sorting order.
+
+				// SO THIS DID NOT WORK:
+				// We sort using a lambda function with capture clause [] to reference data member mazeCenterPos to determine the sorting order
+				// Coi2 center = mazeCenterPoint;
+				/*
+				std::sort(e.second.begin(), e.second.end(), [this](Coi2 a, Coi2 b)
+					{
+						int a_distanceFromCenter = (abs(a.x - mazeCenterPoint.x) + abs(a.y - mazeCenterPoint.y));
+						int b_distanceFromCenter = (abs(b.x - mazeCenterPoint.x) + abs(b.y - mazeCenterPoint.y));
+						return (a_distanceFromCenter < b_distanceFromCenter);
+					});
+				*/
+
+				// BUT THIS DOES:
+				if (e.second[0].x == 2 || e.second[0].x == (fieldWidth - 3) ||  // this means this warp position is on one of the outer donut verticals
+					e.second[0].y == 2 || e.second[0].y == (fieldHeight - 3) )  // this  ,,    ,,   ,,      ,,    ,,   ,,    ,,     ,,    ,,  horizontals
+				{
+					std::reverse(e.second.begin(), e.second.end());
+				}
+			}
 		}
 
 	private: // Data members
@@ -419,5 +462,7 @@ namespace MazeDay20
 		std::vector<char> field;
 		size_t fieldWidth;
 		size_t fieldHeight;
+		Coi2 mazeCenterPoint;
+		const bool isRecursiveMaze;
 	};
 }

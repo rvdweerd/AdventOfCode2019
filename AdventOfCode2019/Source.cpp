@@ -3,16 +3,26 @@
 //#include "PastDaysSolutions.h"
 #include "Day20HelperFunctions.h"
 
-void Day20()
+void Day20a()
 {
-	MazeDay20::Maze maze;
-	maze.PrintField();
+	bool recursiveMazeOption = false;
+	MazeDay20::Maze maze(recursiveMazeOption);
 	Coi2 startpos = maze.GetStartPos();
 	Coi2 endpos = maze.GetEndPos();
 	int answer = maze.ShortestPath(startpos, endpos);
 	std::cout << "Steps to exit: " << answer;
-
+	std::cout << "\nPress Enter to continue."; std::cin.get();
 }
+void Day20b()
+{
+	bool recursiveMazeOption = true;
+	MazeDay20::Maze maze(recursiveMazeOption);
+	Coi2 startpos = maze.GetStartPos();
+	Coi2 endpos = maze.GetEndPos();
+	int answer = maze.ShortestPath(startpos, endpos);
+	std::cout << "Steps to exit: " << answer;
+}
+
 
 int main()
 {
@@ -20,8 +30,8 @@ int main()
 	// So, for example, to run Day 7 challenge:
 	// --> save data to "Resources/day7ainput.txt" and "Resources/day7binput.txt"
 	// --> run the functions Day7a(); and/or Day7b(); in main()
-	//Day19b_demo();
-	Day20();
+	Day20a();
+	Day20b();
 
 	while (!_kbhit());
 	return 0;
