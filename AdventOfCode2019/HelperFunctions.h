@@ -11,6 +11,7 @@ struct Coi2
 	int x;
 	int y;
 	int steps = 0;
+	std::vector<std::pair<int,int>> history;
 	friend bool operator==(const Coi2& p1, const Coi2& p2)
 	{
 		return (p1.x == p2.x) && (p1.y == p2.y);

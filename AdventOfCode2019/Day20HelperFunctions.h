@@ -43,23 +43,55 @@ namespace MazeDay20
 				}
 				std::cout << '\n';
 			}
+			std::cout << '\n';
 		}
 		void PrintFieldWithVisited(std::set<std::string>& visited)
 		{
-			//std::vector<char> fieldCopy = this->field;
-			//for (Coi2 p : visited)
-			//{
-			//	fieldCopy[p.y * fieldWidth + p.x] = 'X';
-			//}
-			//for (size_t y = 0; y < fieldHeight; y++)
-			//{
-			//	for (size_t x = 0; x < fieldWidth; x++)
-			//	{
-			//		std::cout << fieldCopy[y*fieldWidth+x];
-			//	}
-			//	std::cout << '\n';
-			//}
+			std::vector<char> fieldCopy = this->field;
+			
+			std::stringstream coord;
+			for (std::string str : visited)
+			{
+				Coi2 p;
+				std::stringstream cstream(str);
+				cstream >> p.x;
+				cstream.get();
+				cstream >> p.y;
+				fieldCopy[p.y * fieldWidth + p.x] = 'o';
+			}
+			for (size_t y = 0; y < fieldHeight; y++)
+			{
+				for (size_t x = 0; x < fieldWidth; x++)
+				{
+					char ch = fieldCopy[y * fieldWidth + x];
+					if (ch == '.') std::cout << ' ';
+					else std::cout << fieldCopy[y*fieldWidth+x];
+				}
+				std::cout << '\n';
+			}
+			std::cout << '\n';
 		}
+		void PrintFieldWithPathway(std::vector<std::pair<int,int>> history)
+		{
+			std::vector<char> fieldCopy = this->field;
+
+			for (std::pair<int,int> p : history)
+			{
+				fieldCopy[p.second * fieldWidth + p.first] = '+';
+			}
+			for (size_t y = 0; y < fieldHeight; y++)
+			{
+				for (size_t x = 0; x < fieldWidth; x++)
+				{
+					char ch = fieldCopy[y * fieldWidth + x];
+					if (ch == '.') std::cout << ' ';
+					else std::cout << fieldCopy[y * fieldWidth + x];
+				}
+				std::cout << '\n';
+			}
+			std::cout << '\n';
+		}
+
 		Coi2 GetStartPos()
 		{
 			return portals["AA"][0];
@@ -70,12 +102,12 @@ namespace MazeDay20
 		}
 		int ShortestPath(Coi2 startpos, Coi2 endpos)
 		{
+			startpos.history.push_back({ startpos.x,startpos.y });
 			std::queue<Coi2> queue;
 			queue.push(startpos);
 			std::set<std::string> visited;
 			visited.insert(HashD20(startpos));
 			int nSteps = 0;
-
 			while (!queue.empty())
 			{
 				//ClearScreen();
@@ -85,20 +117,22 @@ namespace MazeDay20
 				std::vector<Coi2> neighbors = GetNeighborsD20(currentpos);
 				for (Coi2 n : neighbors)
 				{
-					if (n.x == endpos.x && n.y == endpos.y)
-					{
-						nSteps = n.steps;
-						break;
-					}
 					if (visited.find(HashD20(n)) == visited.end())
 					{
 						n.steps++;
 						visited.insert(HashD20(n));
 						queue.push(n);
 					}
+					if (n.x == endpos.x && n.y == endpos.y)
+					{
+						nSteps = n.steps;
+						PrintFieldWithPathway(n.history);
+						while (!queue.empty()) queue.pop();
+						break;
+					}
 				}
 			}
-			return nSteps+1;
+			return nSteps;
 		}
 
 	private: // Support methods
@@ -118,6 +152,12 @@ namespace MazeDay20
 			if (portals.find(str) != portals.end())
 			{
 				std::vector<Coi2> warpPositions = portals[str];
+				for (Coi2& p : warpPositions)
+				{
+					Coi2 p_tmp = pos;
+					p_tmp.history.push_back({ p.x,p.y });
+					p.history = p_tmp.history;
+				}
 				if (warpPositions.size() == 1)
 				{
 					warpPositions[0].steps = pos.steps;
@@ -147,7 +187,9 @@ namespace MazeDay20
 						{
 							if (ch == '.')
 							{
-								outputVec.push_back({ pos.x, pos.y - 1,pos.steps });
+								Coi2 p_tmp = pos;
+								p_tmp.history.push_back({ pos.x,pos.y - 1 });
+								outputVec.push_back({ pos.x, pos.y - 1,pos.steps,p_tmp.history });
 							}
 							else
 							{
@@ -164,7 +206,9 @@ namespace MazeDay20
 						{
 							if (ch == '.')
 							{
-								outputVec.push_back({ pos.x, pos.y + 1,pos.steps });
+								Coi2 p_tmp = pos;
+								p_tmp.history.push_back({ pos.x,pos.y + 1 });
+								outputVec.push_back({ pos.x, pos.y + 1,pos.steps,p_tmp.history });
 							}
 							else
 							{
@@ -181,7 +225,9 @@ namespace MazeDay20
 						{
 							if (ch == '.')
 							{
-								outputVec.push_back({ pos.x-1, pos.y ,pos.steps });
+								Coi2 p_tmp = pos;
+								p_tmp.history.push_back({ pos.x-1,pos.y  });
+								outputVec.push_back({ pos.x-1, pos.y ,pos.steps,p_tmp.history });
 							}
 							else
 							{
@@ -198,7 +244,9 @@ namespace MazeDay20
 						{
 							if (ch == '.')
 							{
-								outputVec.push_back({ pos.x+1, pos.y,pos.steps });
+								Coi2 p_tmp = pos;
+								p_tmp.history.push_back({ pos.x+1,pos.y  });
+								outputVec.push_back({ pos.x+1, pos.y,pos.steps,p_tmp.history });
 							}
 							else
 							{
