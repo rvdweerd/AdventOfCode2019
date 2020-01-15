@@ -157,6 +157,7 @@
     <ClInclude Include="HelperFunctions.h" />
     <ClInclude Include="IncludesUsed.h" />
     <ClInclude Include="IntCode.h" />
+    <ClInclude Include="IntCode_char.h" />
     <ClInclude Include="IntCode_simple.h" />
     <ClInclude Include="Maze.h" />
     <ClInclude Include="Maze_simple.h" />
@@ -167,7 +168,7 @@
     <ClInclude Include="TestingPqueues.h" />
   </ItemGroup>
   <ItemGroup>
-    <Text Include="day20input.txt" />
+    <Text Include="Day21input.txt" />
     <Text Include="Resources\day10input.txt" />
     <Text Include="Resources\day11input.txt" />
     <Text Include="Resources\day13input.txt" />
@@ -183,6 +184,7 @@
     <Text Include="Resources\day19input.txt" />
     <Text Include="Resources\day19testinput.txt" />
     <Text Include="Resources\day1input.txt" />
+    <Text Include="Resources\day20input.txt" />
     <Text Include="Resources\day2input.txt" />
     <Text Include="Resources\day3input.txt" />
     <Text Include="Resources\day5input.txt" />

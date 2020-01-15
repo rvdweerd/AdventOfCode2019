@@ -65,6 +65,9 @@
     <ClInclude Include="Day20HelperFunctions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="IntCode_char.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="Resources\day11input.txt">
@@ -139,7 +142,10 @@
     <Text Include="Resources\day19testinput.txt">
       <Filter>Resource Files</Filter>
     </Text>
-    <Text Include="day20input.txt" />
+    <Text Include="Resources\day20input.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="Day21input.txt" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\maze_instr.bin">

@@ -360,7 +360,7 @@ return str;
 		{
 			fieldWidth = 1; // we don't know this yet, this is the starting assumption
 			bool fieldWidthSet = false;
-			std::ifstream in("day20input.txt");
+			std::ifstream in("Resources/day20input.txt");
 			while (!in.eof())
 			{
 				char ch;

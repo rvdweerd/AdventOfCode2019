@@ -1,28 +1,38 @@
 #pragma once
 #include "IncludesUsed.h"
 //#include "PastDaysSolutions.h"
-#include "Day20HelperFunctions.h"
+//#include "Day20HelperFunctions.h"
 
-void Day20a()
+void Day21a()
 {
-	bool recursiveMazeOption = false;
-	MazeDay20::Maze maze(recursiveMazeOption);
-	Coi2 startpos = maze.GetStartPos();
-	Coi2 endpos = maze.GetEndPos();
-	int answer = maze.ShortestPath(startpos, endpos);
-	std::cout << "Steps to exit: " << answer;
-	std::cout << "\nPress Enter to continue."; std::cin.get();
+	Day21::IntCode_char compu("Day21input.txt");
+	std::string s1;
+	s1 += "NOT C J\n";
+	s1 += "AND D J\n";
+	s1 += "NOT A T\n";
+	s1 += "OR T J\n";
+	s1 += "WALK\n";
+	compu.Run(s1);
+	std::cout << '\n';
 }
-void Day20b()
+void Day21b()
 {
-	bool recursiveMazeOption = true;
-	MazeDay20::Maze maze(recursiveMazeOption);
-	Coi2 startpos = maze.GetStartPos();
-	Coi2 endpos = maze.GetEndPos();
-	int answer = maze.ShortestPath(startpos, endpos);
-	std::cout << "Steps to exit: " << answer;
+	Day21::IntCode_char compu("Day21input.txt");
+	std::string s1;
+	s1 += "NOT A J\n";
+	s1 += "NOT B T\n";
+	s1 += "OR T J\n";
+	s1 += "NOT C T\n";
+	s1 += "OR T J\n";
+	s1 += "AND D J\n";
+	s1 += "NOT E T\n";
+	s1 += "NOT J T\n";
+	s1 += "OR E T\n";
+	s1 += "OR H T\n";
+	s1 += "AND T J\n";
+	s1 += "RUN\n";
+	compu.Run(s1);
 }
-
 
 int main()
 {
@@ -30,8 +40,8 @@ int main()
 	// So, for example, to run Day 7 challenge:
 	// --> save data to "Resources/day7ainput.txt" and "Resources/day7binput.txt"
 	// --> run the functions Day7a(); and/or Day7b(); in main()
-	Day20a();
-	Day20b();
+	Day21a();
+	Day21b();
 
 	while (!_kbhit());
 	return 0;

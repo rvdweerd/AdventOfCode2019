@@ -1884,4 +1884,53 @@ void Day19b_WithBinarySearch()
 		std::cout << "So, the puzzle answer((x) * 10000 + (y)) = " << (10000 * (xFirstFit)+(yFirstFit)) << '\n';
 	}
 }
+void Day20a()
+{
+	bool recursiveMazeOption = false;
+	MazeDay20::Maze maze(recursiveMazeOption);
+	Coi2 startpos = maze.GetStartPos();
+	Coi2 endpos = maze.GetEndPos();
+	int answer = maze.ShortestPath(startpos, endpos);
+	std::cout << "Steps to exit: " << answer;
+	std::cout << "\nPress Enter to continue."; std::cin.get();
+}
+void Day20b()
+{
+	bool recursiveMazeOption = true;
+	MazeDay20::Maze maze(recursiveMazeOption);
+	Coi2 startpos = maze.GetStartPos();
+	Coi2 endpos = maze.GetEndPos();
+	int answer = maze.ShortestPath(startpos, endpos);
+	std::cout << "Steps to exit: " << answer;
+}
+void Day21a()
+{
+	Day21::IntCode_char compu("Day21input.txt");
+	std::string s1;
+	s1 += "NOT C J\n";
+	s1 += "AND D J\n";
+	s1 += "NOT A T\n";
+	s1 += "OR T J\n";
+	s1 += "WALK\n";
+	compu.Run(s1);
+	std::cout << '\n';
+}
+void Day21b()
+{
+	Day21::IntCode_char compu("Day21input.txt");
+	std::string s1;
+	s1 += "NOT A J\n";
+	s1 += "NOT B T\n";
+	s1 += "OR T J\n";
+	s1 += "NOT C T\n";
+	s1 += "OR T J\n";
+	s1 += "AND D J\n";
+	s1 += "NOT E T\n";
+	s1 += "NOT J T\n";
+	s1 += "OR E T\n";
+	s1 += "OR H T\n";
+	s1 += "AND T J\n";
+	s1 += "RUN\n";
+	compu.Run(s1);
+}
 
