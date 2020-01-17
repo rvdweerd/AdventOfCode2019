@@ -399,9 +399,7 @@ std::vector<std::pair<Key, int>> GetAvailableKeyPositions(
 
 std::vector<std::vector<std::pair<Key, int>>> GetAvailableKeyPositionsForSubFields(
 	KeyPosition4D& curKeyPos4D,
-	//const std::vector<std::vector<char>>& subFields,
 	const std::vector<char>& field,
-	//const int& subFieldWidth,
 	const int& fieldWidth,
 	std::set<std::string>& visitedKeys,
 	std::map<std::string, CacheInfo4D>& cache,
