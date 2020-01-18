@@ -80,10 +80,10 @@ void Day22Test()
 }
 
 
-void Day22()
+void Day22a_literal()
 {
 	// Initialize the deck
-	static constexpr int n = 10007;
+	static constexpr int n = 10;// 007;
 	std::vector<int> deck;
 	for (size_t i = 0; i < n; i++)
 	{
@@ -126,16 +126,89 @@ void Day22()
 				std::cout << std::setw(5) << deck[i] << ", ";
 			}
 			std::cout << " ... ] => ";
-			std::cout << "The position of card 2019 is: " << int(std::find(deck.begin(), deck.end(), 2019) - deck.begin()) << "\n";
+			std::cout << "The position of card "<<2019%deck.size()<<" is: " << int(std::find(deck.begin(), deck.end(), 2019%deck.size()) - deck.begin()) << "\n";
 		}
 
-		size_t index2019 = (std::find(deck.begin(), deck.end(), 2019) - deck.begin());
-		std::cout << "After shuffeling, the position of card 2019 is: " << index2019 << '\n';
-		std::cout << "The 2019th card in the shuffled deck is: " << deck[2019];
+		size_t index2019 = (std::find(deck.begin(), deck.end(), 2019 % deck.size()) - deck.begin());
+		std::cout << "After shuffeling, the position of card " << 2019 % deck.size() << " is: " << index2019 << '\n';
+		std::cout << "The " << 2019 % deck.size() << "th card in the shuffled deck is: " << deck[2019%deck.size()];
 	}
 	
 	
 	
+	return;
+}
+enum class ShuffleType
+{
+	DIN,
+	DWI,
+	CUT
+};
+struct MOVE
+{
+	ShuffleType sType;
+	int n;
+};
+int NewIndexAfterShuffling(const int deckSize, const int cardNumber, const std::vector<MOVE>& moves)
+{
+	int newIndex = cardNumber;
+	for (MOVE m : moves)
+	{
+		switch (m.sType)
+		{
+		case ShuffleType::DIN:
+			newIndex = (deckSize - newIndex - 1) % deckSize;
+			break;
+		case ShuffleType::CUT:
+			newIndex = (newIndex - m.n + deckSize) % deckSize;
+			break;
+		case ShuffleType::DWI:
+			newIndex = (newIndex * m.n ) % deckSize;
+			break;
+		}
+	}
+	return newIndex;
+}
+void Day22a_clean()
+{
+	// Parse all intructions from the input file into a vector
+	std::vector<MOVE> moves;
+	{
+		std::ifstream in("Resources/day22input.txt");
+		for (std::string str; std::getline(in, str, '\n');)
+		{
+			// retrieve step integer from instruction (if present)
+			int n = 0;
+			if (str.back() >= '0' && str.back() <= '9')
+			{
+				size_t i = str.rfind(' ');
+				n = stoi(str.substr(i));
+			}
+			// push back intstruction onto moves vector
+			if (str.find("cut")!=std::string::npos) // instruction: cut
+			{
+				moves.push_back({ ShuffleType::CUT,n });
+			}
+			else if (str.find("wit") != std::string::npos) // instruction: deal with increment 
+			{
+				moves.push_back({ ShuffleType::DWI,n });
+			}
+			else if (str.find("int") != std::string::npos) // instruction: deal into new stack
+			{
+				moves.push_back({ ShuffleType::DIN,0 });
+			}
+			else
+			{
+				std::cout << "error reading instructions.\n";
+			}	
+		}
+	}
+
+	// Apply moves
+	int deckSize = 10007;
+	int cardNumber = 2019;
+	int newIndex = NewIndexAfterShuffling(deckSize, cardNumber, moves);
+	std::cout << "After " << moves.size() << " sufffle moves, the new position of card " << cardNumber << " is: " << newIndex;
 	return;
 }
 
@@ -146,8 +219,9 @@ int main()
 	// --> save data to "Resources/day7ainput.txt" and "Resources/day7binput.txt"
 	// --> run the functions Day7a(); and/or Day7b(); in main()
 	//Day22Test();
-	Day22();
+	Day22a_clean();
 	
+
 
 	while (!_kbhit());
 	return 0;
