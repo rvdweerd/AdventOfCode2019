@@ -3,93 +3,16 @@
 //#include "PastDaysSolutions.h"
 //#include "Day20HelperFunctions.h"
 
-void DealIntoNew(std::vector<int>& deck)
-{
-	std::reverse(deck.begin(), deck.end());
-	std::cout << "din      ; ";
-	return;
-}
-void CutNCards(std::vector<int>& deck, int n)
-{
-	if (n > 0)
-	{
-		std::cout << "cut " << std::setw(5)<< n << "; ";
-		auto it = deck.begin();
-		for (int i=0; i<n;i++)
-		{
-			deck.push_back(*it);
-			it = deck.erase(it);
-		}
-	}
-	else if (n < 0)
-	{
-		std::cout << "cut " << std::setw(5)<< n << "; ";
-		//CutNCards(deck, deck.size() + n);
-		auto it = deck.begin();
-		auto end = deck.size() + n;
-		for (int i = 0; i < end; i++)
-		{
-			deck.push_back(*it);
-			it = deck.erase(it);
-		}
-	}
-	return;
-}
-void DealWithIncrement(std::vector<int>& deck, int n)
-{
-	int len = (int)deck.size();
-	std::vector<int> newVec;  newVec.assign(deck.size(),0);
-	std::cout << "dwi " << std::setw(5)<<n << "; ";
-	std::vector<int> copy = deck;
-	int offset = 0;
-	for (int i = 0; i < copy.size(); i++)
-	{
-		if ((i * n) % copy.size() == 0 & i != 0)
-		{
-			offset++;
-		}
-		int index = (i * n) % copy.size()+offset;
-		newVec[index] = copy[i];
-	}
-	deck = newVec;
-	return;
-}
-void Day22Test()
+void Day22a_demo()
 {
 	// Initialize the deck
-	static constexpr int n = 10;// 007;
+	static constexpr int n = 10007;
 	std::vector<int> deck;
 	for (size_t i = 0; i < n; i++)
 	{
 		deck.push_back(i);
 	}
 
-	std::vector<std::vector<int>> tests;
-
-	for (int i = 1; i < 10; i++)
-	{
-		std::vector<int> copy = deck;
-		DealWithIncrement(copy, i);
-		std::cout <<  " yields: ";
-		for (int v : copy)
-		{
-			std::cout << v << ", ";
-		}
-		std::cout << "\n";
-	}
-}
-
-
-void Day22a_literal()
-{
-	// Initialize the deck
-	static constexpr int n = 10;// 007;
-	std::vector<int> deck;
-	for (size_t i = 0; i < n; i++)
-	{
-		deck.push_back(i);
-	}
-	
 	// Execute all intructions in the input file
 	{
 		std::ifstream in("Resources/day22input.txt");
@@ -126,91 +49,82 @@ void Day22a_literal()
 				std::cout << std::setw(5) << deck[i] << ", ";
 			}
 			std::cout << " ... ] => ";
-			std::cout << "The position of card "<<2019%deck.size()<<" is: " << int(std::find(deck.begin(), deck.end(), 2019%deck.size()) - deck.begin()) << "\n";
+			std::cout << "The position of card " << 2019 % deck.size() << " is: " << int(std::find(deck.begin(), deck.end(), 2019 % deck.size()) - deck.begin()) << "\n";
 		}
 
 		size_t index2019 = (std::find(deck.begin(), deck.end(), 2019 % deck.size()) - deck.begin());
 		std::cout << "After shuffeling, the position of card " << 2019 % deck.size() << " is: " << index2019 << '\n';
-		std::cout << "The " << 2019 % deck.size() << "th card in the shuffled deck is: " << deck[2019%deck.size()];
+		std::cout << "The " << 2019 % deck.size() << "th card in the shuffled deck is: " << deck[2019 % deck.size()]<<"\n\n";
 	}
-	
-	
-	
 	return;
 }
-enum class ShuffleType
-{
-	DIN,
-	DWI,
-	CUT
-};
-struct MOVE
-{
-	ShuffleType sType;
-	int n;
-};
-int NewIndexAfterShuffling(const int deckSize, const int cardNumber, const std::vector<MOVE>& moves)
-{
-	int newIndex = cardNumber;
-	for (MOVE m : moves)
-	{
-		switch (m.sType)
-		{
-		case ShuffleType::DIN:
-			newIndex = (deckSize - newIndex - 1) % deckSize;
-			break;
-		case ShuffleType::CUT:
-			newIndex = (newIndex - m.n + deckSize) % deckSize;
-			break;
-		case ShuffleType::DWI:
-			newIndex = (newIndex * m.n ) % deckSize;
-			break;
-		}
-	}
-	return newIndex;
-}
-void Day22a_clean()
+void Day22a()
 {
 	// Parse all intructions from the input file into a vector
 	std::vector<MOVE> moves;
-	{
-		std::ifstream in("Resources/day22input.txt");
-		for (std::string str; std::getline(in, str, '\n');)
-		{
-			// retrieve step integer from instruction (if present)
-			int n = 0;
-			if (str.back() >= '0' && str.back() <= '9')
-			{
-				size_t i = str.rfind(' ');
-				n = stoi(str.substr(i));
-			}
-			// push back intstruction onto moves vector
-			if (str.find("cut")!=std::string::npos) // instruction: cut
-			{
-				moves.push_back({ ShuffleType::CUT,n });
-			}
-			else if (str.find("wit") != std::string::npos) // instruction: deal with increment 
-			{
-				moves.push_back({ ShuffleType::DWI,n });
-			}
-			else if (str.find("int") != std::string::npos) // instruction: deal into new stack
-			{
-				moves.push_back({ ShuffleType::DIN,0 });
-			}
-			else
-			{
-				std::cout << "error reading instructions.\n";
-			}	
-		}
-	}
+	LoadMoves(moves);
 
-	// Apply moves
-	int deckSize = 10007;
-	int cardNumber = 2019;
-	int newIndex = NewIndexAfterShuffling(deckSize, cardNumber, moves);
-	std::cout << "After " << moves.size() << " sufffle moves, the new position of card " << cardNumber << " is: " << newIndex;
-	return;
+	LL N = 10007;
+	LL startIndex = 2019;
+	LL newIndex = ApplyMoves(startIndex, N, moves);
+
+	std::cout << "After " << moves.size() << " sufffle moves, the new position of card " << startIndex << " is: " << newIndex<< "\n\n";
 }
+void Day22b()
+{
+	// For this challenge I had to revert to the Subreddit for aoc2019 since my modular math was a bit rusty.
+	// Key resources to help solve this were:
+	// => Wikipedia on Modular Arithmaticand Modular Multiplicative Inverse
+	// => CP algorithms on Binary Exponentiation : https://cp-algorithms.com/algebra/binary-exp.html
+	// => CP algorithms on the Extended Euclidean Algo : https://cp-algorithms.com/algebra/extended-euclid-algorithm.html
+	// => cs.stackexchange on Modular Multiplicationand avoiding int64 overflow : https://cs.stackexchange.com/questions/77016/modular-multiplication
+	
+	// Parse all intructions from the input file into a vector
+	std::vector<MOVE> moves;
+	LoadMoves(moves);
+
+	// Define the tranformation function F(i) as the function that return the new index of position i after applying all moves.
+	// We need to find the linear composition of the inversed transformation function 
+	//
+	//		F_inv(i) = ALPHA * i + BETA
+	//
+	// In order to calculate ALPHA and BETA, we will apply F_inv(i) to our endposition X=2020 twice. This yields:
+	//		Y = F_inv(X)
+	//		Z = F_inv(Y*) = F_inv(F_inv(X))
+	// 
+	// With these results, we can calculate ALPHA and BETA, remembering that all is under modulo of N
+	//		ALPHA = (Y-Z) * MMI(X-Y+N,N) % N
+	//		BETA  = (Y-ALPHA*X) % N
+	// (where MMI = modular multiplicative inverse ax==1(mod M) )
+	LL X = 2020;
+	LL N = 119315717514047;
+
+	// Apply the moves in reverse order to the endposition X referred to in the question (2020) to the deck size N
+	std::vector<MOVE> moves_reversed(moves);
+	std::reverse(moves_reversed.begin(), moves_reversed.end());
+	LL Y = ApplyReverseMoves(X, N, moves_reversed);
+	LL Z = ApplyReverseMoves(Y, N, moves_reversed);
+	LL ALPHA = mul_mod((Y - Z), MMI(X - Y + N, N), N) % N;
+	LL BETA = (Y - mul_mod(ALPHA, X, N)) % N;
+
+	// Now we are asked to backtrack an insane amount of nShuffles
+	// Writing out the inverse transformation function n times shows a pattern that contains a geomatric series:
+	//
+	// F_inv^n(i) = ALPHA^n * i + ALPHA^(n-1)*BETA + APLHA^(n-2)*BETA + ... + ALPHA^(0)*BETA = 
+	//
+	//			  = ALPHA^n * i + (ALPHA^n-1) / (ALPHA-1) * BETA
+	//
+	// And let's not forget this is still in bloody modulo N
+	LL nShuffles = 101741582076661;
+	LL startIndex =	(	mul_mod(binpow_undermod(ALPHA, nShuffles, N), X, N) + 
+						mul_mod(mul_mod((binpow_undermod(ALPHA, nShuffles, N) - 1), MMI(ALPHA - 1, N), N), BETA, N) % N  
+					) % N;
+
+	// Print results
+	std::cout << "The card that ends up in position 2020 after " << nShuffles << " shuffles is: " << startIndex;
+	std::cout << "\nNow get back to work!";
+}
+
 
 int main()
 {
@@ -219,9 +133,12 @@ int main()
 	// --> save data to "Resources/day7ainput.txt" and "Resources/day7binput.txt"
 	// --> run the functions Day7a(); and/or Day7b(); in main()
 	//Day22Test();
-	Day22a_clean();
-	
-
+	//Day22a_literal();
+	//Day22a_clean1();
+	//Day22a_clean2();
+	Day22a_demo();
+	Day22a();
+	Day22b();
 
 	while (!_kbhit());
 	return 0;
