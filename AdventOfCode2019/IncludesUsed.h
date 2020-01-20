@@ -11,6 +11,8 @@
 #include <conio.h>
 #include "IntCode.h"
 #include "IntCode_simple.h"
+#include "IntCode_char.h"
+#include "IntCode_net.h"
 #include "HelperFunctions.h"
 #include "Planet.h"
 #include <iomanip>
@@ -21,13 +23,13 @@
 #include "PlanetSys.h"
 #include <utility>
 #include <stack>
+
 #include "Maze.h"
 #include "Maze_simple.h"
 #include <random>
 #include "SimpGraph.h"
 #include <queue>
 #include <cassert>
-#include "IntCode_char.h"
 //#include "Day18HelperFunctions.h"
 //#include "Day19HelperFunctions.h"
 //#include "Day20HelperFunctions.h"

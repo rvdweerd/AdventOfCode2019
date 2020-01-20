@@ -2,149 +2,97 @@
 #include "IncludesUsed.h"
 //#include "PastDaysSolutions.h"
 //#include "Day20HelperFunctions.h"
-#include "IntCode_net.h"
 
-void Day23a()
+void PrintEris(const std::string& field, int fieldWidth)
 {
-	// Initialize the computer network
-	std::map<int, IntCode_net*> compNet;
-	for (int i = 0; i < 50; i++)
+	for (int i = 0; i < field.size(); i++)
 	{
-		compNet.emplace( i , new IntCode_net("Resources/day23input.txt"));
-		std::vector<long long int> retVec = compNet[i]->Run({ i });
+		if (i % fieldWidth == 0 && i!=0) std::cout << '\n';
+		std::cout << field[i];
 	}
-
-	// Run
-	// Principle: loop the computers to pass -1 values. When a response is received, put these on a global queue
-	// Handle queue responses (and add any subsequent responses to the queue) until the queue is empty,
-	// then go back to looping with -1 values.
-	std::queue<long long int> queue;
-	bool CeaseOps = false;
-	int instructionCount = 0;
-	while (!CeaseOps)
+	std::cout << '\n';
+}
+unsigned int HashToUInt(const std::string& field)
+{
+	unsigned int res = 0b0;
+	unsigned int mash = 0b1;
+	for (int i = 0; i < field.size(); i++)
 	{
-		for (int i = 0; i < 50; i++) // loop the network for responses
+		if (field[i] == '#')
 		{
+			// Set ith bit to 1
+			res = res | mash;
+		}
+		mash <<= 1;
+	}
+	return res;
+}
+std::string ToBin(unsigned int n, int min_digits = 0)
+{
+	std::string bin_str;
+	for (int count = 0; n != 0 || count < min_digits; n >>= 1, count++)
+	{
+		bin_str.push_back(bool(n & 0b1) ? '1' : '0');
+	}
+	std::reverse(bin_str.begin(), bin_str.end());
+	return bin_str;
+}
+bool bugAt(int x, int y, const std::string& field, const int fieldWidth)
+{
+	return int(field[y * fieldWidth + x] == '#');
+}
+int countAdjacentBugs(int x, int y, const std::string& field, const int fieldWidth)
+{
+	int fieldHeight = field.size() / fieldWidth;
+	int count = 0;
+	if (y != 0)				count += bugAt(x, y - 1, field, fieldWidth); // CHECK NORTH
+	if (y != fieldHeight-1) count += bugAt(x, y + 1, field, fieldWidth); // CHECK SOUTH
+	if (x != 0)				count += bugAt(x - 1, y, field, fieldWidth); // CHECK WEST
+	if (x != fieldWidth-1)	count += bugAt(x + 1, y, field, fieldWidth); // CHECK EAST
+	return count;
+}
+void ApplyTimeStep(std::string& field, const int fieldWidth)
+{
+	std::string field_copy = field;
+	for (int y = 0; y < field.size() / fieldWidth; y++)
+	{
+		for (int x = 0; x < fieldWidth; x++)
+		{
+			if (bugAt(x, y, field, fieldWidth))
 			{
-				std::cout << "Passing to comp: " << i << ", instruction X=" << -1 << '\n';
-				std::cout << "Receiving back : ";
-				std::vector<long long int> retVec = compNet[i]->Run({ -1 });
-
-				// Add responses to the queue (note: we assume output adheres to instruction format [id,X,Y]
-				for (auto v : retVec) queue.push(v);
+				if (countAdjacentBugs(x, y, field, fieldWidth) != 1) field_copy[y * fieldWidth + x] = '.';
 			}
-
-			// Handle all queue instructions until empty
-			while (!queue.empty())
+			else
 			{
-				// Retrieve instruction at front of queue [id,X,Y]
-				int compId = (int)queue.front(); queue.pop(); instructionCount++;
-				long long int instr1 = queue.front(); queue.pop();
-				long long int instr2 = queue.front(); queue.pop();
-				if (compId == 255)
-				{
-					std::cout << "Packet sent to address 255. Y value = " << instr2;
-					CeaseOps = true;
-					break;
-				}
-				std::cout << "Passing to comp: " << compId << ", instruction X=" << instr1 << ", Y=" << instr2 << '\n';
-				std::cout << "Receiving back : ";
-				std::vector<long long int> retVec = compNet[compId]->Run({ instr1, instr2 });
-				for (auto v : retVec) queue.push(v);
+				int n = countAdjacentBugs(x, y, field, fieldWidth);
+				if (n == 1 || n==2) field_copy[y * fieldWidth + x] = '#';
 			}
 		}
-		if (CeaseOps) break;
 	}
-	std::cout << "\nPress [Enter] to continue"; std::cin.get();
+	field = field_copy;
 	return;
 }
-void Day23b()
+void Day24a()
 {
-	// Initialize the computer network
-	std::map<int, IntCode_net*> compNet;
-	static constexpr int networkSize = 50;
-	for (int i = 0; i < networkSize; i++)
-	{
-		compNet.emplace(i, new IntCode_net("Resources/day23input.txt"));
-		std::vector<long long int> retVec = compNet[i]->Run({ i });
-	}
+	// Init
+	std::string field = ".#..#.#.#.#..##.#.####..#";
+	std::set<int> history;
+	const int fieldWidth = 5;
+	int loopCount = 0;
+	int fieldID = HashToUInt(field);
+	std::cout << "Start field:\n";
+	PrintEris(field, fieldWidth);
 
-	// Run
-	// Principle: loop the computers to pass -1 values. When a response is received, put these on a global queue
-	// Handle queue responses (and add any subsequent responses to the queue) until the queue is empty,
-	// then go back to looping with -1 values.
-	std::queue<long long int> queue;
-	bool CeaseOps = false;
-	int instructionCount = 0;
-	int idleCount = 0;
-	std::vector<long long int> retVec;
-	struct NAT_mem
+	// Evolve until similar state is found
+	while (history.emplace(fieldID).second)
 	{
-		long long int X=0;
-		long long int Y=0;
-		long long int X_lastsent = 0;
-		long long int Y_lastsent = 0;
-	} NAT;
-	
-
-	while (!CeaseOps)
-	{
-		for (int i = 0; i < networkSize; i++) // loop the network for responses
-		{
-			{
-				std::cout << "Passing to comp: " << i << ", instruction X=" << -1 << '\n';
-				std::cout << "Receiving back : ";
-				retVec = compNet[i]->Run({ -1 });
-				instructionCount++;
-				retVec.size() == 0 ? idleCount++ : idleCount = 0;
-				if (idleCount == networkSize) // Network is idle
-				{
-					queue.push({ 0 }); queue.push({ NAT.X }); queue.push({ NAT.Y });
-					if (NAT.Y == NAT.Y_lastsent)
-					{
-						std::cout << "The NAT has sent the instruction Y=" << NAT.Y << " twice in a row after " << instructionCount << " instructions. END.";
-						CeaseOps = true;
-						retVec.clear();
-						while (!queue.empty()) queue.pop();
-					}
-					else
-					{
-						NAT.X_lastsent = NAT.X;
-						NAT.Y_lastsent = NAT.Y;
-					}
-				}
-				for (auto v : retVec) queue.push(v);
-				retVec.clear();
-			}
-
-			while (!queue.empty())
-			{
-				int compId = (int)queue.front(); queue.pop(); 
-				long long int instr1 = queue.front(); queue.pop();
-				long long int instr2 = queue.front(); queue.pop();
-				if (compId == 255)
-				{
-					std::cout << "Packet sent to address 255. instruction X="<<instr1<<", Y=" << instr2<<'\n';
-					NAT.X = instr1;
-					NAT.Y = instr2;
-					//std::cout << "Receiving back : ";
-					//retVec = compNet[compId]->Run({ instr1, instr2 });
-				}
-				else
-				{
-					std::cout << "Passing to comp: " << compId << ", instruction X=" << instr1 << ", Y=" << instr2 << '\n';
-					std::cout << "Receiving back : ";
-					retVec = compNet[compId]->Run({ instr1, instr2 });
-					instructionCount++;
-					retVec.size() == 0 ? idleCount++ : idleCount = 0;
-				}
-				for (auto v : retVec) queue.push(v);
-				retVec.clear();
-			}
-		}
-		if (CeaseOps) break;
-	}
-	return;
+		ApplyTimeStep(field, fieldWidth);
+		fieldID = HashToUInt(field);
+		loopCount++;
+	} 
+	std::cout << "\nSimilar state found after " << loopCount << "timesteps.\n";
+	PrintEris(field, fieldWidth);
+	std::cout << "Biodiversity rating = " << fieldID;	
 }
 
 int main()
@@ -157,8 +105,8 @@ int main()
 	//Day22a_literal();
 	//Day22a_clean1();
 	//Day22a_clean2();
-	Day23a();
-	Day23b();
+	Day24a();
+	
 	
 	while (!_kbhit());
 	return 0;
