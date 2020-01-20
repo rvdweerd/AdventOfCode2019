@@ -71,6 +71,9 @@
     <ClInclude Include="Day22HelperFunctions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="IntCode_net.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="Resources\day11input.txt">
@@ -148,8 +151,13 @@
     <Text Include="Resources\day20input.txt">
       <Filter>Resource Files</Filter>
     </Text>
-    <Text Include="Day21input.txt" />
     <Text Include="Resources\day22input.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="Resources\Day21input.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="Resources\day23input.txt">
       <Filter>Resource Files</Filter>
     </Text>
   </ItemGroup>
