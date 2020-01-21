@@ -159,6 +159,7 @@
     <ClInclude Include="IncludesUsed.h" />
     <ClInclude Include="IntCode.h" />
     <ClInclude Include="IntCode_char.h" />
+    <ClInclude Include="IntCode_charLL.h" />
     <ClInclude Include="IntCode_net.h" />
     <ClInclude Include="IntCode_simple.h" />
     <ClInclude Include="Maze.h" />
@@ -189,6 +190,7 @@
     <Text Include="Resources\Day21input.txt" />
     <Text Include="Resources\day22input.txt" />
     <Text Include="Resources\day23input.txt" />
+    <Text Include="Resources\day25input.txt" />
     <Text Include="Resources\day2input.txt" />
     <Text Include="Resources\day3input.txt" />
     <Text Include="Resources\day5input.txt" />

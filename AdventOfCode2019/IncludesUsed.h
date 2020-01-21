@@ -12,6 +12,7 @@
 #include "IntCode.h"
 #include "IntCode_simple.h"
 #include "IntCode_char.h"
+#include "IntCode_charLL.h"
 #include "IntCode_net.h"
 #include "HelperFunctions.h"
 #include "Planet.h"

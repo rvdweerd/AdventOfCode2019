@@ -317,7 +317,23 @@ void Day24b_int()
 	std::cout << "After 200 minutes, there are " << bugCount << " bugs present in the recursive grid.\n\n";
 	for (int i=-5;i<6;i++) PrintEris(map[i], 5);
 }
-
+void Day25a()
+{
+	Day25::IntCode_charLL compASCII("Resources/day25input.txt");
+	std::vector<std::string> allInstr;
+	while (1)
+	{
+		std::string input;
+		std::getline(std::cin, input);
+		//std::cin >> input; 
+		std::replace(input.begin(), input.end(), ';', '\n');
+		if (input.back() != '\n') input += '\n';
+		allInstr.push_back(input);
+		ClearScreen();
+		compASCII.Run(input);
+	}
+	return;
+}
 int main()
 {
 	// Instruction: load data in appropriate .txt input file and run the function associated with a specific day
@@ -328,9 +344,9 @@ int main()
 	//Day22a_literal();
 	//Day22a_clean1();
 	//Day22a_clean2();
-	Day24a_int();
-	Day24b_int();
-	
+	//Day24a_int();
+	//Day24b_int();
+	Day25a();
 	
 	while (!_kbhit());
 	return 0;
