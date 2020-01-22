@@ -32,7 +32,7 @@ void CutNCards(std::vector<int>& deck, int n)
 		//CutNCards(deck, deck.size() + n);
 		auto it = deck.begin();
 		auto end = deck.size() + n;
-		for (int i = 0; i < end; i++)
+		for (size_t i = 0; i < end; i++)
 		{
 			deck.push_back(*it);
 			it = deck.erase(it);
@@ -48,9 +48,9 @@ void DealWithIncrement(std::vector<int>& deck, int n)
 	std::cout << "dwi " << std::setw(5) << n << "; ";
 	std::vector<int> copy = deck;
 	int offset = 0;
-	for (int i = 0; i < copy.size(); i++)
+	for (size_t i = 0; i < copy.size(); i++)
 	{
-		if ((i * n) % copy.size() == 0 & i != 0)
+		if (((i * n) % copy.size() == 0) && i != 0)
 		{
 			offset++;
 		}
@@ -131,8 +131,8 @@ uint64_t mul_mod(uint64_t a, uint64_t b, uint64_t m)
 	int64_t r;
 	if (a >= m) a %= m;
 	if (b >= m) b %= m;
-	x = a;
-	c = x * b / m;
+	x = (long double)a;
+	c = (uint64_t)x * b / m;
 	r = (int64_t)(a * b - c * m) % (int64_t)m;
 	return r < 0 ? r + m : r;
 }

@@ -35,3 +35,6 @@
 //#include "Day19HelperFunctions.h"
 //#include "Day20HelperFunctions.h"
 #include "Day22HelperFunctions.h"
+#include "Day24HelperFunctions.h"
+#include "Day25HelperFunctions.h"
+

@@ -155,6 +155,8 @@
     <ClInclude Include="Day19HelperFunctions.h" />
     <ClInclude Include="Day20HelperFunctions.h" />
     <ClInclude Include="Day22HelperFunctions.h" />
+    <ClInclude Include="Day24HelperFunctions.h" />
+    <ClInclude Include="Day25HelperFunctions.h" />
     <ClInclude Include="HelperFunctions.h" />
     <ClInclude Include="IncludesUsed.h" />
     <ClInclude Include="IntCode.h" />

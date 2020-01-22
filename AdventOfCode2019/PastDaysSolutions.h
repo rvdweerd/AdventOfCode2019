@@ -2199,4 +2199,68 @@ void Day23b()
 	}
 	return;
 }
+void Day24a_char()
+{
+	// Init
+	std::string field = ".#..#.#.#.#..##.#.####..#";
+	std::set<int> history;
+	const int fieldWidth = 5;
+	int loopCount = 0;
+	int fieldID = HashToUInt(field);
+	std::cout << "Start field:\n";
+	PrintEris(field, fieldWidth);
 
+	// Evolve until similar state is found
+	while (history.emplace(fieldID).second)
+	{
+		ApplyTimeStep(field, fieldWidth);
+		fieldID = HashToUInt(field);
+		loopCount++;
+	}
+	std::cout << "\nSimilar state found after " << loopCount << " timesteps.\n";
+	PrintEris(field, fieldWidth);
+	std::cout << "\nBiodiversity rating = " << fieldID;
+}
+void Day24a_int()
+{
+	// Init
+	// field =   ".#..#.#.#.#..##.#.####..#";
+	unsigned int field = HashToUInt(".#..#.#.#.#..##.#.####..#");
+	std::set<int> history;
+	const int fieldWidth = 5;
+	int loopCount = 0;
+	std::cout << "Start field:\n";
+	PrintEris(field, fieldWidth);
+
+	// Evolve until similar state is found
+	while (history.emplace(field).second)
+	{
+		ApplyTimeStep(field, fieldWidth);
+		loopCount++;
+	}
+	std::cout << "\nSimilar state found after " << loopCount << " timesteps.\n";
+	PrintEris(field, fieldWidth);
+	std::cout << "\nBiodiversity rating = " << field;
+	std::cout << "\nPress [Enter] to continue...";
+	std::cin.get();
+}
+void Day24b_int()
+{
+	unsigned int field = HashToUInt(".#..#.#.#.#..##.#.####..#");
+	//unsigned int field = HashToUInt("....##..#.#..##..#..#....");
+	int fieldWidth = 5;
+	std::map<int, unsigned int> map;
+	map[0] = field;
+	int steps = 200;
+	for (int q = 0; q < steps; q++)
+	{
+		ApplyTimeStep(map, fieldWidth);
+	}
+	int bugCount = 0;
+	for (auto e : map)
+	{
+		bugCount += countSetBits(e.second);
+	}
+	std::cout << "After 200 minutes, there are " << bugCount << " bugs present in the recursive grid.\n\n";
+	for (int i = -5; i < 6; i++) PrintEris(map[i], 5);
+}

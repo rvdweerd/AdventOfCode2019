@@ -120,8 +120,9 @@ namespace Day25
 			}
 			return;
 		}
-		void Run(std::string inputInstructions)
+		std::string Run(std::string inputInstructions)
 		{
+			std::string outputString;
 			int instructionIndex = 0;
 			int increment = 0;
 			for (; (int)runCodeVec[code_index] != 99; code_index += increment)
@@ -145,9 +146,8 @@ namespace Day25
 				{
 					if (instructionIndex == inputInstructions.size())
 					{
-						return;
+						return outputString;
 					}
-					char ch;
 					//std::cout << inputInstructions[instructionIndex];
 					writeVal<int>(code_index + 1, C, inputInstructions[instructionIndex++]);
 					increment = 2;
@@ -155,8 +155,16 @@ namespace Day25
 				else if (opcode == 4) // output
 				{
 					long long int val1 = readVal<long long int>(code_index + 1, C);
-					if (val1 >= 0 && val1 < 256) std::cout << (char)val1;
-					else std::cout << val1;
+					if (val1 >= 0 && val1 < 256)
+					{
+						std::cout << (char)val1;
+						outputString += (char)val1;
+					}
+					else
+					{
+						std::cout << val1;
+						outputString += std::to_string(val1);
+					}
 					increment = 2;
 					//code_index += 2;
 					//return;
@@ -212,10 +220,10 @@ namespace Day25
 				else
 				{
 					std::cout << "error.";
-					return;
+					return outputString;
 				}
 			}
-			return;
+			return outputString;
 		}
 
 

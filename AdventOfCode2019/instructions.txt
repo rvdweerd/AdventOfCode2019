@@ -1,0 +1,27 @@
+south
+east
+take asterisk
+west
+take monolith
+north
+west
+north
+east
+take astronaut ice cream
+west
+south
+take coin
+east
+north
+north
+take mutex
+west
+take astrolabe
+west
+take dehydrated water
+west
+take wreath
+east
+south
+east
+north
