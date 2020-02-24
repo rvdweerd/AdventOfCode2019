@@ -5,3 +5,6 @@ An amazing and rewarding learning experience.
 @roger_vdw on https//www.reddit.com/r/adventofcode
 
 ![Image description](the_end.png)
+
+
+![Pathfinder Day15](pathfinder_day15.gif)
