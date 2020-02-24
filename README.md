@@ -6,5 +6,6 @@ An amazing and rewarding learning experience.
 
 ![Image description](the_end.png)
 
+Some action from the solutions: Pathfinding using a recursive backtracking algorithm
 
 ![Pathfinder Day15](pathfinder_day15.gif)
