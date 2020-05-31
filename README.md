@@ -9,3 +9,6 @@ An amazing and rewarding learning experience.
 Some action from the solutions: Pathfinding using a recursive backtracking algorithm
 
 ![Pathfinder Day15](pathfinder_day15.gif)
+
+Abstractions used in a Maze class to solve the most challenging puzzle (day 18).
+![Pathfinder Day15](AoC2019_Day18_abstractions.jpg)
